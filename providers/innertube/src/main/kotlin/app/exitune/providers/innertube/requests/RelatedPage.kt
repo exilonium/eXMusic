@@ -15,27 +15,42 @@ import io.ktor.client.call.body
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 
+private const val RELATED_BROWSE_PREFIX = "MPTRt"
+
 suspend fun Innertube.relatedPage(body: NextBody) = runCatchingCancellable {
     val nextResponse = client.post(NEXT) {
         setBody(body.copy(context = Context.DefaultWebNoLang))
+        Context.DefaultWebNoLang.apply()
         @Suppress("all")
         mask(
             "contents.singleColumnMusicWatchNextResultsRenderer.tabbedRenderer.watchNextTabbedResultsRenderer.tabs.tabRenderer(endpoint,title)"
         )
     }.body<NextResponse>()
 
-    val browseId = nextResponse
+    val tabs = nextResponse
         .contents
         ?.singleColumnMusicWatchNextResultsRenderer
         ?.tabbedRenderer
         ?.watchNextTabbedResultsRenderer
         ?.tabs
-        ?.getOrNull(2)
-        ?.tabRenderer
+        .orEmpty()
+        .mapNotNull { it.tabRenderer }
+
+    // The related tab used to be the third one, but YouTube varies how many tabs it sends, so
+    // identify it by its browse id instead of its position
+    val browseId = tabs
+        .firstOrNull { it.endpoint?.browseEndpoint?.browseId?.startsWith(RELATED_BROWSE_PREFIX) == true }
         ?.endpoint
         ?.browseEndpoint
         ?.browseId
-        ?: return@runCatchingCancellable null
+        ?: tabs
+            .lastOrNull { it.endpoint?.browseEndpoint?.browseId != null }
+            ?.endpoint
+            ?.browseEndpoint
+            ?.browseId
+        // Reporting this as a failure rather than an empty page: callers cannot tell a null
+        // payload from "still loading", and would wait on it forever
+        ?: error("No related tab in the watch next response for ${body.videoId}")
 
     val response = client.post(BROWSE) {
         setBody(
@@ -44,6 +59,7 @@ suspend fun Innertube.relatedPage(body: NextBody) = runCatchingCancellable {
                 context = Context.DefaultWebNoLang
             )
         )
+        Context.DefaultWebNoLang.apply()
         @Suppress("all")
         mask(
             "contents.sectionListRenderer.contents.musicCarouselShelfRenderer(header.musicCarouselShelfBasicHeaderRenderer(title,strapline),contents($MUSIC_RESPONSIVE_LIST_ITEM_RENDERER_MASK,$MUSIC_TWO_ROW_ITEM_RENDERER_MASK))"
