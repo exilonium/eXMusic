@@ -4,6 +4,7 @@ import app.exitune.providers.innertube.Innertube
 import app.exitune.providers.innertube.models.MusicShelfRenderer
 import app.exitune.providers.innertube.models.NavigationEndpoint
 import app.exitune.providers.innertube.models.isExplicit
+import app.exitune.providers.innertube.models.videoThumbnail
 
 // Possible configurations:
 // "song" • author(s) • album • duration
@@ -50,10 +51,12 @@ fun Innertube.SongItem.Companion.from(content: MusicShelfRenderer.Content) = run
 fun Innertube.VideoItem.Companion.from(content: MusicShelfRenderer.Content) = runCatching {
     val (mainRuns, otherRuns) = content.runs
 
+    val info: Innertube.Info<NavigationEndpoint.Endpoint.Watch>? = mainRuns
+        .firstOrNull()
+        ?.let(Innertube::Info)
+
     Innertube.VideoItem(
-        info = mainRuns
-            .firstOrNull()
-            ?.let(Innertube::Info),
+        info = info,
         authors = otherRuns
             .getOrNull(otherRuns.lastIndex - 2)
             ?.map(Innertube::Info),
@@ -65,7 +68,8 @@ fun Innertube.VideoItem.Companion.from(content: MusicShelfRenderer.Content) = ru
             .getOrNull(otherRuns.lastIndex)
             ?.firstOrNull()
             ?.text,
-        thumbnail = content.thumbnail
+        // what Music lists for a video is a crop of the frame; YouTube serves the whole one
+        thumbnail = info?.endpoint?.videoId?.let(::videoThumbnail) ?: content.thumbnail
     ).takeIf { it.info?.endpoint?.videoId != null }
 }.getOrNull()
 

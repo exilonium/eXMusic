@@ -7,6 +7,7 @@ import app.exitune.providers.innertube.models.NavigationEndpoint
 import app.exitune.providers.innertube.models.Runs
 import app.exitune.providers.innertube.models.isExplicit
 import app.exitune.providers.innertube.models.largest
+import app.exitune.providers.innertube.models.videoThumbnail
 
 private const val PAGE_TYPE_ALBUM = "MUSIC_PAGE_TYPE_ALBUM"
 private const val PAGE_TYPE_ARTIST = "MUSIC_PAGE_TYPE_ARTIST"
@@ -89,7 +90,7 @@ fun itemFromSearchResult(
                 authors = authors,
                 viewsText = otherRuns.lastToken?.takeIf { ':' !in it },
                 durationText = durationText,
-                thumbnail = thumbnail
+                thumbnail = endpoint.videoId?.let(::videoThumbnail) ?: thumbnail
             ) else Innertube.SongItem(
                 info = info,
                 authors = authors,
@@ -150,10 +151,25 @@ fun itemFromSearchResult(card: MusicCardShelfRenderer): Innertube.Item? = runCat
             val endpoint = (card.onTap?.watchEndpoint ?: title.navigationEndpoint?.watchEndpoint)
                 ?.takeIf { it.videoId != null }
                 ?: return@runCatching null
+            val info = Innertube.Info(name = title.text, endpoint = endpoint)
+            val authors: List<Innertube.Info<NavigationEndpoint.Endpoint.Browse>>? =
+                subtitle.byLine?.map(Innertube::Info)
 
-            Innertube.SongItem(
-                info = Innertube.Info(name = title.text, endpoint = endpoint),
-                authors = subtitle.byLine?.map(Innertube::Info),
+            val isVideo = endpoint
+                .watchEndpointMusicSupportedConfigs
+                ?.watchEndpointMusicConfig
+                ?.musicVideoType
+                ?.let { it != MUSIC_VIDEO_TYPE_ATV } == true
+
+            if (isVideo) Innertube.VideoItem(
+                info = info,
+                authors = authors,
+                viewsText = subtitle.lastToken?.takeIf { ':' !in it },
+                durationText = subtitle.lastToken?.takeIf { ':' in it },
+                thumbnail = endpoint.videoId?.let(::videoThumbnail) ?: thumbnail
+            ) else Innertube.SongItem(
+                info = info,
+                authors = authors,
                 album = null,
                 durationText = subtitle.lastToken?.takeIf { ':' in it },
                 explicit = false,

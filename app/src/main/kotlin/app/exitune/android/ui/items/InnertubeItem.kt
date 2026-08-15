@@ -1,8 +1,10 @@
 package app.exitune.android.ui.items
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
@@ -19,6 +21,7 @@ import app.exitune.android.ui.components.themed.NonQueuedMediaItemMenu
 import app.exitune.android.utils.asMediaItem
 import app.exitune.android.utils.forcePlay
 import app.exitune.core.ui.Dimensions
+import app.exitune.core.ui.LocalAppearance
 import app.exitune.core.ui.utils.px
 import app.exitune.providers.innertube.Innertube
 import app.exitune.providers.innertube.models.NavigationEndpoint
@@ -75,13 +78,29 @@ fun InnertubeItem(
         )
 
         is Innertube.VideoItem -> SongItem(
-            thumbnailUrl = item.thumbnail?.size(thumbnailSize.px),
             title = item.info?.name,
             authors = item.authors?.joinToString("") { it.name.orEmpty() },
             // a search rarely gives a video a duration, and puts the view count there instead
             duration = item.durationText ?: item.viewsText,
             explicit = false,
             thumbnailSize = thumbnailSize,
+            // a video's artwork is a 16:9 frame: cropping it to the square every other row uses
+            // leaves the middle third and little else, so it is fitted instead
+            thumbnailContent = {
+                Box(
+                    modifier = Modifier
+                        .clip(LocalAppearance.current.thumbnailShape)
+                        .background(LocalAppearance.current.colorPalette.background1)
+                        .fillMaxSize()
+                ) {
+                    AsyncImage(
+                        model = item.thumbnail?.url,
+                        contentDescription = null,
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+            },
             modifier = playable({ item.asMediaItem }, { item.info?.endpoint }),
             isPlaying = playing && currentMediaId == item.key
         )

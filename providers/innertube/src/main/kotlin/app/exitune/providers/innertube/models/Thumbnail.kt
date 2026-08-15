@@ -37,3 +37,17 @@ data class Thumbnail(
 ) {
     fun size(size: Int) = url.resizedThumbnail(size)
 }
+
+/**
+ * The frame YouTube itself shows for a video, taken straight from the video id.
+ *
+ * What YouTube Music lists for a video is that same frame behind a crop directive of its own
+ * (`hqdefault.jpg?sqp=…`), which is both smaller and cut to whatever shape Music wanted. `mqdefault`
+ * is the plain 16:9 frame and, unlike `hq720` or `maxresdefault`, exists for every video, including
+ * uploads that were never available above 360p.
+ */
+fun videoThumbnail(videoId: String) = Thumbnail(
+    url = "https://i.ytimg.com/vi/$videoId/mqdefault.jpg",
+    width = 320,
+    height = 180
+)
