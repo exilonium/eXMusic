@@ -122,8 +122,13 @@ import app.vitune.providers.innertube.Innertube
 import app.vitune.providers.innertube.models.NavigationEndpoint
 import app.vitune.providers.innertube.models.bodies.PlayerBody
 import app.vitune.providers.innertube.models.bodies.SearchBody
+import app.vitune.providers.innertube.requests.LoginRequiredPlaybackException
+import app.vitune.providers.innertube.requests.NoPlayableFormatException
+import app.vitune.providers.innertube.requests.PlaybackStatusException
+import app.vitune.providers.innertube.requests.UnplayablePlaybackException
 import app.vitune.providers.innertube.requests.playback
 import app.vitune.providers.innertube.requests.player
+import app.vitune.providers.innertube.requests.VideoIdMismatchException as InnertubeVideoIdMismatchException
 import app.vitune.providers.innertube.requests.searchPage
 import app.vitune.providers.innertube.utils.from
 import app.vitune.providers.sponsorblock.SponsorBlock
@@ -1393,6 +1398,19 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         }
 
         /**
+         * Restates a resolution failure as the matching playback exception, so the player surfaces
+         * why a song would not play rather than a generic error.
+         */
+        private fun Throwable.asPlaybackException(): PlaybackException = when (this) {
+            is LoginRequiredPlaybackException -> LoginRequiredException(this)
+            is UnplayablePlaybackException -> UnplayableException(this)
+            is NoPlayableFormatException -> PlayableFormatNotFoundException(this)
+            is InnertubeVideoIdMismatchException -> VideoIdMismatchException(this)
+            is PlaybackStatusException -> RestrictedVideoException(this)
+            else -> UnplayableException(this)
+        }
+
+        /**
          * Resolves a stream according to [source], falling back to yt-dlp when YouTube Music could
          * not produce a playable URL and the user allows it.
          */
@@ -1422,7 +1440,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         private fun resolveFromYouTubeMusic(mediaId: String): ResolvedStream {
             val playback = runBlocking(Dispatchers.IO) {
                 Innertube.playback(videoId = mediaId)
-            }?.getOrThrow() ?: throw UnplayableException()
+            }?.getOrElse { throw it.asPlaybackException() } ?: throw UnplayableException()
 
             val uri = playback.url.toUri().let {
                 if (playback.cpn == null) it
