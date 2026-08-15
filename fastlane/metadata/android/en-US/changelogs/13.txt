@@ -1,5 +1,5 @@
 * Added new translations
-* Made ExiTune more recognizable as a music application to other apps
+* Made eXMusic more recognizable as a music application to other apps
 * Subtle UI improvements
 * Minor bugfixes
 * Removed limit of 100 songs in online albums

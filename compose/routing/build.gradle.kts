@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "app.exitune.compose.routing"
+    namespace = "app.exmusic.compose.routing"
     compileSdk = 37
 
     defaultConfig {

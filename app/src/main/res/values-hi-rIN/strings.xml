@@ -116,7 +116,7 @@
     <string name="no_browser_installed">इंटरनेट ब्राउज़ करने के लिए कोई एप्लिकेशन नहीं मिल सका</string>
     <string name="no_equalizer_installed">ऑडियो को समान करने वाला कोई एप्लिकेशन नहीं मिला</string>
     <string name="no_file_chooser_installed">दस्तावेज़ बनाने के लिए कोई एप्लिकेशन नहीं मिल सका</string>
-    <string name="no_battery_optimization_settings_found">बैटरी ऑप्टिमाइज़ेशन सेटिंग नहीं मिल सकी, कृपया ExiTune को ख़ुद से श्वेतसूची में डालें</string>
+    <string name="no_battery_optimization_settings_found">बैटरी ऑप्टिमाइज़ेशन सेटिंग नहीं मिल सकी, कृपया eXMusic को ख़ुद से श्वेतसूची में डालें</string>
     <string name="related_albums">संबंधित एल्बम</string>
     <string name="similar_artists">समान कलाकार</string>
     <string name="recommended_playlists">प्लेलिस्ट जो आपको पसंद आ सकती हैं</string>
@@ -230,7 +230,7 @@
     <string name="backup_description">व्यक्तिगत प्राथमिकताएं (अर्थात थीम मोड) और कैश को इसमें शामिल नहीं किया गया है।</string>
     <string name="backup_action_description">डेटाबेस को बाह्य संग्रहण में निर्यात करें</string>
     <string name="restore">पुनर्स्थापित</string>
-    <string name="restore_warning">मौजूदा डेटा अधिलेखित कर दिया जाएगा। \nडेटाबेस को पुनर्स्थापित करने के बाद ExiTune स्वचालित रूप से बंद हो जाएगा।</string>
+    <string name="restore_warning">मौजूदा डेटा अधिलेखित कर दिया जाएगा। \nडेटाबेस को पुनर्स्थापित करने के बाद eXMusic स्वचालित रूप से बंद हो जाएगा।</string>
     <string name="restore_description">एक्सटर्नल स्टोरेज से डेटाबेस आयात करें</string>
     <string name="other">अन्य</string>
     <string name="android_auto">एंड्रॉइड ऑटो</string>
@@ -310,7 +310,7 @@
     <string name="username">उपयोगकर्ता नाम</string>
     <string name="password">पासवर्ड</string>
     <string name="login">लॉग इन</string>
-    <string name="sync_description">आप प्लेलिस्ट को कहीं और होस्ट कर सकते हैं और उन्हें ExiTune के साथ सिंक्रोनाइज़ कर सकते हैं। वर्तमान में केवल Piped का समर्थन करता है।</string>
+    <string name="sync_description">आप प्लेलिस्ट को कहीं और होस्ट कर सकते हैं और उन्हें eXMusic के साथ सिंक्रोनाइज़ कर सकते हैं। वर्तमान में केवल Piped का समर्थन करता है।</string>
     <string name="add_account">खाता जोड़ें</string>
     <string name="add_account_description">Piped खाते को अपने इंस्टैंस, उपयोगकर्ता नाम और पासवर्ड से लिंक करें।</string>
     <string name="learn_more">अधिक जानें</string>

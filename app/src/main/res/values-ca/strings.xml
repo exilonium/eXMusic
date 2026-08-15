@@ -116,7 +116,7 @@
     <string name="no_browser_installed">No s\'ha pogut trobar una aplicació per navegar per internet</string>
     <string name="no_equalizer_installed">No s\'ha pogut trobar una aplicació per ecualitzar àudio</string>
     <string name="no_file_chooser_installed">No s\'ha pogut trobar una aplicació per crear documents</string>
-    <string name="no_battery_optimization_settings_found">No s\'ha pogut trobar la configuració d\'optimització de bateria, si us plau afegiu ExiTune a la llista blanca manualment</string>
+    <string name="no_battery_optimization_settings_found">No s\'ha pogut trobar la configuració d\'optimització de bateria, si us plau afegiu eXMusic a la llista blanca manualment</string>
     <string name="related_albums">Àlbums relacionats</string>
     <string name="similar_artists">Artistes similars</string>
     <string name="recommended_playlists">Llistes de reproducció que et poden agradar</string>
@@ -228,7 +228,7 @@
     <string name="backup_description">S\'exclouen les preferències personals (és a dir, el mode de tema) i la memòria cau.</string>
     <string name="backup_action_description">Exportar la base de dades a l\'emmagatzematge extern</string>
     <string name="restore">Restaurar còpia de seguretat</string>
-    <string name="restore_warning">Les dades existents se sobreescriuran.\nExiTune es tancarà automàticament després de restaurar la base de dades.</string>
+    <string name="restore_warning">Les dades existents se sobreescriuran.\neXMusic es tancarà automàticament després de restaurar la base de dades.</string>
     <string name="restore_description">Importar la base de dades des de l\'emmagatzematge extern</string>
     <string name="other">Altres</string>
     <string name="android_auto">Android Auto</string>
@@ -306,7 +306,7 @@
     <string name="username">Nom d\'usuari</string>
     <string name="password">Contrasenya</string>
     <string name="login">Iniciar sessió</string>
-    <string name="sync_description">Podeu allotjar llistes de reproducció en un altre lloc i sincronitzar-les amb ExiTune. Ara per ara només admet Piped.</string>
+    <string name="sync_description">Podeu allotjar llistes de reproducció en un altre lloc i sincronitzar-les amb eXMusic. Ara per ara només admet Piped.</string>
     <string name="add_account">Afegir compte</string>
     <string name="add_account_description">Vincula un compte de Piped amb la teva instància, nom d\'usuari i contrasenya.</string>
     <string name="learn_more">Més informació</string>

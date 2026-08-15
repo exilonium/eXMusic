@@ -116,7 +116,7 @@
     <string name="no_browser_installed">Не удалось найти приложение для просмотра интернета</string>
     <string name="no_equalizer_installed">Не удалось найти приложение для настройки эквалайзера</string>
     <string name="no_file_chooser_installed">Не удалось найти приложение для создания документов</string>
-    <string name="no_battery_optimization_settings_found">Не удалось найти настройки оптимизации батареи, добавьте ExiTune в белый список вручную</string>
+    <string name="no_battery_optimization_settings_found">Не удалось найти настройки оптимизации батареи, добавьте eXMusic в белый список вручную</string>
     <string name="related_albums">Похожие альбомы</string>
     <string name="similar_artists">Похожие исполнители</string>
     <string name="recommended_playlists">Рекомендуемые плейлисты</string>
@@ -227,7 +227,7 @@
     <string name="backup_description">Персональные настройки (например, тема) и кэш исключаются.</string>
     <string name="backup_action_description">Экспортировать базу данных на внешнее хранилище</string>
     <string name="restore">Восстановить</string>
-    <string name="restore_warning">Существующие данные будут перезаписаны.\nExiTune автоматически закроется после восстановления базы данных.</string>
+    <string name="restore_warning">Существующие данные будут перезаписаны.\neXMusic автоматически закроется после восстановления базы данных.</string>
     <string name="restore_description">Импортировать базу данных с внешнего хранилища</string>
     <string name="other">Прочее</string>
     <string name="android_auto">Android Auto</string>
@@ -303,7 +303,7 @@
     <string name="username">Имя пользователя</string>
     <string name="password">Пароль</string>
     <string name="login">Войти</string>
-    <string name="sync_description">Вы можете размещать плейлисты где угодно и синхронизировать их с ExiTune. В данный момент поддерживается только Piped.</string>
+    <string name="sync_description">Вы можете размещать плейлисты где угодно и синхронизировать их с eXMusic. В данный момент поддерживается только Piped.</string>
     <string name="add_account">Добавить учетную запись</string>
     <string name="add_account_description">Привязать учетную запись Piped к вашему экземпляру, имени пользователя и паролю.</string>
     <string name="learn_more">Узнать больше</string>

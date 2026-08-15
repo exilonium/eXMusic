@@ -10,7 +10,7 @@ plugins {
 }
 
 android {
-    val appId = "${project.group}.android"
+    val appId = "${project.group}.exilonium"
 
     namespace = appId
     compileSdk = 37
@@ -64,14 +64,14 @@ android {
         debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-DEBUG"
-            manifestPlaceholders["appName"] = "ExiTune Debug"
+            manifestPlaceholders["appName"] = "eXMusic Debug"
         }
 
         release {
             versionNameSuffix = "-RELEASE"
             isMinifyEnabled = true
             isShrinkResources = true
-            manifestPlaceholders["appName"] = "ExiTune"
+            manifestPlaceholders["appName"] = "eXMusic"
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -84,7 +84,7 @@ android {
 
             applicationIdSuffix = ".nightly"
             versionNameSuffix = "-NIGHTLY"
-            manifestPlaceholders["appName"] = "ExiTune Nightly"
+            manifestPlaceholders["appName"] = "eXMusic Nightly"
             signingConfig = signingConfigs.findByName("ci")
         }
     }

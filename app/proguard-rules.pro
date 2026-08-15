@@ -1,11 +1,11 @@
 -keep,allowobfuscation,allowshrinking class kotlin.coroutines.Continuation
 
--keepclassmembers class app.exitune.android.utils.ActionReceiver$* {
+-keepclassmembers class app.exmusic.exilonium.utils.ActionReceiver$* {
     <fields>;
     <methods>;
 }
 
--if @app.exitune.android.utils.ActionReceiver class **
+-if @app.exmusic.exilonium.utils.ActionReceiver class **
 -keepclassmembers class <1> {
     <fields>;
     <methods>;

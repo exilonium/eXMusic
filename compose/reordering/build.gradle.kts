@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "app.exitune.compose.reordering"
+    namespace = "app.exmusic.compose.reordering"
     compileSdk = 37
 
     defaultConfig {

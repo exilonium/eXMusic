@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "app.exitune.compose.persist"
+    namespace = "app.exmusic.compose.persist"
     compileSdk = 37
 
     defaultConfig {

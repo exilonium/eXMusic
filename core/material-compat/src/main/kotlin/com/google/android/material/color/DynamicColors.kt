@@ -1,6 +1,6 @@
 package com.google.android.material.color
 
-import app.exitune.core.ui.utils.isAtLeastAndroid12
+import app.exmusic.core.ui.utils.isAtLeastAndroid12
 
 @Suppress("unused")
 object DynamicColors {

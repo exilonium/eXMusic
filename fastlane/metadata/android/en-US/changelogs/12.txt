@@ -1,7 +1,7 @@
 * Enhanced routing animations/transitions
 * Added new translations
 * Adjusted background color for the logs screen
-* ExiTune now ignores upper/lowercase when sorting alphabetically
+* eXMusic now ignores upper/lowercase when sorting alphabetically
 * Added music note icons at empty LRC lines
 * Added hold-to-edit to all navigation tabs
 * Improved predictive back

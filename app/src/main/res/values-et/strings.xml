@@ -116,7 +116,7 @@
     <string name="no_browser_installed">Interneti sirvimiseks ei leitud rakendust</string>
     <string name="no_equalizer_installed">Heli ekvalaiserit ei leitud</string>
     <string name="no_file_chooser_installed">Dokumentide loomise rakendust ei leitud</string>
-    <string name="no_battery_optimization_settings_found">Aku optimeerimise seadeid ei leitud, palun lisa ExiTune käsitsi valgesse nimekirja</string>
+    <string name="no_battery_optimization_settings_found">Aku optimeerimise seadeid ei leitud, palun lisa eXMusic käsitsi valgesse nimekirja</string>
     <string name="related_albums">Seotud albumid</string>
     <string name="similar_artists">Sarnased artistid</string>
     <string name="recommended_playlists">Soovitatud Esitusloendid</string>
@@ -227,7 +227,7 @@
     <string name="backup_description">Isiklikud seaded (nt teema režiim) ja vahemälu jäetakse välja.</string>
     <string name="backup_action_description">Ekspordi andmebaas välisele salvestusele</string>
     <string name="restore">Taasta</string>
-    <string name="restore_warning">Olemasolevad andmed kirjutatakse üle.\nExiTune sulgub automaatselt pärast andmebaasi taastamist.</string>
+    <string name="restore_warning">Olemasolevad andmed kirjutatakse üle.\neXMusic sulgub automaatselt pärast andmebaasi taastamist.</string>
     <string name="restore_description">Impordi andmebaas väliselt salvestuselt</string>
     <string name="other">Muud</string>
     <string name="android_auto">Android Auto</string>
@@ -303,7 +303,7 @@
     <string name="username">Kasutajanimi</string>
     <string name="password">Parool</string>
     <string name="login">Logi sisse</string>
-    <string name="sync_description">Sa saad esitusloendeid mujal majutada ja sünkroonida neid ExiTune\'iga. Praegu toetab ainult Piped.</string>
+    <string name="sync_description">Sa saad esitusloendeid mujal majutada ja sünkroonida neid eXMusic\'iga. Praegu toetab ainult Piped.</string>
     <string name="add_account">Lisa konto</string>
     <string name="add_account_description">Siduge Piped\'i konto oma instantsiga, kasutajanime ja parooliga.</string>
     <string name="learn_more">Uuri rohkem</string>

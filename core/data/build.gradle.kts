@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "app.exitune.core.data"
+    namespace = "app.exmusic.core.data"
     compileSdk = 37
 
     defaultConfig {

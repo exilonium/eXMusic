@@ -1,9 +1,9 @@
 * Added pre-cache button to Piped playlists
-* Removed fixed 1:1 thumbnail ratio, ExiTune now animates between thumbnail aspect ratio and favors the screen's width
+* Removed fixed 1:1 thumbnail ratio, eXMusic now animates between thumbnail aspect ratio and favors the screen's width
 * Fixed inconsistent bottom sheet state (when the player gets killed, for example)
 * Added 'keep screen awake' toggle in settings
 * Improve lyrics editing experience
-* Added search intents, ExiTune now works together with third-party launchers using app search
+* Added search intents, eXMusic now works together with third-party launchers using app search
 * Fixed literal 'null' in notifications
 * Added more content to discover tab
 * Tweaked player UI (QOL)

@@ -116,7 +116,7 @@
     <string name="no_browser_installed">Kan geen applicatie vinden om het internet te browsen</string>
     <string name="no_equalizer_installed">Kan geen applicatie vinden om audio bij te stellen</string>
     <string name="no_file_chooser_installed">Kan geen applicatie vinden om bestanden te maken</string>
-    <string name="no_battery_optimization_settings_found">Kan geen batterij optimalisatie instellingen vinden, maak handmatig een uitzondering voor ExiTune</string>
+    <string name="no_battery_optimization_settings_found">Kan geen batterij optimalisatie instellingen vinden, maak handmatig een uitzondering voor eXMusic</string>
     <string name="related_albums">Gerelateerde albums</string>
     <string name="similar_artists">Vergelijkbare artiesten</string>
     <string name="recommended_playlists">Afspeelijsten die je misschien leuk vindt</string>
@@ -230,7 +230,7 @@
     <string name="backup_description">Persoonlijke voorkeuren (bijvoorbeeld het thema) en de cache worden niet opgeslagen.</string>
     <string name="backup_action_description">Exporteer de database naar de externe opslag</string>
     <string name="restore">Herstellen</string>
-    <string name="restore_warning">Bestaande data zal worden vervangen. ExiTune sluit zichzelf automatisch nadat de database is hersteld.</string>
+    <string name="restore_warning">Bestaande data zal worden vervangen. eXMusic sluit zichzelf automatisch nadat de database is hersteld.</string>
     <string name="restore_description">Importeer de database van de externe opslag</string>
     <string name="other">Overig</string>
     <string name="android_auto">Android Auto</string>
@@ -310,7 +310,7 @@
     <string name="username">Gebruikersnaam</string>
     <string name="password">Wachtwoord</string>
     <string name="login">Login</string>
-    <string name="sync_description">Je kan playlists elders bewaren en synchroniseren met ExiTune. Ondersteunt momenteel alleen Piped.</string>
+    <string name="sync_description">Je kan playlists elders bewaren en synchroniseren met eXMusic. Ondersteunt momenteel alleen Piped.</string>
     <string name="add_account">Account toevoegen</string>
     <string name="add_account_description">Link een Piped account met jouw instantie, gebruikersnaam en wachtwoord</string>
     <string name="learn_more">Meer informatie</string>

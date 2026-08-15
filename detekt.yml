@@ -18,7 +18,7 @@ Compose:
   ModifierMissing:
     active: true
     ignoreAnnotated:
-      - app.exitune.android.ui.screens.Route
+      - app.exmusic.exilonium.ui.screens.Route
   ModifierNaming:
     active: true
   ModifierNotUsedAtRoot:
