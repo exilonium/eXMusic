@@ -7,6 +7,7 @@ import app.exitune.android.R
 import app.exitune.core.data.enums.CoilDiskCacheSize
 import app.exitune.core.data.enums.ExoPlayerDiskCacheSize
 import app.exitune.providers.innertube.Innertube
+import app.exitune.providers.innertube.VisitorData
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
@@ -26,6 +27,9 @@ object DataPreferences : GlobalPreferencesHolder() {
     var shouldCacheQuickPicks by boolean(true)
     var cachedQuickPicks by json(Innertube.RelatedPage())
     var autoSyncPlaylists by boolean(true)
+
+    /** Kept between runs so YouTube sees the same listener each launch. See [VisitorData]. */
+    var visitorData by string("")
 
     enum class TopListPeriod(
         val displayName: @Composable () -> String,

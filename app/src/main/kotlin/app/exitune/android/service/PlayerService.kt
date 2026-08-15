@@ -394,6 +394,10 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
         maybeResumePlaybackWhenDeviceConnected()
 
+        if (PlayerPreferences.streamSource.useYouTubeDl) coroutineScope.launch {
+            Dependencies.warmUpYouTubeDl()
+        }
+
         preferenceUpdaterJob = coroutineScope.launch {
             fun <T : Any> subscribe(
                 prop: SharedPreferencesProperty<T>,
@@ -1485,12 +1489,17 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             }?.getOrNull()
             val youtubeFormat = body?.streamingData?.highestQualityFormat
 
+            // Surfacing yt-dlp's own failure rather than folding it into a mismatch, which reads
+            // as "we got the wrong song" when the truth is that yt-dlp never answered
             val info = runCatching {
                 Dependencies.runDownload(mediaId)
             }.mapCatching {
                 YouTubeDLResponse.fromString(it)
-            }.also { it.exceptionOrNull()?.printStackTrace() }.getOrNull()
-            if (info?.id != mediaId) throw VideoIdMismatchException()
+            }.getOrElse {
+                it.printStackTrace()
+                throw UnplayableException(it)
+            }
+            if (info.id != mediaId) throw VideoIdMismatchException()
             val format = info.formats?.firstOrNull { it.formatId == info.formatId }
 
             val uri = runCatching { info.url?.toUri() }.getOrNull() ?: throw UnplayableException()

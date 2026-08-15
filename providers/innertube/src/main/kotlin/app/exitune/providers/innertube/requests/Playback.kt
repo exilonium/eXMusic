@@ -1,6 +1,7 @@
 package app.exitune.providers.innertube.requests
 
 import app.exitune.providers.innertube.Innertube
+import app.exitune.providers.innertube.VisitorData
 import app.exitune.providers.innertube.models.Context
 import app.exitune.providers.innertube.models.PlayerResponse
 import app.exitune.providers.innertube.models.bodies.PlayerBody
@@ -48,6 +49,29 @@ suspend fun Innertube.playback(
     playlistId: String? = null,
     contexts: List<Context> = Context.PlaybackContexts
 ): Result<PlaybackData>? = runCatchingCancellable {
+    tryContexts(videoId, playlistId, contexts)
+        .recoverCatching { error ->
+            // Every client refusing the same way means YouTube rejected the visitor id rather than
+            // the video, and a new one is all that stands between here and a playable stream
+            if (!error.isBotCheck) throw error
+
+            logger.info("Visitor id rejected as a bot, minting a new one and retrying $videoId")
+            VisitorData.invalidate()
+
+            tryContexts(videoId, playlistId, contexts).getOrThrow()
+        }
+        .getOrThrow()
+}
+
+/**
+ * Asks each client in turn, giving up on the first one that resolves. Fails with the last client's
+ * error.
+ */
+private suspend fun Innertube.tryContexts(
+    videoId: String,
+    playlistId: String?,
+    contexts: List<Context>
+): Result<PlaybackData> {
     var lastError: Throwable = NoPlayableFormatException(videoId)
 
     contexts.forEach { context ->
@@ -61,15 +85,22 @@ suspend fun Innertube.playback(
             )
         } ?: throw CancellationException("Cancelled while resolving $videoId")
 
-        result.getOrNull()?.let { return@runCatchingCancellable it }
-        result.exceptionOrNull()?.let {
+        result.onSuccess { return result }.onFailure {
             lastError = it
             logger.warn("Client ${context.client.clientName} could not resolve $videoId: ${it.message}")
         }
     }
 
-    throw lastError
+    return Result.failure(lastError)
 }
+
+/**
+ * A bot check surfaces as either status, and its reason is localised, so a sign-in demand from a
+ * client that never signs in is taken as one too.
+ */
+private val Throwable.isBotCheck
+    get() = this is LoginRequiredPlaybackException ||
+        (this is PlaybackResolutionException && message?.contains("not a bot", true) == true)
 
 private suspend fun Innertube.resolve(
     videoId: String,

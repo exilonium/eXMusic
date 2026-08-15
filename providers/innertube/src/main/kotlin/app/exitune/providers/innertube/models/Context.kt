@@ -1,5 +1,6 @@
 package app.exitune.providers.innertube.models
 
+import app.exitune.providers.innertube.VisitorData
 import io.ktor.client.request.headers
 import io.ktor.http.HttpMessageBuilder
 import io.ktor.http.parameters
@@ -25,7 +26,7 @@ data class Context(
         val hl: String = "en",
         val gl: String = "US",
         @SerialName("visitorData")
-        val defaultVisitorData: String = DEFAULT_VISITOR_DATA,
+        val defaultVisitorData: String = VisitorData.peek(),
         val androidSdkVersion: Int? = null,
         val userAgent: String? = null,
         val referer: String? = null,
@@ -115,11 +116,15 @@ data class Context(
                     )
                 )
             }
-        const val DEFAULT_VISITOR_DATA = "CgtsZG1ySnZiQWtSbyiMjuGSBg%3D%3D"
+        /**
+         * The contexts below are built on every access rather than held as constants, so that each
+         * one carries the visitor id currently in hand instead of the one that happened to be
+         * current when this class was loaded.
+         */
 
         val DefaultWeb get() = DefaultWebNoLang.withLang
 
-        val DefaultWebNoLang = Context(
+        val DefaultWebNoLang get() = Context(
             client = Client(
                 clientId = 67,
                 clientName = "WEB_REMIX",
@@ -131,7 +136,7 @@ data class Context(
             )
         )
 
-        val DefaultIOS = Context(
+        val DefaultIOS get() = Context(
             client = Client(
                 clientId = 5,
                 clientName = "IOS",
@@ -147,7 +152,7 @@ data class Context(
             )
         )
 
-        val DefaultAndroidMusic = Context(
+        val DefaultAndroidMusic get() = Context(
             client = Client(
                 clientId = 21,
                 clientName = "ANDROID_MUSIC",
@@ -161,7 +166,7 @@ data class Context(
             )
         )
 
-        val DefaultTV = Context(
+        val DefaultTV get() = Context(
             client = Client(
                 clientId = 7,
                 clientName = "TVHTML5",
@@ -178,7 +183,7 @@ data class Context(
          * without solving the JavaScript signature challenge.
          */
 
-        val DefaultVisionOS = Context(
+        val DefaultVisionOS get() = Context(
             client = Client(
                 clientId = 101,
                 clientName = "VISIONOS",
@@ -192,7 +197,7 @@ data class Context(
             )
         )
 
-        val DefaultAndroidVR = Context(
+        val DefaultAndroidVR get() = Context(
             client = Client(
                 clientId = 28,
                 clientName = "ANDROID_VR",
@@ -212,7 +217,7 @@ data class Context(
          * Older VR client: constant bitrate only, which works around audio stuttering on streams
          * the newer client hands out as adaptive.
          */
-        val DefaultAndroidVRLegacy = Context(
+        val DefaultAndroidVRLegacy get() = Context(
             client = Client(
                 clientId = 28,
                 clientName = "ANDROID_VR",
@@ -230,14 +235,18 @@ data class Context(
 
         /**
          * Ordered by how reliably they return a directly playable audio stream.
+         *
+         * [DefaultIOS] and [DefaultTV] are deliberately absent. iOS answers OK and hands out a URL
+         * that the CDN serves exactly once, refusing every range after the first with a 403, so
+         * picking it means about half a minute of audio and then a dead stop that re-resolving
+         * cannot fix. TV no longer returns a playable URL at all. Both only ever shadow a client
+         * that would have worked, or the yt-dlp fallback.
          */
         val PlaybackContexts
             get() = listOf(
                 DefaultVisionOS,
                 DefaultAndroidVR,
-                DefaultAndroidVRLegacy,
-                DefaultIOS,
-                DefaultTV
+                DefaultAndroidVRLegacy
             )
     }
 }

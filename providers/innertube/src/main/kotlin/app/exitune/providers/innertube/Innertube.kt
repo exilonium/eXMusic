@@ -49,6 +49,18 @@ object Innertube {
         }
     }
 
+    /**
+     * The visitor id decides whether YouTube treats the caller as a bot, and the header wins over
+     * whatever the request body carries, so it is set here rather than per-request.
+     */
+    private val VisitorDataInterceptor = createClientPlugin("VisitorDataInterceptor") {
+        client.sendPipeline.intercept(HttpSendPipeline.State) {
+            val visitorData = VisitorData.get()
+
+            context.headers { set("X-Goog-Visitor-Id", visitorData) }
+        }
+    }
+
     val logger: Logger = LoggerFactory.getLogger(Innertube::class.java)
     val baseClient = HttpClient(OkHttp) {
         expectSuccess = true
@@ -78,6 +90,8 @@ object Innertube {
         install(OriginInterceptor)
     }
     val client = baseClient.config {
+        install(VisitorDataInterceptor)
+
         defaultRequest {
             url(scheme = "https", host = "music.youtube.com") {
                 contentType(ContentType.Application.Json)

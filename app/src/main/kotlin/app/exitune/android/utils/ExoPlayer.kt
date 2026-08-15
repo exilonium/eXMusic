@@ -124,40 +124,39 @@ class RetryingDataSourceFactory(
 ) : DataSource.Factory {
     inner class Source(private val parent: DataSource) : DataSource by parent {
         override fun open(dataSpec: DataSpec): Long {
-            var lastException: Throwable? = null
             var retries = 0
-            while (retries < maxRetries) {
+            while (true) {
                 if (retries > 0) Log.d(TAG, "Retry $retries of $maxRetries fetching datasource")
 
                 @Suppress("TooGenericExceptionCaught")
                 return try {
                     parent.open(dataSpec)
                 } catch (ex: Throwable) {
-                    lastException = ex
                     if (printStackTrace) Log.e(
                         /* tag = */ TAG,
                         /* msg = */ "Exception caught by retry mechanism",
                         /* tr = */ ex
                     )
-                    if (predicate(ex)) {
-                        val time = if (exponential) 1000L * 2.0.pow(retries).toLong() else 2500L
-                        Log.d(TAG, "Retry policy accepted retry, sleeping for $time milliseconds")
-                        Thread.sleep(time)
-                        retries++
-                        continue
+
+                    // Counted as retries rather than attempts: asking for one retry has to leave
+                    // room for a second call, or the only thing the policy does is sleep before
+                    // rethrowing
+                    if (!predicate(ex)) {
+                        Log.e(TAG, "Retry policy declined retry, throwing the last exception...")
+                        throw ex
                     }
-                    Log.e(
-                        TAG,
-                        "Retry policy declined retry, throwing the last exception..."
-                    )
-                    throw ex
+                    if (retries >= maxRetries) {
+                        Log.e(TAG, "Max retries $maxRetries exceeded, throwing last exception...")
+                        throw ex
+                    }
+
+                    val time = if (exponential) 1000L * 2.0.pow(retries).toLong() else 2500L
+                    Log.d(TAG, "Retry policy accepted retry, sleeping for $time milliseconds")
+                    Thread.sleep(time)
+                    retries++
+                    continue
                 }
             }
-            Log.e(
-                TAG,
-                "Max retries $maxRetries exceeded, throwing the last exception..."
-            )
-            throw lastException!!
         }
 
         override fun getResponseHeaders(): Map<String, List<String>> = parent.responseHeaders

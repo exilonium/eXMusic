@@ -111,6 +111,7 @@ import app.exitune.core.ui.utils.isAtLeastAndroid12
 import app.exitune.core.ui.utils.isAtLeastAndroid17
 import app.exitune.core.ui.utils.songBundle
 import app.exitune.providers.innertube.Innertube
+import app.exitune.providers.innertube.VisitorData
 import app.exitune.providers.innertube.models.bodies.BrowseBody
 import app.exitune.providers.innertube.requests.playlistPage
 import app.exitune.providers.innertube.requests.song
@@ -537,6 +538,9 @@ class MainApplication : Application(), SingletonImageLoader.Factory, Configurati
         MonetCompat.debugLog = BuildConfig.DEBUG
         super.onCreate()
 
+        VisitorData.restore(DataPreferences.visitorData)
+        VisitorData.onMinted = { DataPreferences.visitorData = it }
+
         MonetCompat.enablePaletteCompat()
         ServiceNotifications.createAll()
     }
@@ -584,6 +588,16 @@ object Dependencies {
     fun runDownload(id: String): String = module
         .callAttr("download", quickjsPath.absolutePath, id)
         .toString()
+
+    /**
+     * Starting the Python runtime and importing yt-dlp takes seconds, and both happen on first use
+     * — which is the player's loading thread, where the wait reads as a song that refused to play
+     * until it is asked two or three more times. Touching them ahead of time keeps that cost off
+     * the first stream.
+     */
+    fun warmUpYouTubeDl() {
+        runCatching { module }.exceptionOrNull()?.printStackTrace()
+    }
 
     fun upgradeYoutubeDl(packageName: String = "yt-dlp"): Boolean {
         val success = runCatching { module.callAttr("upgrade", packageName) }
