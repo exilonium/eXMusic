@@ -14,9 +14,14 @@ data class SearchSuggestionsResponse(
         data class SearchSuggestionsSectionRenderer(
             val contents: List<Content>?
         ) {
+            /**
+             * The first section holds the completed queries, the second one the items YouTube
+             * offers straight away, so both renderers have to be optional here.
+             */
             @Serializable
             data class Content(
-                val searchSuggestionRenderer: SearchSuggestionRenderer?
+                val searchSuggestionRenderer: SearchSuggestionRenderer?,
+                val musicResponsiveListItemRenderer: MusicResponsiveListItemRenderer?
             ) {
                 @Serializable
                 data class SearchSuggestionRenderer(

@@ -306,6 +306,37 @@ object Innertube {
         val items: List<T>?,
         val continuation: String?
     )
+
+    /**
+     * What the search box offers while typing: the queries YouTube would complete the input to,
+     * plus the handful of songs, albums and artists it is confident enough about to offer straight
+     * away.
+     */
+    data class SearchSuggestions(
+        val queries: List<String>,
+        val items: List<Item>
+    )
+
+    /**
+     * An unfiltered search: everything YouTube considers relevant, in one page, grouped by kind.
+     */
+    data class SearchSummaryPage(
+        val sections: List<Section>
+    ) {
+        data class Section(
+            val type: Type,
+            val items: List<Item>
+        )
+
+        enum class Type {
+            TopResult,
+            Songs,
+            Videos,
+            Albums,
+            Artists,
+            Playlists
+        }
+    }
 }
 
 data class InvalidHttpCodeException(val code: Int) :

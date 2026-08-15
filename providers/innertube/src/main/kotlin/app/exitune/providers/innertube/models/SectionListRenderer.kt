@@ -18,11 +18,21 @@ data class SectionListRenderer(
         val musicShelfRenderer: MusicShelfRenderer?,
         val gridRenderer: GridRenderer?,
         val musicDescriptionShelfRenderer: MusicDescriptionShelfRenderer?,
-        val musicResponsiveHeaderRenderer: MusicResponsiveHeaderRenderer?
+        val musicResponsiveHeaderRenderer: MusicResponsiveHeaderRenderer?,
+        val musicCardShelfRenderer: MusicCardShelfRenderer? = null,
+        val itemSectionRenderer: ItemSectionRenderer? = null
     ) {
         @Serializable
         data class MusicDescriptionShelfRenderer(
             val description: Runs?
+        )
+
+        /**
+         * How an unfiltered search hands back its results: one section per item, without a title.
+         */
+        @Serializable
+        data class ItemSectionRenderer(
+            val contents: List<MusicShelfRenderer.Content>?
         )
 
         @Serializable
