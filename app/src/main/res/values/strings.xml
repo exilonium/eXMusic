@@ -18,6 +18,8 @@
     <string name="past_month">Past month</string>
     <string name="past_year">Past year</string>
     <string name="all_time">All time</string>
+    <string name="all">All</string>
+    <string name="top_result">Top result</string>
     <string name="songs">Songs</string>
     <string name="playlists">Playlists</string>
     <string name="albums">Albums</string>

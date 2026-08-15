@@ -1,5 +1,6 @@
 package app.exitune.android.ui.screens.search
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -17,12 +18,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -31,31 +28,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.layout.LocalPinnableContainer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import app.exitune.android.Database
 import app.exitune.android.LocalPlayerAwareWindowInsets
+import app.exitune.android.LocalPlayerServiceBinder
 import app.exitune.android.R
 import app.exitune.android.models.SearchQuery
 import app.exitune.android.preferences.DataPreferences
 import app.exitune.android.query
 import app.exitune.android.ui.components.themed.FloatingActionsContainerWithScrollToTop
-import app.exitune.android.ui.components.themed.Header
-import app.exitune.android.ui.components.themed.SecondaryTextButton
-import app.exitune.android.utils.align
+import app.exitune.android.ui.items.InnertubeItem
 import app.exitune.android.utils.center
 import app.exitune.android.utils.disabled
-import app.exitune.android.utils.medium
+import app.exitune.android.utils.playingSong
 import app.exitune.android.utils.secondary
 import app.exitune.compose.persist.persist
 import app.exitune.compose.persist.persistList
@@ -63,7 +53,6 @@ import app.exitune.core.ui.LocalAppearance
 import app.exitune.providers.innertube.Innertube
 import app.exitune.providers.innertube.models.bodies.SearchSuggestionsBody
 import app.exitune.providers.innertube.requests.searchSuggestions
-import io.ktor.http.Url
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -73,15 +62,18 @@ fun OnlineSearch(
     textFieldValue: TextFieldValue,
     onTextFieldValueChange: (TextFieldValue) -> Unit,
     onSearch: (String) -> Unit,
-    onViewPlaylist: (String) -> Unit,
-    decorationBox: @Composable (@Composable () -> Unit) -> Unit,
-    focused: Boolean,
+    onAlbumClick: (String) -> Unit,
+    onArtistClick: (String) -> Unit,
+    onPlaylistClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) = Box(modifier = modifier) {
-    val (colorPalette, typography) = LocalAppearance.current
+    val (_, typography) = LocalAppearance.current
+    val binder = LocalPlayerServiceBinder.current
 
     var history by persistList<SearchQuery>("search/online/history")
-    var suggestionsResult by persist<Result<List<String>?>?>("search/online/suggestionsResult")
+    var suggestionsResult by persist<Result<Innertube.SearchSuggestions>?>(
+        tag = "search/online/suggestionsResult"
+    )
 
     LaunchedEffect(textFieldValue.text) {
         if (DataPreferences.pauseSearchHistory) return@LaunchedEffect
@@ -92,7 +84,12 @@ fun OnlineSearch(
     }
 
     LaunchedEffect(textFieldValue.text) {
-        if (textFieldValue.text.isEmpty()) return@LaunchedEffect
+        // an empty box has nothing to suggest, and leaving the last results up makes clearing it
+        // look like it did nothing
+        if (textFieldValue.text.isEmpty()) {
+            suggestionsResult = null
+            return@LaunchedEffect
+        }
 
         delay(500)
         suggestionsResult = Innertube.searchSuggestions(
@@ -100,17 +97,10 @@ fun OnlineSearch(
         )
     }
 
-    val playlistId = remember(textFieldValue.text) {
-        runCatching {
-            Url(textFieldValue.text).takeIf {
-                it.host.endsWith("youtube.com", ignoreCase = true) &&
-                    it.segments.lastOrNull()?.equals("playlist", ignoreCase = true) == true
-            }?.parameters?.get("list")
-        }.getOrNull()
-    }
-
-    val focusRequester = remember { FocusRequester() }
     val lazyListState = rememberLazyListState()
+    val (currentMediaId, playing) = playingSong(binder)
+
+    val suggestions = suggestionsResult?.getOrNull()
 
     LazyColumn(
         state = lazyListState,
@@ -119,191 +109,66 @@ fun OnlineSearch(
             .asPaddingValues(),
         modifier = Modifier.fillMaxSize()
     ) {
-        item(
-            key = "header",
-            contentType = 0
-        ) {
-            val container = LocalPinnableContainer.current
-
-            DisposableEffect(Unit) {
-                val handle = container?.pin()
-
-                onDispose {
-                    handle?.release()
-                }
-            }
-
-            LaunchedEffect(focused) {
-                if (!focused) return@LaunchedEffect
-
-                delay(300)
-                focusRequester.requestFocus()
-            }
-
-            Header(
-                titleContent = {
-                    BasicTextField(
-                        value = textFieldValue,
-                        onValueChange = onTextFieldValueChange,
-                        textStyle = typography.xxl.medium.align(TextAlign.End),
-                        singleLine = true,
-                        maxLines = 1,
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                        keyboardActions = KeyboardActions(
-                            onSearch = {
-                                if (textFieldValue.text.isNotEmpty()) onSearch(textFieldValue.text)
-                            }
-                        ),
-                        cursorBrush = SolidColor(colorPalette.text),
-                        decorationBox = decorationBox,
-                        modifier = Modifier.focusRequester(focusRequester)
+        items(
+            items = history,
+            key = SearchQuery::id
+        ) { searchQuery ->
+            QueryRow(
+                query = searchQuery.query,
+                icon = R.drawable.time,
+                onClick = { onSearch(searchQuery.query) },
+                onFill = {
+                    onTextFieldValueChange(
+                        TextFieldValue(
+                            text = searchQuery.query,
+                            selection = TextRange(searchQuery.query.length)
+                        )
                     )
                 },
-                actionsContent = {
-                    if (playlistId != null) {
-                        val isAlbum = playlistId.startsWith("OLAK5uy_")
-
-                        SecondaryTextButton(
-                            text = if (isAlbum) stringResource(R.string.view_album)
-                            else stringResource(R.string.view_playlist),
-                            onClick = { onViewPlaylist(textFieldValue.text) }
-                        )
+                onDelete = {
+                    query {
+                        Database.delete(searchQuery)
                     }
+                },
+                modifier = Modifier.animateItem()
+            )
+        }
 
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    if (textFieldValue.text.isNotEmpty()) SecondaryTextButton(
-                        text = stringResource(R.string.clear),
-                        onClick = { onTextFieldValueChange(TextFieldValue()) }
+        items(
+            items = suggestions?.queries.orEmpty(),
+            key = { "suggestion/$it" }
+        ) { suggestion ->
+            QueryRow(
+                query = suggestion,
+                icon = R.drawable.search,
+                onClick = { onSearch(suggestion) },
+                onFill = {
+                    onTextFieldValueChange(
+                        TextFieldValue(
+                            text = suggestion,
+                            selection = TextRange(suggestion.length)
+                        )
                     )
                 }
             )
         }
 
         items(
-            items = history,
-            key = SearchQuery::id
-        ) { searchQuery ->
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .clickable { onSearch(searchQuery.query) }
-                    .fillMaxWidth()
-                    .padding(all = 16.dp)
-                    .animateItem()
-            ) {
-                Spacer(
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp)
-                        .size(20.dp)
-                        .paint(
-                            painter = painterResource(R.drawable.time),
-                            colorFilter = ColorFilter.disabled
-                        )
-                )
-
-                BasicText(
-                    text = searchQuery.query,
-                    style = typography.s.secondary,
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp)
-                        .weight(1f)
-                )
-
-                Image(
-                    painter = painterResource(R.drawable.close),
-                    contentDescription = null,
-                    colorFilter = ColorFilter.disabled,
-                    modifier = Modifier
-                        .clickable(
-                            indication = ripple(bounded = false),
-                            interactionSource = remember { MutableInteractionSource() },
-                            onClick = {
-                                query {
-                                    Database.delete(searchQuery)
-                                }
-                            }
-                        )
-                        .padding(horizontal = 8.dp)
-                        .size(20.dp)
-                )
-
-                Image(
-                    painter = painterResource(R.drawable.arrow_forward),
-                    contentDescription = null,
-                    colorFilter = ColorFilter.disabled,
-                    modifier = Modifier
-                        .clickable(
-                            indication = ripple(bounded = false),
-                            interactionSource = remember { MutableInteractionSource() },
-                            onClick = {
-                                onTextFieldValueChange(
-                                    TextFieldValue(
-                                        text = searchQuery.query,
-                                        selection = TextRange(searchQuery.query.length)
-                                    )
-                                )
-                            }
-                        )
-                        .rotate(225f)
-                        .padding(horizontal = 8.dp)
-                        .size(22.dp)
-                )
-            }
+            items = suggestions?.items.orEmpty(),
+            key = { "item/${it.key}" }
+        ) { item ->
+            InnertubeItem(
+                item = item,
+                onAlbumClick = onAlbumClick,
+                onArtistClick = onArtistClick,
+                onPlaylistClick = onPlaylistClick,
+                currentMediaId = currentMediaId,
+                playing = playing
+            )
         }
 
-        suggestionsResult?.getOrNull()?.let { suggestions ->
-            items(items = suggestions) { suggestion ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .clickable { onSearch(suggestion) }
-                        .fillMaxWidth()
-                        .padding(all = 16.dp)
-                ) {
-                    Spacer(
-                        modifier = Modifier
-                            .padding(horizontal = 8.dp)
-                            .size(20.dp)
-                            .paint(
-                                painter = painterResource(R.drawable.search),
-                                colorFilter = ColorFilter.disabled
-                            )
-                    )
-
-                    BasicText(
-                        text = suggestion,
-                        style = typography.s.secondary,
-                        modifier = Modifier
-                            .padding(horizontal = 8.dp)
-                            .weight(1f)
-                    )
-
-                    Image(
-                        painter = painterResource(R.drawable.arrow_forward),
-                        contentDescription = null,
-                        colorFilter = ColorFilter.disabled,
-                        modifier = Modifier
-                            .clickable(
-                                indication = ripple(bounded = false),
-                                interactionSource = remember { MutableInteractionSource() },
-                                onClick = {
-                                    onTextFieldValueChange(
-                                        TextFieldValue(
-                                            text = suggestion,
-                                            selection = TextRange(suggestion.length)
-                                        )
-                                    )
-                                }
-                            )
-                            .rotate(225f)
-                            .padding(horizontal = 8.dp)
-                            .size(22.dp)
-                    )
-                }
-            }
-        } ?: suggestionsResult?.exceptionOrNull()?.let {
-            item {
+        suggestionsResult?.exceptionOrNull()?.let {
+            item(key = "error") {
                 Box(modifier = Modifier.fillMaxSize()) {
                     BasicText(
                         text = stringResource(R.string.error_message),
@@ -316,4 +181,73 @@ fun OnlineSearch(
     }
 
     FloatingActionsContainerWithScrollToTop(lazyListState = lazyListState)
+}
+
+@Composable
+private fun QueryRow(
+    query: String,
+    @DrawableRes icon: Int,
+    onClick: () -> Unit,
+    onFill: () -> Unit,
+    modifier: Modifier = Modifier,
+    onDelete: (() -> Unit)? = null
+) {
+    val (_, typography) = LocalAppearance.current
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .clickable(onClick = onClick)
+            .fillMaxWidth()
+            .padding(all = 16.dp)
+    ) {
+        Spacer(
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .size(20.dp)
+                .paint(
+                    painter = painterResource(icon),
+                    colorFilter = ColorFilter.disabled
+                )
+        )
+
+        BasicText(
+            text = query,
+            style = typography.s.secondary,
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .weight(1f)
+        )
+
+        onDelete?.let {
+            Image(
+                painter = painterResource(R.drawable.close),
+                contentDescription = null,
+                colorFilter = ColorFilter.disabled,
+                modifier = Modifier
+                    .clickable(
+                        indication = ripple(bounded = false),
+                        interactionSource = remember { MutableInteractionSource() },
+                        onClick = it
+                    )
+                    .padding(horizontal = 8.dp)
+                    .size(20.dp)
+            )
+        }
+
+        Image(
+            painter = painterResource(R.drawable.arrow_forward),
+            contentDescription = null,
+            colorFilter = ColorFilter.disabled,
+            modifier = Modifier
+                .clickable(
+                    indication = ripple(bounded = false),
+                    interactionSource = remember { MutableInteractionSource() },
+                    onClick = onFill
+                )
+                .rotate(225f)
+                .padding(horizontal = 8.dp)
+                .size(22.dp)
+        )
+    }
 }

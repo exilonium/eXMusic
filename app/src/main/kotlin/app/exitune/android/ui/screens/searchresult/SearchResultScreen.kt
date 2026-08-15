@@ -82,16 +82,25 @@ fun SearchResultScreen(query: String, onSearchAgain: () -> Unit) {
                 tabIndex = UIStatePreferences.searchResultScreenTabIndex,
                 onTabChange = { UIStatePreferences.searchResultScreenTabIndex = it },
                 tabColumnContent = {
-                    tab(0, R.string.songs, R.drawable.musical_notes)
-                    tab(1, R.string.albums, R.drawable.disc)
-                    tab(2, R.string.artists, R.drawable.person)
-                    tab(3, R.string.videos, R.drawable.film)
-                    tab(4, R.string.playlists, R.drawable.playlist)
+                    tab(0, R.string.all, R.drawable.sparkles, canHide = false)
+                    tab(1, R.string.songs, R.drawable.musical_notes)
+                    tab(2, R.string.albums, R.drawable.disc)
+                    tab(3, R.string.artists, R.drawable.person)
+                    tab(4, R.string.videos, R.drawable.film)
+                    tab(5, R.string.playlists, R.drawable.playlist)
                 }
             ) { tabIndex ->
                 saveableStateHolder.SaveableStateProvider(tabIndex) {
                     when (tabIndex) {
-                        0 -> ItemsPage(
+                        0 -> SearchSummary(
+                            query = query,
+                            onAlbumClick = { albumRoute(it) },
+                            onArtistClick = { artistRoute(it) },
+                            onPlaylistClick = { playlistRoute(it, null, null, false) },
+                            header = { headerContent(null) }
+                        )
+
+                        1 -> ItemsPage(
                             tag = "searchResults/$query/songs",
                             provider = { continuation ->
                                 if (continuation == null) Innertube.searchPage(
@@ -134,7 +143,7 @@ fun SearchResultScreen(query: String, onSearchAgain: () -> Unit) {
                             }
                         )
 
-                        1 -> ItemsPage(
+                        2 -> ItemsPage(
                             tag = "searchResults/$query/albums",
                             provider = { continuation ->
                                 if (continuation == null) {
@@ -166,7 +175,7 @@ fun SearchResultScreen(query: String, onSearchAgain: () -> Unit) {
                             }
                         )
 
-                        2 -> ItemsPage(
+                        3 -> ItemsPage(
                             tag = "searchResults/$query/artists",
                             provider = { continuation ->
                                 if (continuation == null) {
@@ -199,7 +208,7 @@ fun SearchResultScreen(query: String, onSearchAgain: () -> Unit) {
                             }
                         )
 
-                        3 -> ItemsPage(
+                        4 -> ItemsPage(
                             tag = "searchResults/$query/videos",
                             provider = { continuation ->
                                 if (continuation == null) Innertube.searchPage(
@@ -245,7 +254,7 @@ fun SearchResultScreen(query: String, onSearchAgain: () -> Unit) {
                             }
                         )
 
-                        4 -> ItemsPage(
+                        5 -> ItemsPage(
                             tag = "searchResults/$query/playlists",
                             provider = { continuation ->
                                 if (continuation == null) Innertube.searchPage(
