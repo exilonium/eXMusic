@@ -128,7 +128,6 @@ import app.vitune.providers.innertube.requests.PlaybackStatusException
 import app.vitune.providers.innertube.requests.UnplayablePlaybackException
 import app.vitune.providers.innertube.requests.playback
 import app.vitune.providers.innertube.requests.player
-import app.vitune.providers.innertube.requests.VideoIdMismatchException as InnertubeVideoIdMismatchException
 import app.vitune.providers.innertube.requests.searchPage
 import app.vitune.providers.innertube.utils.from
 import app.vitune.providers.sponsorblock.SponsorBlock
@@ -175,6 +174,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import android.os.Binder as AndroidBinder
+import app.vitune.providers.innertube.requests.VideoIdMismatchException as InnertubeVideoIdMismatchException
 
 const val LOCAL_KEY_PREFIX = "local:"
 private const val TAG = "PlayerService"
