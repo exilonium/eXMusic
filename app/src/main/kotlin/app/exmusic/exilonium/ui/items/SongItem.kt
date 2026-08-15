@@ -204,7 +204,7 @@ fun SongItem(
     isPlaying: Boolean = false,
     hideExplicit: Boolean = AppearancePreferences.hideExplicit
 ) {
-    val (colorPalette, typography) = LocalAppearance.current
+    val (colorPalette, typography, _, thumbnailShape) = LocalAppearance.current
 
     val backgroundColor by animateColorAsState(
         targetValue = if (isPlaying) colorPalette.background2 else Color.Transparent,
@@ -215,9 +215,11 @@ fun SongItem(
         alternative = false,
         thumbnailSize = thumbnailSize,
         modifier = modifier
-            .background(backgroundColor)
+            // shaped on its own, because rows the screen padded inwards sit inside the clip below,
+            // where its rounding cannot reach - the highlight stayed a bare rectangle there
+            .background(color = backgroundColor, shape = thumbnailShape)
             .let {
-                if (clip) Modifier.clip(LocalAppearance.current.thumbnailShape) then it
+                if (clip) Modifier.clip(thumbnailShape) then it
                 else it
             }
     ) {
