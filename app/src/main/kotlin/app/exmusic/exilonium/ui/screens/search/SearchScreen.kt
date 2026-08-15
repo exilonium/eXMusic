@@ -6,8 +6,12 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.exclude
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
@@ -179,12 +183,17 @@ fun SearchScreen(
                                 .asPaddingValues()
                         )
                     )
-                }
+                },
+                // the keyboard shortens the screen instead of covering the end of it, so that the
+                // results stop where it starts rather than being laid out underneath it
+                modifier = Modifier.imePadding()
             ) { currentTabIndex ->
-                // the search bar above already took the top inset
+                // the search bar above already took the top inset, and the keyboard is now part of
+                // the layout rather than something the content has to pad itself away from
                 CompositionLocalProvider(
                     LocalPlayerAwareWindowInsets provides windowInsets
                         .only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal)
+                        .exclude(WindowInsets.ime)
                 ) {
                     saveableStateHolder.SaveableStateProvider(currentTabIndex) {
                         when (currentTabIndex) {
