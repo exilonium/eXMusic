@@ -180,6 +180,14 @@ const val LOCAL_KEY_PREFIX = "local:"
 private const val TAG = "PlayerService"
 
 /**
+ * What the player needs to keep fetching a stream it has already resolved.
+ */
+data class StreamMeta(
+    val contentLength: Long?,
+    val headers: Map<String, String> = emptyMap()
+)
+
+/**
  * A stream URL plus the metadata worth persisting about it, regardless of where it came from.
  */
 private data class ResolvedStream(
@@ -191,7 +199,8 @@ private data class ResolvedStream(
     val loudnessDb: Float?,
     val lastModified: Long?,
     val approxDurationMs: Long?,
-    val validUntil: Instant?
+    val validUntil: Instant?,
+    val headers: Map<String, String> = emptyMap()
 )
 
 @get:OptIn(UnstableApi::class)
@@ -1461,7 +1470,8 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                 approxDurationMs = playback.format.approxDurationMs,
                 validUntil = playback.expiresInSeconds
                     ?.seconds
-                    ?.let { Clock.System.now() + it }
+                    ?.let { Clock.System.now() + it },
+                headers = playback.streamHeaders
             )
         }
 
@@ -1501,7 +1511,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             cache: Cache,
             chunkLength: Long? = DEFAULT_CHUNK_LENGTH,
             findMediaItem: suspend (videoId: String) -> MediaItem? = { null },
-            uriCache: UriCache<String, Long?> = UriCache()
+            uriCache: UriCache<String, StreamMeta> = UriCache()
         ): DataSource.Factory = ResolvingDataSource.Factory(
             ConditionalCacheDataSourceFactory(
                 cacheDataSourceFactory = cache.readOnlyWhen { PlayerPreferences.pauseCache }.asDataSource,
@@ -1512,16 +1522,20 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             val mediaId = dataSpec.key?.removePrefix("https://youtube.com/watch?v=")
                 ?: error("A key must be set")
 
-            fun DataSpec.ranged(contentLength: Long?) = contentLength?.let {
-                if (chunkLength == null) return@let null
+            fun DataSpec.ranged(meta: StreamMeta): DataSpec {
+                val spec =
+                    if (meta.headers.isEmpty()) this else withAdditionalHeaders(meta.headers)
+
+                if (chunkLength == null || meta.contentLength == null) return spec
 
                 val start = dataSpec.uriPositionOffset
-                val length = (contentLength - start).coerceAtMost(chunkLength)
+                val length = (meta.contentLength - start).coerceAtMost(chunkLength)
                 val rangeText = "$start-${start + length}"
 
-                this.subrange(start, length)
+                return spec
+                    .subrange(start, length)
                     .withAdditionalHeaders(mapOf("Range" to "bytes=$rangeText"))
-            } ?: this
+            }
 
             if (
                 dataSpec.isLocal || (
@@ -1578,16 +1592,21 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                         }
                     }
 
+                    val meta = StreamMeta(
+                        contentLength = stream.contentLength,
+                        headers = stream.headers
+                    )
+
                     uriCache.push(
                         key = mediaId,
-                        meta = stream.contentLength,
+                        meta = meta,
                         uri = stream.uri,
                         validUntil = stream.validUntil
                     )
 
                     dataSpec
                         .withUri(stream.uri)
-                        .ranged(stream.contentLength)
+                        .ranged(meta)
                 }
             }
         }.handleUnknownErrors {

@@ -18,8 +18,23 @@ data class PlaybackData(
     val expiresInSeconds: Long?,
     val loudnessDb: Float?,
     val clientName: String,
-    val cpn: String?
+    val cpn: String?,
+    /**
+     * Must be sent when fetching [url]: the CDN ties a stream to the client that asked for it, and
+     * serves a mismatched caller a truncated response.
+     */
+    val streamHeaders: Map<String, String>
 )
+
+private val Context.streamHeaders: Map<String, String>
+    get() = buildMap {
+        client.userAgent?.let { put("User-Agent", it) }
+
+        val origin =
+            if (client.music) "https://music.youtube.com" else "https://www.youtube.com"
+        put("Origin", origin)
+        put("Referer", "$origin/")
+    }
 
 /**
  * Resolves a playable audio stream by asking the player endpoint as a series of clients that hand
@@ -95,7 +110,8 @@ private suspend fun Innertube.resolve(
         expiresInSeconds = streamingData.expiresInSeconds,
         loudnessDb = response.playerConfig?.audioConfig?.normalizedLoudnessDb,
         clientName = context.client.clientName,
-        cpn = response.cpn
+        cpn = response.cpn,
+        streamHeaders = context.streamHeaders
     )
 }
 
