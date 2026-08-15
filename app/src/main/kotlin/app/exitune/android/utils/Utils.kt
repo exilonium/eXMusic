@@ -21,6 +21,7 @@ import app.exitune.android.service.isLocal
 import app.exitune.core.ui.utils.SongBundleAccessor
 import app.exitune.providers.innertube.Innertube
 import app.exitune.providers.innertube.models.bodies.ContinuationBody
+import app.exitune.providers.innertube.models.resizedThumbnail
 import app.exitune.providers.innertube.requests.playlistPage
 import app.exitune.providers.piped.models.Playlist
 import kotlinx.coroutines.currentCoroutineContext
@@ -155,18 +156,7 @@ val Duration.formatted
 fun String?.thumbnail(
     size: Int,
     maxSize: Int = AppearancePreferences.maxThumbnailSize
-): String? {
-    val actualSize = size.coerceAtMost(maxSize)
-    return when {
-        this?.startsWith("https://lh3.googleusercontent.com") == true ->
-            "${substringBefore('=')}=w$actualSize-h$actualSize-l90-rj"
-
-        this?.startsWith("https://yt3.ggpht.com") == true ->
-            "${substringBefore('=')}=s$actualSize"
-
-        else -> this
-    }
-}
+) = this?.resizedThumbnail(size.coerceAtMost(maxSize))
 
 fun Uri?.thumbnail(size: Int) = toString().thumbnail(size)?.toUri()
 
