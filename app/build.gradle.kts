@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -148,8 +146,8 @@ kotlin {
     jvmToolchain(libs.versions.jvm.get().toInt())
 
     compilerOptions {
-        languageVersion.set(KotlinVersion.KOTLIN_2_5)
-
+        // Don't set languageVersion ahead of the compiler's stable version: it makes kotlinc emit
+        // metadata R8 can't parse yet, which floods every build with metadata warnings
         freeCompilerArgs.addAll(
             "-Xconsistent-data-class-copy-visibility"
         )
