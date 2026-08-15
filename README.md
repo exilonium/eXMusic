@@ -1,6 +1,6 @@
 <div align="center">
     <img src="./app/src/main/ic_launcher-playstore.png" width="128" height="128" style="display: block; margin: 0 auto"/>
-    <h1>ViTune</h1>
+    <h1>ExiTune</h1>
     <p>An Android application for seamless music streaming</p>
 </div>
 
@@ -30,7 +30,7 @@
 - Highly customizable (dynamic theme, Material You, ...)
 - Normalize audio for the perfect listening experience
 - Listen from your car using Android Auto
-- Open YouTube/YouTube Music links (`watch`, `playlist`, `channel`, etc.) with ViTune
+- Open YouTube/YouTube Music links (`watch`, `playlist`, `channel`, etc.) with ExiTune
 - Ridiculously lightweight APK
 
 ## Installation
@@ -38,19 +38,22 @@
 [<img src="https://github.com/machiav3lli/oandbackupx/blob/034b226cea5c1b30eb4f6a6f313e4dadcbb0ece4/badge_github.png"
 alt="Get it on GitHub"
 height="80"
-align="center">](https://github.com/25huizengek1/ViTune/releases/latest)
-
-[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
-alt="Get it on F-Droid"
-height="80"
-align="center">](https://repo.vitune.app/)
+align="center">](https://github.com/exilonium/exitune/releases/latest)
 
 [<img src="https://github.com/ImranR98/Obtainium/blob/main/assets/graphics/badge_obtainium.png"
 alt="Get it on Obtainium"
 height="54"
-align="center">](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/25huizengek1/ViTune/)
+align="center">](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/exilonium/exitune/)
+
+Every push is built by CI, so you can also grab an APK from the artifacts of a
+[build run](https://github.com/exilonium/exitune/actions).
 
 ## Acknowledgments
+
+- [**ViTune**](https://github.com/25huizengek1/ViTune): ExiTune is a fork of ViTune, which is itself
+  a fork of ViMusic.
+- [**Metrolist**](https://github.com/MetrolistGroup/Metrolist): the approach ExiTune uses to resolve
+  streams from YouTube Music directly.
 
 - [**YouTube-Internal-Clients**](https://github.com/zerodytrash/YouTube-Internal-Clients): A Python
   script that discovers hidden YouTube API clients. Just a research project.

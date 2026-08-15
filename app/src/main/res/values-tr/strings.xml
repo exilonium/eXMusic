@@ -113,7 +113,7 @@
     <string name="no_browser_installed">İnternette gezinmek için bir uygulama bulunamadı</string>
     <string name="no_equalizer_installed">Sesi eşitleyecek bir uygulama bulunamadı</string>
     <string name="no_file_chooser_installed">Belge oluşturmak için bir uygulama bulunamadı</string>
-    <string name="no_battery_optimization_settings_found">Pil optimizasyon ayarları bulunamadı, lütfen ViTune\'u manuel olarak beyaz listeye alın</string>
+    <string name="no_battery_optimization_settings_found">Pil optimizasyon ayarları bulunamadı, lütfen ExiTune\'u manuel olarak beyaz listeye alın</string>
     <string name="related_albums">İlgili albümler</string>
     <string name="similar_artists">Benzer sanatçılar</string>
     <string name="recommended_playlists">Beğenebileceğiniz oynatma listeleri</string>
@@ -216,7 +216,7 @@
     <string name="backup_description">Kişisel tercihler (yani tema modu) ve önbellek hariç tutulur.</string>
     <string name="backup_action_description">Veritabanını harici depolamaya aktar</string>
     <string name="restore">Geri Yükle</string>
-    <string name="restore_warning">Mevcut verilerin üzerine yazılacak.\nViTune, veritabanını geri yükledikten sonra otomatik olarak kendini kapatacak.</string>
+    <string name="restore_warning">Mevcut verilerin üzerine yazılacak.\nExiTune, veritabanını geri yükledikten sonra otomatik olarak kendini kapatacak.</string>
     <string name="restore_description">Veritabanını harici depolama alanından içe aktar</string>
     <string name="other">Diğer</string>
     <string name="android_auto">Android Auto</string>
@@ -285,7 +285,7 @@
     <string name="username">Kullanıcı adı</string>
     <string name="password">Parola</string>
     <string name="login">Giriş</string>
-    <string name="sync_description">Oynatma listelerini başka bir yerde barındırabilir ve bunları ViTune ile senkronize edebilirsiniz. Şu anda yalnızca Piped\'ı destekliyor.</string>
+    <string name="sync_description">Oynatma listelerini başka bir yerde barındırabilir ve bunları ExiTune ile senkronize edebilirsiniz. Şu anda yalnızca Piped\'ı destekliyor.</string>
     <string name="add_account">Hesap ekle</string>
     <string name="add_account_description">Piped hesabınızı oturumunuz, kullanıcı adınız ve şifrenizle bağlayın.</string>
     <string name="learn_more">Daha fazla bilgi edinin</string>

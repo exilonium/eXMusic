@@ -136,7 +136,7 @@
     <string name="no_browser_installed">Impossibile trovare un\'applicazione per navigare in internet</string>
     <string name="no_equalizer_installed">Impossibile trovare un\'applicazione per equalizzare l\'audio</string>
     <string name="no_file_chooser_installed">Impossibile trovare un\'applicazione per creare documenti</string>
-    <string name="no_battery_optimization_settings_found">Impossibile trovare le impostazioni di ottimizzazione della batteria, inserisci manualmente ViTune nella lista bianca</string>
+    <string name="no_battery_optimization_settings_found">Impossibile trovare le impostazioni di ottimizzazione della batteria, inserisci manualmente ExiTune nella lista bianca</string>
 
     <string name="related_albums">Album correlati</string>
     <string name="similar_artists">Artisti simili</string>
@@ -266,7 +266,7 @@
     <string name="backup_description">Le preferenze personali (ad es. la modalità tema) e la cache sono escluse.</string>
     <string name="backup_action_description">Esporta il database nella memoria esterna</string>
     <string name="restore">Ripristina</string>
-    <string name="restore_warning">I dati esistenti verranno sovrascritti.\nViTune si chiuderà automaticamente dopo il ripristino del database.</string>
+    <string name="restore_warning">I dati esistenti verranno sovrascritti.\nExiTune si chiuderà automaticamente dopo il ripristino del database.</string>
     <string name="restore_description">Importa il database dalla memoria esterna</string>
 
     <string name="other">Altro</string>
@@ -355,7 +355,7 @@
     <string name="username">Nome utente</string>
     <string name="password">Password</string>
     <string name="login">Accedi</string>
-    <string name="sync_description">Puoi ospitare playlist altrove e sincronizzarle con ViTune. Attualmente supporta solo Piped.</string>
+    <string name="sync_description">Puoi ospitare playlist altrove e sincronizzarle con ExiTune. Attualmente supporta solo Piped.</string>
     <string name="add_account">Aggiungi account</string>
     <string name="add_account_description">Collega un account Piped con la tua istanza, nome utente e password.</string>
     <string name="learn_more">Scopri di più</string>

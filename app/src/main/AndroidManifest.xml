@@ -54,7 +54,7 @@
         android:label="${appName}"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="false"
-        android:theme="@style/Theme.ViTune.NoActionBar"
+        android:theme="@style/Theme.ExiTune.NoActionBar"
         android:appCategory="audio"
         tools:ignore="UnusedAttribute">
 
@@ -62,7 +62,7 @@
             android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTask"
-            android:theme="@style/Theme.ViTune.NoActionBar"
+            android:theme="@style/Theme.ExiTune.NoActionBar"
             android:windowSoftInputMode="adjustResize"
             android:supportsPictureInPicture="true"
             android:configChanges="colorMode|density|fontScale|keyboard|keyboardHidden|layoutDirection|locale|mcc|mnc|navigation|orientation|screenLayout|screenSize|smallestScreenSize|touchscreen|uiMode">

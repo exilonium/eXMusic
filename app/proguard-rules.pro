@@ -1,11 +1,11 @@
 -keep,allowobfuscation,allowshrinking class kotlin.coroutines.Continuation
 
--keepclassmembers class app.vitune.android.utils.ActionReceiver$* {
+-keepclassmembers class app.exitune.android.utils.ActionReceiver$* {
     <fields>;
     <methods>;
 }
 
--if @app.vitune.android.utils.ActionReceiver class **
+-if @app.exitune.android.utils.ActionReceiver class **
 -keepclassmembers class <1> {
     <fields>;
     <methods>;

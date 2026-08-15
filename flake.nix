@@ -1,5 +1,5 @@
 {
-  description = "ViTune development tooling";
+  description = "ExiTune development tooling";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";

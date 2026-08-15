@@ -22,7 +22,7 @@ tasks.register<Delete>("clean") {
 val topLevelLibs = libs
 
 allprojects {
-    group = "app.vitune"
+    group = "app.exitune"
     version = "1.2.2"
 
     apply(plugin = "dev.detekt")

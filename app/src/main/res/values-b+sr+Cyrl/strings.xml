@@ -116,7 +116,7 @@
     <string name="no_browser_installed">Није пронађена апликација за прегледање интернета</string>
     <string name="no_equalizer_installed">Није пронађена апликација за подешавање еквилајзера</string>
     <string name="no_file_chooser_installed">Није пронађена апликација за креирање докумената</string>
-    <string name="no_battery_optimization_settings_found">Није пронађено подешавање за оптимизацију батерије, молимо да ручно додате ViTune на белу листу</string>
+    <string name="no_battery_optimization_settings_found">Није пронађено подешавање за оптимизацију батерије, молимо да ручно додате ExiTune на белу листу</string>
     <string name="related_albums">Повезани албуми</string>
     <string name="similar_artists">Слични уметници</string>
     <string name="recommended_playlists">Плејлисте које би вам се могле свидети</string>
@@ -225,7 +225,7 @@
     <string name="backup_description">Лични преференције (нпр. мод теме) и кеш су искључени.</string>
     <string name="backup_action_description">Извези базу података на екстерну меморију</string>
     <string name="restore">Врати</string>
-    <string name="restore_warning">Постојећи подаци ће бити преписани.\nViTune ће се аутоматски затворити након враћања базе података.</string>
+    <string name="restore_warning">Постојећи подаци ће бити преписани.\nExiTune ће се аутоматски затворити након враћања базе података.</string>
     <string name="restore_description">Увези базу података са екстерне меморије</string>
     <string name="other">Остало</string>
     <string name="android_auto">Android Auto</string>
@@ -299,7 +299,7 @@
     <string name="username">Корисничко име</string>
     <string name="password">Лозинка</string>
     <string name="login">Пријава</string>
-    <string name="sync_description">Можете хостовати плејлисте на другом месту и синхронизовати их са ViTune. Тренутно подржава само Piped.</string>
+    <string name="sync_description">Можете хостовати плејлисте на другом месту и синхронизовати их са ExiTune. Тренутно подржава само Piped.</string>
     <string name="add_account">Додај налог</string>
     <string name="add_account_description">Повежите Piped налог са инстанцом, корисничким именом и лозинком.</string>
     <string name="learn_more">Сазнај више</string>

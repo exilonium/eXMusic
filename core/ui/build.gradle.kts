@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "app.vitune.core.ui"
+    namespace = "app.exitune.core.ui"
     compileSdk = 37
 
     defaultConfig {

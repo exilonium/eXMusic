@@ -115,7 +115,7 @@
     <string name="no_browser_installed">インターネットを閲覧するためのアプリが見つかりませんでした</string>
     <string name="no_equalizer_installed">イコライザーが見つかりませんでした</string>
     <string name="no_file_chooser_installed">ドキュメントを作成するアプリケーションが見つかりませんでした</string>
-    <string name="no_battery_optimization_settings_found">バッテリー最適化設定が見つかりませんでした\nViTuneを手動で設定してください</string>
+    <string name="no_battery_optimization_settings_found">バッテリー最適化設定が見つかりませんでした\nExiTuneを手動で設定してください</string>
     <string name="related_albums">関連アルバム</string>
     <string name="similar_artists">類似したアーティスト</string>
     <string name="recommended_playlists">類似したプレイリスト</string>
@@ -220,7 +220,7 @@
     <string name="backup_description">個人的な設定(テーマ モードなど)とキャッシュは除外されます.</string>
     <string name="backup_action_description">データベースを外部ストレージにエクスポートします</string>
     <string name="restore">復元</string>
-    <string name="restore_warning">既存のデータは上書きされます\nデータベースの復元後、ViTune は自動的に終了します.</string>
+    <string name="restore_warning">既存のデータは上書きされます\nデータベースの復元後、ExiTune は自動的に終了します.</string>
     <string name="restore_description">データベースを外部ストレージからインポートします</string>
     <string name="other">その他</string>
     <string name="android_auto">Android Auto</string>
@@ -289,7 +289,7 @@
     <string name="username">ユーザーネーム</string>
     <string name="password">パスワード</string>
     <string name="login">ログイン</string>
-    <string name="sync_description">プレイリストを別の場所で保存し、ViTune と同期することができます一現在、Piped のみをサポートしています.</string>
+    <string name="sync_description">プレイリストを別の場所で保存し、ExiTune と同期することができます一現在、Piped のみをサポートしています.</string>
     <string name="add_account">アカウントを追加する</string>
     <string name="add_account_description">Piped アカウントにリンクします.</string>
     <string name="learn_more">もっと知る</string>
