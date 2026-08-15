@@ -40,6 +40,9 @@ import kotlinx.coroutines.withContext
 
 private const val PLACEHOLDER_COUNT = 8
 
+/** Lines the rows up with the section titles, which sit at the list's own 16dp. */
+private val ROW_PADDING = 8.dp
+
 /**
  * Everything YouTube found for the query on one page - the top result first, then the songs, then
  * the rest - rather than one kind per tab. Songs play from here, the others open their own screen.
@@ -96,7 +99,7 @@ fun SearchSummary(
                         style = typography.m.semiBold,
                         modifier = Modifier
                             .padding(horizontal = 16.dp)
-                            .padding(top = 24.dp, bottom = 8.dp)
+                            .padding(top = 24.dp, bottom = 12.dp)
                     )
                 }
 
@@ -109,6 +112,7 @@ fun SearchSummary(
                         onAlbumClick = onAlbumClick,
                         onArtistClick = onArtistClick,
                         onPlaylistClick = onPlaylistClick,
+                        modifier = Modifier.padding(horizontal = ROW_PADDING),
                         currentMediaId = currentMediaId,
                         playing = playing
                     )
@@ -131,7 +135,10 @@ fun SearchSummary(
             if (summary == null) item(key = "loading") {
                 ShimmerHost(modifier = Modifier.fillParentMaxSize()) {
                     repeat(PLACEHOLDER_COUNT) {
-                        SongItemPlaceholder(thumbnailSize = Dimensions.thumbnails.song)
+                        SongItemPlaceholder(
+                            thumbnailSize = Dimensions.thumbnails.song,
+                            modifier = Modifier.padding(horizontal = ROW_PADDING)
+                        )
                     }
                 }
             }

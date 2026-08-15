@@ -125,7 +125,7 @@ fun SongItem(
 )
 
 @Composable
-private fun SongItem(
+fun SongItem(
     thumbnailUrl: String?,
     title: String?,
     authors: String?,
@@ -190,7 +190,7 @@ private fun SongItem(
 }
 
 @Composable
-private fun SongItem(
+fun SongItem(
     title: String?,
     authors: String?,
     duration: String?,

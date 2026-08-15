@@ -162,6 +162,8 @@ fun OnlineSearch(
                 onAlbumClick = onAlbumClick,
                 onArtistClick = onArtistClick,
                 onPlaylistClick = onPlaylistClick,
+                // lines the thumbnails up with the icons of the query rows above
+                modifier = Modifier.padding(horizontal = 8.dp),
                 currentMediaId = currentMediaId,
                 playing = playing
             )
