@@ -91,6 +91,7 @@ object VisitorData {
      */
     private fun JsonElement.findVisitorData(): String? = when (this) {
         is JsonArray -> firstNotNullOfOrNull { it.findVisitorData() }
+
         is JsonPrimitive -> content.takeIf {
             isString && it.startsWith("Cg") && it.length > MIN_LENGTH
         }
