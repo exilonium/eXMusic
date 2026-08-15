@@ -1,6 +1,11 @@
+@file:OptIn(ExperimentalTime::class)
+
 package app.vitune.core.data.utils
 
 import android.net.Uri
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 open class RingBuffer<T>(val size: Int, private val init: (index: Int) -> T) : Iterable<T> {
     private val list = MutableList(size, init)
@@ -27,17 +32,23 @@ class UriCache<Key : Any, Meta>(size: Int = 16) {
     data class CachedUri<Key, Meta> internal constructor(
         val key: Key,
         val meta: Meta,
-        val uri: Uri
+        val uri: Uri,
+        val validUntil: Instant?
     )
 
-    operator fun get(key: Key) = buffer.find { it != null && it.key == key }
+    operator fun get(key: Key) = buffer.find {
+        it != null && it.key == key && (it.validUntil == null || it.validUntil > Clock.System.now())
+    }
 
     fun push(
         key: Key,
         meta: Meta,
-        uri: Uri
+        uri: Uri,
+        validUntil: Instant? = null
     ) {
-        buffer += CachedUri(key, meta, uri)
+        if (validUntil != null && validUntil <= Clock.System.now()) return
+
+        buffer += CachedUri(key, meta, uri, validUntil)
     }
 
     fun clear() = buffer.clear()
