@@ -30,8 +30,10 @@ class RangeHandlerDataSourceFactory(private val parent: DataSource.Factory) : Da
             ) parent.open(
                 dataSpec
                     .buildUpon()
+                    // Retry unbounded: drop the range that the server would not serve, but keep
+                    // every other header, since the stream is bound to the client that asked for it
                     .setHttpRequestHeaders(
-                        dataSpec.httpRequestHeaders.filter {
+                        dataSpec.httpRequestHeaders.filterNot {
                             it.key.equals("range", ignoreCase = true)
                         }
                     )

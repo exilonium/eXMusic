@@ -96,11 +96,13 @@ import app.exitune.android.utils.forcePlayFromBeginning
 import app.exitune.android.utils.forceSeekToNext
 import app.exitune.android.utils.forceSeekToPrevious
 import app.exitune.android.utils.get
+import app.exitune.android.utils.handleRangeErrors
 import app.exitune.android.utils.handleUnknownErrors
 import app.exitune.android.utils.intent
 import app.exitune.android.utils.mediaItems
 import app.exitune.android.utils.progress
 import app.exitune.android.utils.readOnlyWhen
+import app.exitune.android.utils.retryIf
 import app.exitune.android.utils.setPlaybackPitch
 import app.exitune.android.utils.shouldBePlaying
 import app.exitune.android.utils.thumbnail
@@ -119,6 +121,7 @@ import app.exitune.core.ui.utils.isAtLeastAndroid9
 import app.exitune.core.ui.utils.songBundle
 import app.exitune.core.ui.utils.streamVolumeFlow
 import app.exitune.providers.innertube.Innertube
+import app.exitune.providers.innertube.InvalidHttpCodeException
 import app.exitune.providers.innertube.models.NavigationEndpoint
 import app.exitune.providers.innertube.models.bodies.PlayerBody
 import app.exitune.providers.innertube.models.bodies.SearchBody
@@ -134,6 +137,7 @@ import app.exitune.providers.sponsorblock.SponsorBlock
 import app.exitune.providers.sponsorblock.models.Action
 import app.exitune.providers.sponsorblock.models.Category
 import app.exitune.providers.sponsorblock.requests.segments
+import io.ktor.client.plugins.ClientRequestException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -1609,8 +1613,23 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                         .ranged(meta)
                 }
             }
-        }.handleUnknownErrors {
-            uriCache.clear()
         }
+            .handleUnknownErrors {
+                uriCache.clear()
+            }
+            // A stream URL can start serving 403s partway through, which strands playback mid-song
+            // unless the URL is resolved again
+            .retryIf(
+                maxRetries = 1,
+                printStackTrace = true
+            ) { ex ->
+                val isForbidden = ex.findCause<InvalidResponseCodeException>()?.responseCode == 403 ||
+                    ex.findCause<ClientRequestException>()?.response?.status?.value == 403 ||
+                    ex.findCause<InvalidHttpCodeException>() != null
+
+                if (isForbidden) uriCache.clear()
+                isForbidden
+            }
+            .handleRangeErrors()
     }
 }

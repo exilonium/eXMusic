@@ -7,6 +7,7 @@ import app.exitune.providers.innertube.models.MusicCarouselShelfRenderer
 import app.exitune.providers.innertube.models.MusicShelfRenderer
 import app.exitune.providers.innertube.models.bodies.BrowseBody
 import app.exitune.providers.innertube.models.bodies.ContinuationBody
+import app.exitune.providers.innertube.models.largest
 import app.exitune.providers.innertube.utils.from
 import app.exitune.providers.utils.runCatchingCancellable
 import io.ktor.client.call.body
@@ -55,7 +56,7 @@ suspend fun Innertube.playlistPage(body: BrowseBody) = runCatchingCancellable {
                 ?.musicThumbnailRenderer
                 ?.thumbnail
                 ?.thumbnails
-                ?.maxByOrNull { (it.width ?: 0) * (it.height ?: 0) },
+                ?.largest,
             authors = header
                 ?.subtitle
                 ?.splitBySeparator()
@@ -122,7 +123,7 @@ suspend fun Innertube.playlistPage(body: BrowseBody) = runCatchingCancellable {
                 ?.musicThumbnailRenderer
                 ?.thumbnail
                 ?.thumbnails
-                ?.maxByOrNull { (it.width ?: 0) * (it.height ?: 0) },
+                ?.largest,
             authors = header
                 ?.straplineTextOne
                 ?.splitBySeparator()

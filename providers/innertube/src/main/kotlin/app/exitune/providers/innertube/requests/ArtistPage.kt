@@ -6,6 +6,7 @@ import app.exitune.providers.innertube.models.Context
 import app.exitune.providers.innertube.models.MusicCarouselShelfRenderer
 import app.exitune.providers.innertube.models.MusicShelfRenderer
 import app.exitune.providers.innertube.models.bodies.BrowseBody
+import app.exitune.providers.innertube.models.largest
 import app.exitune.providers.innertube.utils.findSectionByTitle
 import app.exitune.providers.innertube.utils.from
 import app.exitune.providers.utils.runCatchingCancellable
@@ -80,7 +81,7 @@ suspend fun Innertube.artistPage(body: BrowseBody) = runCatchingCancellable {
             ?.musicThumbnailRenderer
             ?.thumbnail
             ?.thumbnails
-            ?.getOrNull(0),
+            ?.largest,
         shuffleEndpoint = response
             .header
             ?.musicImmersiveHeaderRenderer

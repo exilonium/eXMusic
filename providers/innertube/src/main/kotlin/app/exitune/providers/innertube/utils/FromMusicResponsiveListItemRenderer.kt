@@ -4,6 +4,7 @@ import app.exitune.providers.innertube.Innertube
 import app.exitune.providers.innertube.models.MusicResponsiveListItemRenderer
 import app.exitune.providers.innertube.models.NavigationEndpoint
 import app.exitune.providers.innertube.models.isExplicit
+import app.exitune.providers.innertube.models.largest
 
 fun Innertube.SongItem.Companion.from(renderer: MusicResponsiveListItemRenderer) =
     Innertube.SongItem(
@@ -52,5 +53,5 @@ fun Innertube.SongItem.Companion.from(renderer: MusicResponsiveListItemRenderer)
             ?.musicThumbnailRenderer
             ?.thumbnail
             ?.thumbnails
-            ?.firstOrNull()
+            ?.largest
     ).takeIf { it.info?.endpoint?.videoId != null }

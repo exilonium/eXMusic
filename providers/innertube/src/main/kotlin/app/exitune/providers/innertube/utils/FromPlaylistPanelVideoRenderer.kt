@@ -3,6 +3,7 @@ package app.exitune.providers.innertube.utils
 import app.exitune.providers.innertube.Innertube
 import app.exitune.providers.innertube.models.PlaylistPanelVideoRenderer
 import app.exitune.providers.innertube.models.isExplicit
+import app.exitune.providers.innertube.models.largest
 
 fun Innertube.SongItem.Companion.from(renderer: PlaylistPanelVideoRenderer) = Innertube.SongItem(
     info = Innertube.Info(
@@ -27,7 +28,7 @@ fun Innertube.SongItem.Companion.from(renderer: PlaylistPanelVideoRenderer) = In
     thumbnail = renderer
         .thumbnail
         ?.thumbnails
-        ?.getOrNull(0),
+        ?.largest,
     durationText = renderer
         .lengthText
         ?.text,

@@ -35,6 +35,6 @@ data class MusicShelfRenderer(
                 ?.musicThumbnailRenderer
                 ?.thumbnail
                 ?.thumbnails
-                ?.firstOrNull()
+                ?.largest
     }
 }

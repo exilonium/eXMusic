@@ -2,6 +2,7 @@ package app.exitune.providers.innertube.utils
 
 import app.exitune.providers.innertube.Innertube
 import app.exitune.providers.innertube.models.MusicTwoRowItemRenderer
+import app.exitune.providers.innertube.models.largest
 
 fun Innertube.AlbumItem.Companion.from(renderer: MusicTwoRowItemRenderer) = Innertube.AlbumItem(
     info = renderer
@@ -20,7 +21,7 @@ fun Innertube.AlbumItem.Companion.from(renderer: MusicTwoRowItemRenderer) = Inne
         ?.musicThumbnailRenderer
         ?.thumbnail
         ?.thumbnails
-        ?.firstOrNull()
+        ?.largest
 ).takeIf { it.info?.endpoint?.browseId != null }
 
 fun Innertube.ArtistItem.Companion.from(renderer: MusicTwoRowItemRenderer) = Innertube.ArtistItem(
@@ -39,7 +40,7 @@ fun Innertube.ArtistItem.Companion.from(renderer: MusicTwoRowItemRenderer) = Inn
         ?.musicThumbnailRenderer
         ?.thumbnail
         ?.thumbnails
-        ?.firstOrNull()
+        ?.largest
 ).takeIf { it.info?.endpoint?.browseId != null }
 
 fun Innertube.PlaylistItem.Companion.from(renderer: MusicTwoRowItemRenderer) =
@@ -67,5 +68,5 @@ fun Innertube.PlaylistItem.Companion.from(renderer: MusicTwoRowItemRenderer) =
             ?.musicThumbnailRenderer
             ?.thumbnail
             ?.thumbnails
-            ?.firstOrNull()
+            ?.largest
     ).takeIf { it.info?.endpoint?.browseId != null }

@@ -4,6 +4,7 @@ import app.exitune.providers.innertube.Innertube
 import app.exitune.providers.innertube.models.BrowseResponse
 import app.exitune.providers.innertube.models.MusicTwoRowItemRenderer
 import app.exitune.providers.innertube.models.bodies.BrowseBody
+import app.exitune.providers.innertube.models.largest
 import app.exitune.providers.innertube.models.oddElements
 import app.exitune.providers.innertube.models.splitBySeparator
 import app.exitune.providers.innertube.utils.from
@@ -105,5 +106,5 @@ fun MusicTwoRowItemRenderer.toNewReleaseAlbumPage() = Innertube.AlbumItem(
         )
     },
     year = subtitle?.runs?.lastOrNull()?.text,
-    thumbnail = thumbnailRenderer?.musicThumbnailRenderer?.thumbnail?.thumbnails?.firstOrNull()
+    thumbnail = thumbnailRenderer?.musicThumbnailRenderer?.thumbnail?.thumbnails?.largest
 )

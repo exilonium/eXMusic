@@ -145,14 +145,25 @@ val Duration.formatted
         }
     }
 
+/**
+ * Requests this Google image at [size].
+ *
+ * The url usually arrives carrying the size it was listed at — thumbnails come out of Innertube as
+ * the smallest variant, tagged `=w60-h60-l90-rj` — so the directive has to replace that one rather
+ * than follow it, or the CDN keeps serving the size it was first asked for.
+ */
 fun String?.thumbnail(
     size: Int,
     maxSize: Int = AppearancePreferences.maxThumbnailSize
 ): String? {
     val actualSize = size.coerceAtMost(maxSize)
     return when {
-        this?.startsWith("https://lh3.googleusercontent.com") == true -> "$this-w$actualSize-h$actualSize"
-        this?.startsWith("https://yt3.ggpht.com") == true -> "$this-w$actualSize-h$actualSize-s$actualSize"
+        this?.startsWith("https://lh3.googleusercontent.com") == true ->
+            "${substringBefore('=')}=w$actualSize-h$actualSize-l90-rj"
+
+        this?.startsWith("https://yt3.ggpht.com") == true ->
+            "${substringBefore('=')}=s$actualSize"
+
         else -> this
     }
 }
