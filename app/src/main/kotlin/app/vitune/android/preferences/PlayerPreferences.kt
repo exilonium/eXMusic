@@ -56,8 +56,41 @@ object PlayerPreferences : GlobalPreferencesHolder() {
 
     var pauseCache by boolean(false)
 
+    var streamSource by enum(StreamSource.YouTubeMusicWithFallback)
+
     val sponsorBlockEnabledProperty = boolean(false)
     var sponsorBlockEnabled by sponsorBlockEnabledProperty
+
+    /**
+     * Where a playable stream URL comes from.
+     */
+    enum class StreamSource(
+        val useYouTubeMusic: Boolean,
+        val useYouTubeDl: Boolean,
+        val displayName: @Composable () -> String,
+        val description: @Composable () -> String
+    ) {
+        YouTubeMusic(
+            useYouTubeMusic = true,
+            useYouTubeDl = false,
+            displayName = { stringResource(R.string.stream_source_youtube_music) },
+            description = { stringResource(R.string.stream_source_youtube_music_description) }
+        ),
+        YouTubeDl(
+            useYouTubeMusic = false,
+            useYouTubeDl = true,
+            displayName = { stringResource(R.string.stream_source_yt_dlp) },
+            description = { stringResource(R.string.stream_source_yt_dlp_description) }
+        ),
+        YouTubeMusicWithFallback(
+            useYouTubeMusic = true,
+            useYouTubeDl = true,
+            displayName = { stringResource(R.string.stream_source_youtube_music_with_fallback) },
+            description = {
+                stringResource(R.string.stream_source_youtube_music_with_fallback_description)
+            }
+        )
+    }
 
     enum class PlayerLayout(val displayName: @Composable () -> String) {
         Classic(displayName = { stringResource(R.string.classic_player_layout_name) }),

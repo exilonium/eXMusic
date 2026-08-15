@@ -369,6 +369,15 @@
     <string name="yt_dlp_success">Upgrading yt-dlp succeeded</string>
     <string name="yt_dlp_fail">Upgrading yt-dlp failed</string>
     <string name="upgrade_yt_dlp">Upgrade yt-dlp</string>
+    <string name="streaming">Streaming</string>
+    <string name="stream_source">Stream source</string>
+    <string name="stream_source_description">Where playable audio links come from. Change this if songs fail to play or take long to start.</string>
+    <string name="stream_source_youtube_music">YouTube Music</string>
+    <string name="stream_source_youtube_music_description">Asks the YouTube Music API directly. Fastest, and needs no extra runtime.</string>
+    <string name="stream_source_yt_dlp">yt-dlp</string>
+    <string name="stream_source_yt_dlp_description">Resolves through the bundled yt-dlp. Slower to start, but copes with more songs.</string>
+    <string name="stream_source_youtube_music_with_fallback">YouTube Music, then yt-dlp</string>
+    <string name="stream_source_youtube_music_with_fallback_description">Asks YouTube Music first and falls back to yt-dlp when it cannot resolve a song.</string>
     <plurals name="format_reset_blacklist_description">
         <item quantity="one">Remove %1$s song from the blacklist</item>
         <item quantity="other">Remove all %1$s songs from the blacklist</item>

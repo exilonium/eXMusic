@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalTime::class)
+
 package app.vitune.android.service
 
 import android.app.PendingIntent
@@ -17,6 +19,7 @@ import android.media.audiofx.LoudnessEnhancer
 import android.media.audiofx.PresetReverb
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
+import android.net.Uri
 import android.os.Bundle
 import android.os.SystemClock
 import android.support.v4.media.session.MediaSessionCompat
@@ -119,6 +122,7 @@ import app.vitune.providers.innertube.Innertube
 import app.vitune.providers.innertube.models.NavigationEndpoint
 import app.vitune.providers.innertube.models.bodies.PlayerBody
 import app.vitune.providers.innertube.models.bodies.SearchBody
+import app.vitune.providers.innertube.requests.playback
 import app.vitune.providers.innertube.requests.player
 import app.vitune.providers.innertube.requests.searchPage
 import app.vitune.providers.innertube.utils.from
@@ -160,11 +164,30 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
 import java.io.IOException
 import kotlin.math.roundToInt
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 import android.os.Binder as AndroidBinder
 
 const val LOCAL_KEY_PREFIX = "local:"
 private const val TAG = "PlayerService"
+
+/**
+ * A stream URL plus the metadata worth persisting about it, regardless of where it came from.
+ */
+private data class ResolvedStream(
+    val uri: Uri,
+    val contentLength: Long?,
+    val itag: Int?,
+    val mimeType: String?,
+    val bitrate: Long?,
+    val loudnessDb: Float?,
+    val lastModified: Long?,
+    val approxDurationMs: Long?,
+    val validUntil: Instant?
+)
 
 @get:OptIn(UnstableApi::class)
 val DataSpec.isLocal get() = key?.startsWith(LOCAL_KEY_PREFIX) == true
@@ -1369,6 +1392,91 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             SimpleCache(directory, cacheEvictor, createDatabaseProvider(context))
         }
 
+        /**
+         * Resolves a stream according to [source], falling back to yt-dlp when YouTube Music could
+         * not produce a playable URL and the user allows it.
+         */
+        private fun resolveStream(
+            mediaId: String,
+            source: PlayerPreferences.StreamSource
+        ): ResolvedStream {
+            var youTubeMusicError: Throwable? = null
+
+            if (source.useYouTubeMusic) runCatching {
+                resolveFromYouTubeMusic(mediaId)
+            }.onSuccess { return it }.onFailure {
+                it.printStackTrace()
+                youTubeMusicError = it
+            }
+
+            if (!source.useYouTubeDl) throw youTubeMusicError ?: UnplayableException()
+
+            return runCatching {
+                resolveFromYouTubeDl(mediaId)
+            }.getOrElse { youTubeDlError ->
+                youTubeMusicError?.let(youTubeDlError::addSuppressed)
+                throw youTubeDlError
+            }
+        }
+
+        private fun resolveFromYouTubeMusic(mediaId: String): ResolvedStream {
+            val playback = runBlocking(Dispatchers.IO) {
+                Innertube.playback(videoId = mediaId)
+            }?.getOrThrow() ?: throw UnplayableException()
+
+            val uri = playback.url.toUri().let {
+                if (playback.cpn == null) it
+                else it
+                    .buildUpon()
+                    .appendQueryParameter("cpn", playback.cpn)
+                    .build()
+            }
+
+            return ResolvedStream(
+                uri = uri,
+                contentLength = playback.format.contentLength,
+                itag = playback.format.itag,
+                mimeType = playback.format.mimeType,
+                bitrate = playback.format.bitrate,
+                loudnessDb = playback.loudnessDb,
+                lastModified = playback.format.lastModified,
+                approxDurationMs = playback.format.approxDurationMs,
+                validUntil = playback.expiresInSeconds
+                    ?.seconds
+                    ?.let { Clock.System.now() + it }
+            )
+        }
+
+        private fun resolveFromYouTubeDl(mediaId: String): ResolvedStream {
+            val body = runBlocking(Dispatchers.IO) {
+                Innertube.player(PlayerBody(videoId = mediaId))
+            }?.getOrNull()
+            val youtubeFormat = body?.streamingData?.highestQualityFormat
+
+            val info = runCatching {
+                Dependencies.runDownload(mediaId)
+            }.mapCatching {
+                YouTubeDLResponse.fromString(it)
+            }.also { it.exceptionOrNull()?.printStackTrace() }.getOrNull()
+            if (info?.id != mediaId) throw VideoIdMismatchException()
+            val format = info.formats?.firstOrNull { it.formatId == info.formatId }
+
+            val uri = runCatching { info.url?.toUri() }.getOrNull() ?: throw UnplayableException()
+
+            return ResolvedStream(
+                uri = uri,
+                contentLength = info.fileSize,
+                itag = info.formatId?.toIntOrNull(),
+                mimeType = youtubeFormat?.mimeType,
+                bitrate = format?.abr?.let { it * 1000 }?.toLong(),
+                loudnessDb = body?.playerConfig?.audioConfig?.normalizedLoudnessDb,
+                lastModified = youtubeFormat?.lastModified,
+                approxDurationMs = youtubeFormat?.approxDurationMs,
+                // yt-dlp URLs carry their own expiry, which we cannot read here
+                validUntil = null
+            )
+        }
+
         @Suppress("CyclomaticComplexMethod")
         fun createYouTubeDataSourceResolverFactory(
             context: Context,
@@ -1416,40 +1524,24 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                         .withUri(cachedUri.uri)
                         .ranged(cachedUri.meta)
                 } ?: run {
-                    val body = runBlocking(Dispatchers.IO) {
-                        Innertube.player(PlayerBody(videoId = mediaId))
-                    }?.getOrNull()
-                    val youtubeFormat = body?.streamingData?.highestQualityFormat
-
-                    val info = runCatching {
-                        Dependencies.runDownload(mediaId)
-                    }.mapCatching {
-                        YouTubeDLResponse.fromString(it)
-                    }.also { it.exceptionOrNull()?.printStackTrace() }.getOrNull()
-                    if (info?.id != mediaId) throw VideoIdMismatchException()
-                    val format = info.formats?.firstOrNull { it.formatId == info.formatId }
-
-                    val uri =
-                        runCatching { info.url?.toUri() }.getOrNull() ?: throw UnplayableException()
+                    val stream = resolveStream(
+                        mediaId = mediaId,
+                        source = PlayerPreferences.streamSource
+                    )
 
                     val mediaItem = runCatching {
                         runBlocking(Dispatchers.IO) { findMediaItem(mediaId) }
                     }.getOrNull()
 
                     val extras = mediaItem?.mediaMetadata?.extras?.songBundle
-                    if (extras?.durationText == null) {
-                        body
-                            ?.streamingData
-                            ?.highestQualityFormat
-                            ?.approxDurationMs
-                            ?.div(1000)
-                            ?.let(DateUtils::formatElapsedTime)
-                            ?.removePrefix("0")
-                            ?.let { durationText ->
-                                extras?.durationText = durationText
-                                Database.updateDurationText(mediaId, durationText)
-                            }
-                    }
+                    if (extras?.durationText == null) stream.approxDurationMs
+                        ?.div(1000)
+                        ?.let(DateUtils::formatElapsedTime)
+                        ?.removePrefix("0")
+                        ?.let { durationText ->
+                            extras?.durationText = durationText
+                            Database.updateDurationText(mediaId, durationText)
+                        }
 
                     transaction {
                         runCatching {
@@ -1457,12 +1549,12 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                             Database.insert(
                                 Format(
                                     songId = mediaId,
-                                    itag = info.formatId?.toIntOrNull(),
-                                    mimeType = youtubeFormat?.mimeType,
-                                    bitrate = format?.abr?.let { it * 1000 }?.toLong(),
-                                    loudnessDb = body?.playerConfig?.audioConfig?.normalizedLoudnessDb,
-                                    contentLength = info.fileSize,
-                                    lastModified = youtubeFormat?.lastModified
+                                    itag = stream.itag,
+                                    mimeType = stream.mimeType,
+                                    bitrate = stream.bitrate,
+                                    loudnessDb = stream.loudnessDb,
+                                    contentLength = stream.contentLength,
+                                    lastModified = stream.lastModified
                                 )
                             )
                         }
@@ -1470,13 +1562,14 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
                     uriCache.push(
                         key = mediaId,
-                        meta = info.fileSize,
-                        uri = uri
+                        meta = stream.contentLength,
+                        uri = stream.uri,
+                        validUntil = stream.validUntil
                     )
 
                     dataSpec
-                        .withUri(uri)
-                        .ranged(info.fileSize)
+                        .withUri(stream.uri)
+                        .ranged(stream.contentLength)
                 }
             }
         }.handleUnknownErrors {

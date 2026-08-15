@@ -26,6 +26,7 @@ import app.vitune.android.ui.components.themed.SecondaryTextButton
 import app.vitune.android.ui.screens.Route
 import app.vitune.android.utils.rememberEqualizerLauncher
 import app.vitune.core.ui.utils.isAtLeastAndroid6
+import kotlinx.collections.immutable.toImmutableList
 
 @OptIn(UnstableApi::class)
 @Route
@@ -73,6 +74,18 @@ fun PlayerSettings() = with(PlayerPreferences) {
                 isChecked = skipOnError,
                 onCheckedChange = { skipOnError = it }
             )
+        }
+        SettingsGroup(title = stringResource(R.string.streaming)) {
+            ValueSelectorSettingsEntry(
+                title = stringResource(R.string.stream_source),
+                text = streamSource.description(),
+                selectedValue = streamSource,
+                values = PlayerPreferences.StreamSource.entries.toImmutableList(),
+                onValueSelect = { streamSource = it },
+                valueText = { it.displayName() }
+            )
+
+            SettingsDescription(text = stringResource(R.string.stream_source_description))
         }
         SettingsGroup(title = stringResource(R.string.audio)) {
             AnimatedVisibility(visible = changed) {

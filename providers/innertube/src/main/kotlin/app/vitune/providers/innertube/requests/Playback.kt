@@ -85,13 +85,14 @@ private suspend fun Innertube.resolve(
         if (it != videoId) throw VideoIdMismatchException(expected = videoId, actual = it)
     }
 
-    val format = response.streamingData?.highestQualityPlayableFormat
+    val streamingData = response.streamingData ?: throw NoPlayableFormatException(videoId)
+    val format = streamingData.highestQualityPlayableFormat
         ?: throw NoPlayableFormatException(videoId)
 
     return PlaybackData(
         format = format,
         url = format.url ?: throw NoPlayableFormatException(videoId),
-        expiresInSeconds = response.streamingData?.expiresInSeconds,
+        expiresInSeconds = streamingData.expiresInSeconds,
         loudnessDb = response.playerConfig?.audioConfig?.normalizedLoudnessDb,
         clientName = context.client.clientName,
         cpn = response.cpn
