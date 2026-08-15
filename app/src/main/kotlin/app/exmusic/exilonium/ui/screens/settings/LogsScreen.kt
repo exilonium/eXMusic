@@ -43,6 +43,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import app.exmusic.compose.routing.RouteHandler
+import app.exmusic.core.ui.LocalAppearance
+import app.exmusic.core.ui.surface
+import app.exmusic.core.ui.utils.ActivityIntentBundleAccessor
 import app.exmusic.exilonium.LocalPlayerAwareWindowInsets
 import app.exmusic.exilonium.R
 import app.exmusic.exilonium.ui.components.themed.FloatingActionsContainerWithScrollToTop
@@ -54,10 +58,6 @@ import app.exmusic.exilonium.utils.color
 import app.exmusic.exilonium.utils.logcat
 import app.exmusic.exilonium.utils.semiBold
 import app.exmusic.exilonium.utils.smoothScrollToTop
-import app.exmusic.compose.routing.RouteHandler
-import app.exmusic.core.ui.LocalAppearance
-import app.exmusic.core.ui.surface
-import app.exmusic.core.ui.utils.ActivityIntentBundleAccessor
 import kotlinx.coroutines.delay
 import kotlin.time.ExperimentalTime
 

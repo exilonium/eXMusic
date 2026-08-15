@@ -21,6 +21,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import app.exmusic.core.ui.LocalAppearance
+import app.exmusic.core.ui.utils.px
 import app.exmusic.exilonium.Database
 import app.exmusic.exilonium.LocalPlayerServiceBinder
 import app.exmusic.exilonium.preferences.PlayerPreferences
@@ -32,8 +34,6 @@ import app.exmusic.exilonium.utils.forceSeekToNext
 import app.exmusic.exilonium.utils.forceSeekToPrevious
 import app.exmusic.exilonium.utils.thumbnail
 import app.exmusic.exilonium.utils.windowState
-import app.exmusic.core.ui.LocalAppearance
-import app.exmusic.core.ui.utils.px
 import coil3.compose.AsyncImage
 
 @Composable

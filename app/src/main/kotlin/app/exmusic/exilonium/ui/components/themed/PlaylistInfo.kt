@@ -8,9 +8,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import app.exmusic.core.ui.LocalAppearance
 import app.exmusic.exilonium.models.Album
 import app.exmusic.exilonium.utils.semiBold
-import app.exmusic.core.ui.LocalAppearance
 import app.exmusic.providers.innertube.Innertube
 
 @Composable

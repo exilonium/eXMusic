@@ -5,8 +5,8 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
-import app.exmusic.exilonium.preferences.AppearancePreferences
 import app.exmusic.core.ui.utils.songBundle
+import app.exmusic.exilonium.preferences.AppearancePreferences
 import kotlin.time.Duration
 
 val Player.currentWindow: Timeline.Window?

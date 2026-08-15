@@ -4,10 +4,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import app.exmusic.exilonium.R
 import app.exmusic.compose.reordering.ReorderingState
 import app.exmusic.compose.reordering.reorder
 import app.exmusic.core.ui.LocalAppearance
+import app.exmusic.exilonium.R
 
 @Composable
 fun ReorderHandle(

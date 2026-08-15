@@ -16,10 +16,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import app.exmusic.exilonium.R
-import app.exmusic.exilonium.utils.medium
 import app.exmusic.core.ui.LocalAppearance
 import app.exmusic.core.ui.utils.roundedShape
+import app.exmusic.exilonium.R
+import app.exmusic.exilonium.utils.medium
 
 @Composable
 fun TextToggle(

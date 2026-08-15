@@ -1,11 +1,11 @@
 package app.exmusic.exilonium.preferences
 
-import app.exmusic.exilonium.GlobalPreferencesHolder
 import app.exmusic.core.data.enums.AlbumSortBy
 import app.exmusic.core.data.enums.ArtistSortBy
 import app.exmusic.core.data.enums.PlaylistSortBy
 import app.exmusic.core.data.enums.SongSortBy
 import app.exmusic.core.data.enums.SortOrder
+import app.exmusic.exilonium.GlobalPreferencesHolder
 
 object OrderPreferences : GlobalPreferencesHolder() {
     var songSortOrder by enum(SortOrder.Descending)

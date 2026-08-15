@@ -45,6 +45,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
+import app.exmusic.compose.persist.persist
+import app.exmusic.core.ui.Dimensions
+import app.exmusic.core.ui.LocalAppearance
+import app.exmusic.core.ui.shimmer
+import app.exmusic.core.ui.utils.isLandscape
 import app.exmusic.exilonium.LocalPlayerAwareWindowInsets
 import app.exmusic.exilonium.LocalPlayerServiceBinder
 import app.exmusic.exilonium.R
@@ -68,11 +73,6 @@ import app.exmusic.exilonium.utils.playingSong
 import app.exmusic.exilonium.utils.rememberSnapLayoutInfo
 import app.exmusic.exilonium.utils.secondary
 import app.exmusic.exilonium.utils.semiBold
-import app.exmusic.compose.persist.persist
-import app.exmusic.core.ui.Dimensions
-import app.exmusic.core.ui.LocalAppearance
-import app.exmusic.core.ui.shimmer
-import app.exmusic.core.ui.utils.isLandscape
 import app.exmusic.providers.innertube.Innertube
 import app.exmusic.providers.innertube.models.NavigationEndpoint
 import app.exmusic.providers.innertube.requests.discoverPage

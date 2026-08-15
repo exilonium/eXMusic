@@ -26,6 +26,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.MediaItem
+import app.exmusic.core.ui.LocalAppearance
+import app.exmusic.core.ui.shimmer
+import app.exmusic.core.ui.utils.px
+import app.exmusic.core.ui.utils.songBundle
 import app.exmusic.exilonium.R
 import app.exmusic.exilonium.models.Song
 import app.exmusic.exilonium.preferences.AppearancePreferences
@@ -34,10 +38,6 @@ import app.exmusic.exilonium.utils.medium
 import app.exmusic.exilonium.utils.secondary
 import app.exmusic.exilonium.utils.semiBold
 import app.exmusic.exilonium.utils.thumbnail
-import app.exmusic.core.ui.LocalAppearance
-import app.exmusic.core.ui.shimmer
-import app.exmusic.core.ui.utils.px
-import app.exmusic.core.ui.utils.songBundle
 import app.exmusic.providers.innertube.Innertube
 import coil3.compose.AsyncImage
 

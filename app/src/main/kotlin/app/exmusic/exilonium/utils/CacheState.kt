@@ -24,6 +24,7 @@ import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DataSpec
 import androidx.media3.datasource.TransferListener
 import androidx.media3.datasource.cache.CacheDataSource
+import app.exmusic.core.ui.LocalAppearance
 import app.exmusic.exilonium.Database
 import app.exmusic.exilonium.LocalPlayerServiceBinder
 import app.exmusic.exilonium.R
@@ -34,7 +35,6 @@ import app.exmusic.exilonium.service.PrecacheService
 import app.exmusic.exilonium.service.downloadState
 import app.exmusic.exilonium.ui.components.themed.CircularProgressIndicator
 import app.exmusic.exilonium.ui.components.themed.HeaderIconButton
-import app.exmusic.core.ui.LocalAppearance
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.distinctUntilChanged
 import java.util.concurrent.atomic.AtomicBoolean

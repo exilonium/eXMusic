@@ -22,10 +22,10 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
+import app.exmusic.core.ui.utils.EqualizerIntentBundleAccessor
 import app.exmusic.exilonium.LocalPlayerServiceBinder
 import app.exmusic.exilonium.R
 import app.exmusic.exilonium.service.PlayerService
-import app.exmusic.core.ui.utils.EqualizerIntentBundleAccessor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlin.time.Duration

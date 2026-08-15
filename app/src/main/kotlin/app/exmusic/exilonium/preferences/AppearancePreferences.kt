@@ -1,13 +1,13 @@
 package app.exmusic.exilonium.preferences
 
-import app.exmusic.exilonium.GlobalPreferencesHolder
-import app.exmusic.exilonium.preferences.OldPreferences.ColorPaletteMode
-import app.exmusic.exilonium.preferences.OldPreferences.ColorPaletteName
 import app.exmusic.core.ui.BuiltInFontFamily
 import app.exmusic.core.ui.ColorMode
 import app.exmusic.core.ui.ColorSource
 import app.exmusic.core.ui.Darkness
 import app.exmusic.core.ui.ThumbnailRoundness
+import app.exmusic.exilonium.GlobalPreferencesHolder
+import app.exmusic.exilonium.preferences.OldPreferences.ColorPaletteMode
+import app.exmusic.exilonium.preferences.OldPreferences.ColorPaletteName
 
 object AppearancePreferences : GlobalPreferencesHolder() {
     var colorSource by enum(

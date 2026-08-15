@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.UnstableApi
+import app.exmusic.core.data.enums.ExoPlayerDiskCacheSize
 import app.exmusic.exilonium.LocalPlayerServiceBinder
 import app.exmusic.exilonium.R
 import app.exmusic.exilonium.preferences.DataPreferences
@@ -24,7 +25,6 @@ import app.exmusic.exilonium.preferences.PlayerPreferences
 import app.exmusic.exilonium.ui.components.themed.LinearProgressIndicator
 import app.exmusic.exilonium.ui.components.themed.SecondaryTextButton
 import app.exmusic.exilonium.ui.screens.Route
-import app.exmusic.core.data.enums.ExoPlayerDiskCacheSize
 import coil3.imageLoader
 
 @OptIn(UnstableApi::class)

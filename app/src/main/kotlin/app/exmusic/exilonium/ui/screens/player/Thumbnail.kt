@@ -47,6 +47,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.C
+import app.exmusic.core.ui.Dimensions
+import app.exmusic.core.ui.LocalAppearance
+import app.exmusic.core.ui.utils.px
 import app.exmusic.exilonium.Database
 import app.exmusic.exilonium.LocalPlayerServiceBinder
 import app.exmusic.exilonium.R
@@ -63,9 +66,6 @@ import app.exmusic.exilonium.utils.forceSeekToPrevious
 import app.exmusic.exilonium.utils.isInPip
 import app.exmusic.exilonium.utils.thumbnail
 import app.exmusic.exilonium.utils.windowState
-import app.exmusic.core.ui.Dimensions
-import app.exmusic.core.ui.LocalAppearance
-import app.exmusic.core.ui.utils.px
 import coil3.compose.AsyncImage
 import kotlinx.coroutines.launch
 import java.net.UnknownHostException

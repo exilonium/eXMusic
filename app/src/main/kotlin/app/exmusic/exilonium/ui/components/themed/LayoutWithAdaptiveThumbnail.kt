@@ -15,12 +15,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
-import app.exmusic.exilonium.utils.thumbnail
 import app.exmusic.core.ui.Dimensions
 import app.exmusic.core.ui.LocalAppearance
 import app.exmusic.core.ui.shimmer
 import app.exmusic.core.ui.utils.isLandscape
 import app.exmusic.core.ui.utils.px
+import app.exmusic.exilonium.utils.thumbnail
 import coil3.compose.AsyncImage
 import com.valentinilk.shimmer.shimmer
 

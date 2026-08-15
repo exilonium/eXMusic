@@ -14,17 +14,17 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import app.exmusic.exilonium.ui.components.themed.TextPlaceholder
-import app.exmusic.exilonium.utils.color
-import app.exmusic.exilonium.utils.medium
-import app.exmusic.exilonium.utils.secondary
-import app.exmusic.exilonium.utils.semiBold
 import app.exmusic.core.ui.Dimensions
 import app.exmusic.core.ui.LocalAppearance
 import app.exmusic.core.ui.onOverlay
 import app.exmusic.core.ui.overlay
 import app.exmusic.core.ui.shimmer
 import app.exmusic.core.ui.utils.roundedShape
+import app.exmusic.exilonium.ui.components.themed.TextPlaceholder
+import app.exmusic.exilonium.utils.color
+import app.exmusic.exilonium.utils.medium
+import app.exmusic.exilonium.utils.secondary
+import app.exmusic.exilonium.utils.semiBold
 import app.exmusic.providers.innertube.Innertube
 import coil3.compose.AsyncImage
 

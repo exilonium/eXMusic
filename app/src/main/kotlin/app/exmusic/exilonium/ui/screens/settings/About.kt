@@ -33,6 +33,11 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import app.exmusic.core.data.utils.Version
+import app.exmusic.core.data.utils.version
+import app.exmusic.core.ui.LocalAppearance
+import app.exmusic.core.ui.utils.isAtLeastAndroid13
+import app.exmusic.core.ui.utils.isCompositionLaunched
 import app.exmusic.exilonium.BuildConfig
 import app.exmusic.exilonium.R
 import app.exmusic.exilonium.preferences.DataPreferences
@@ -46,11 +51,6 @@ import app.exmusic.exilonium.utils.center
 import app.exmusic.exilonium.utils.hasPermission
 import app.exmusic.exilonium.utils.pendingIntent
 import app.exmusic.exilonium.utils.semiBold
-import app.exmusic.core.data.utils.Version
-import app.exmusic.core.data.utils.version
-import app.exmusic.core.ui.LocalAppearance
-import app.exmusic.core.ui.utils.isAtLeastAndroid13
-import app.exmusic.core.ui.utils.isCompositionLaunched
 import app.exmusic.providers.github.GitHub
 import app.exmusic.providers.github.models.Release
 import app.exmusic.providers.github.requests.releases

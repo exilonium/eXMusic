@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.UnstableApi
+import app.exmusic.core.ui.utils.isAtLeastAndroid6
 import app.exmusic.exilonium.LocalPlayerServiceBinder
 import app.exmusic.exilonium.R
 import app.exmusic.exilonium.preferences.PlayerPreferences
@@ -25,7 +26,6 @@ import app.exmusic.exilonium.service.PlayerService
 import app.exmusic.exilonium.ui.components.themed.SecondaryTextButton
 import app.exmusic.exilonium.ui.screens.Route
 import app.exmusic.exilonium.utils.rememberEqualizerLauncher
-import app.exmusic.core.ui.utils.isAtLeastAndroid6
 import kotlinx.collections.immutable.toImmutableList
 
 @OptIn(UnstableApi::class)

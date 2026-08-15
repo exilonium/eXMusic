@@ -20,9 +20,9 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.offline.DownloadRequest
 import androidx.media3.exoplayer.offline.DownloadService
 import androidx.media3.exoplayer.offline.DownloadService.sendAddDownload
-import app.exmusic.exilonium.BuildConfig
 import app.exmusic.core.ui.utils.isAtLeastAndroid11
 import app.exmusic.core.ui.utils.isAtLeastAndroid6
+import app.exmusic.exilonium.BuildConfig
 
 context(context: Context)
 inline fun <reified T> intent(): Intent = Intent(context, T::class.java)

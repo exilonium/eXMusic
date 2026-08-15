@@ -48,6 +48,10 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.media3.common.Player
+import app.exmusic.core.ui.LocalAppearance
+import app.exmusic.core.ui.favoritesIcon
+import app.exmusic.core.ui.utils.px
+import app.exmusic.core.ui.utils.roundedShape
 import app.exmusic.exilonium.Database
 import app.exmusic.exilonium.LocalPlayerServiceBinder
 import app.exmusic.exilonium.R
@@ -65,10 +69,6 @@ import app.exmusic.exilonium.utils.forceSeekToNext
 import app.exmusic.exilonium.utils.forceSeekToPrevious
 import app.exmusic.exilonium.utils.secondary
 import app.exmusic.exilonium.utils.semiBold
-import app.exmusic.core.ui.LocalAppearance
-import app.exmusic.core.ui.favoritesIcon
-import app.exmusic.core.ui.utils.px
-import app.exmusic.core.ui.utils.roundedShape
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

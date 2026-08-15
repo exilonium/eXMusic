@@ -34,6 +34,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import app.exmusic.compose.persist.persist
+import app.exmusic.compose.persist.persistList
+import app.exmusic.core.ui.LocalAppearance
 import app.exmusic.exilonium.Database
 import app.exmusic.exilonium.LocalPlayerAwareWindowInsets
 import app.exmusic.exilonium.LocalPlayerServiceBinder
@@ -47,9 +50,6 @@ import app.exmusic.exilonium.utils.center
 import app.exmusic.exilonium.utils.disabled
 import app.exmusic.exilonium.utils.playingSong
 import app.exmusic.exilonium.utils.secondary
-import app.exmusic.compose.persist.persist
-import app.exmusic.compose.persist.persistList
-import app.exmusic.core.ui.LocalAppearance
 import app.exmusic.providers.innertube.Innertube
 import app.exmusic.providers.innertube.models.bodies.SearchSuggestionsBody
 import app.exmusic.providers.innertube.requests.searchSuggestions

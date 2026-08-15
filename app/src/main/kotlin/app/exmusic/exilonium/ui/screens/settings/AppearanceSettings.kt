@@ -11,13 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import app.exmusic.exilonium.R
-import app.exmusic.exilonium.preferences.AppearancePreferences
-import app.exmusic.exilonium.preferences.PlayerPreferences
-import app.exmusic.exilonium.ui.screens.Route
-import app.exmusic.exilonium.utils.currentLocale
-import app.exmusic.exilonium.utils.findActivity
-import app.exmusic.exilonium.utils.startLanguagePicker
 import app.exmusic.core.ui.BuiltInFontFamily
 import app.exmusic.core.ui.ColorMode
 import app.exmusic.core.ui.ColorSource
@@ -26,6 +19,13 @@ import app.exmusic.core.ui.LocalAppearance
 import app.exmusic.core.ui.ThumbnailRoundness
 import app.exmusic.core.ui.googleFontsAvailable
 import app.exmusic.core.ui.utils.isAtLeastAndroid13
+import app.exmusic.exilonium.R
+import app.exmusic.exilonium.preferences.AppearancePreferences
+import app.exmusic.exilonium.preferences.PlayerPreferences
+import app.exmusic.exilonium.ui.screens.Route
+import app.exmusic.exilonium.utils.currentLocale
+import app.exmusic.exilonium.utils.findActivity
+import app.exmusic.exilonium.utils.startLanguagePicker
 
 @Route
 @Composable

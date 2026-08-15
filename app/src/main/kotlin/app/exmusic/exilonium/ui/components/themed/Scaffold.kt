@@ -18,9 +18,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
+import app.exmusic.core.ui.LocalAppearance
 import app.exmusic.exilonium.R
 import app.exmusic.exilonium.preferences.UIStatePreferences
-import app.exmusic.core.ui.LocalAppearance
 import kotlinx.collections.immutable.toImmutableList
 
 @Composable

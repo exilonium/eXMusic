@@ -58,6 +58,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.C
 import androidx.media3.common.MediaMetadata
+import app.exmusic.core.ui.LocalAppearance
+import app.exmusic.core.ui.onOverlay
+import app.exmusic.core.ui.onOverlayShimmer
+import app.exmusic.core.ui.overlay
+import app.exmusic.core.ui.utils.dp
 import app.exmusic.exilonium.Database
 import app.exmusic.exilonium.LocalPlayerServiceBinder
 import app.exmusic.exilonium.R
@@ -84,11 +89,6 @@ import app.exmusic.exilonium.utils.isInPip
 import app.exmusic.exilonium.utils.medium
 import app.exmusic.exilonium.utils.semiBold
 import app.exmusic.exilonium.utils.toast
-import app.exmusic.core.ui.LocalAppearance
-import app.exmusic.core.ui.onOverlay
-import app.exmusic.core.ui.onOverlayShimmer
-import app.exmusic.core.ui.overlay
-import app.exmusic.core.ui.utils.dp
 import app.exmusic.providers.innertube.Innertube
 import app.exmusic.providers.innertube.models.bodies.NextBody
 import app.exmusic.providers.innertube.requests.lyrics

@@ -34,12 +34,12 @@ import androidx.core.app.OnPictureInPictureModeChangedProvider
 import androidx.core.app.PictureInPictureModeChangedInfo
 import androidx.core.graphics.toRect
 import androidx.core.util.Consumer
-import app.exmusic.exilonium.R
-import app.exmusic.exilonium.preferences.AppearancePreferences
 import app.exmusic.compose.persist.findActivityNullable
 import app.exmusic.core.ui.utils.isAtLeastAndroid12
 import app.exmusic.core.ui.utils.isAtLeastAndroid7
 import app.exmusic.core.ui.utils.isAtLeastAndroid8
+import app.exmusic.exilonium.R
+import app.exmusic.exilonium.preferences.AppearancePreferences
 
 private fun logError(throwable: Throwable) = Log.e("PipHandler", "An error occurred", throwable)
 

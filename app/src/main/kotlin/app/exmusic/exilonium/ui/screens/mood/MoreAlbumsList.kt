@@ -21,6 +21,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import app.exmusic.compose.persist.persist
+import app.exmusic.core.ui.Dimensions
+import app.exmusic.core.ui.LocalAppearance
 import app.exmusic.exilonium.LocalPlayerAwareWindowInsets
 import app.exmusic.exilonium.R
 import app.exmusic.exilonium.ui.components.ShimmerHost
@@ -28,9 +31,6 @@ import app.exmusic.exilonium.ui.components.themed.Header
 import app.exmusic.exilonium.ui.components.themed.HeaderPlaceholder
 import app.exmusic.exilonium.ui.items.AlbumItem
 import app.exmusic.exilonium.ui.items.AlbumItemPlaceholder
-import app.exmusic.compose.persist.persist
-import app.exmusic.core.ui.Dimensions
-import app.exmusic.core.ui.LocalAppearance
 import app.exmusic.providers.innertube.Innertube
 import app.exmusic.providers.innertube.models.bodies.BrowseBody
 import app.exmusic.providers.innertube.requests.BrowseResult

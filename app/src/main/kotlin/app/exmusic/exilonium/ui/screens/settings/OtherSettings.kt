@@ -33,6 +33,8 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import app.exmusic.core.ui.utils.isAtLeastAndroid12
+import app.exmusic.core.ui.utils.isAtLeastAndroid6
 import app.exmusic.exilonium.Database
 import app.exmusic.exilonium.DatabaseDependency
 import app.exmusic.exilonium.Dependencies
@@ -54,8 +56,6 @@ import app.exmusic.exilonium.utils.intent
 import app.exmusic.exilonium.utils.isIgnoringBatteryOptimizations
 import app.exmusic.exilonium.utils.smoothScrollToBottom
 import app.exmusic.exilonium.utils.toast
-import app.exmusic.core.ui.utils.isAtLeastAndroid12
-import app.exmusic.core.ui.utils.isAtLeastAndroid6
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged

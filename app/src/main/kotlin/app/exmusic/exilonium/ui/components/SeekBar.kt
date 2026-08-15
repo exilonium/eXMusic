@@ -52,13 +52,13 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.C
+import app.exmusic.core.ui.LocalAppearance
+import app.exmusic.core.ui.utils.roundedShape
 import app.exmusic.exilonium.models.ui.UiMedia
 import app.exmusic.exilonium.preferences.PlayerPreferences
 import app.exmusic.exilonium.service.PlayerService
 import app.exmusic.exilonium.utils.formatAsDuration
 import app.exmusic.exilonium.utils.semiBold
-import app.exmusic.core.ui.LocalAppearance
-import app.exmusic.core.ui.utils.roundedShape
 import kotlin.math.PI
 import kotlin.math.sin
 

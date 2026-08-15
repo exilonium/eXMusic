@@ -26,9 +26,9 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import app.exmusic.core.ui.LocalAppearance
 import app.exmusic.exilonium.utils.medium
 import app.exmusic.exilonium.utils.secondary
-import app.exmusic.core.ui.LocalAppearance
 
 @Composable
 inline fun Menu(

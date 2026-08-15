@@ -16,11 +16,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import app.exmusic.exilonium.ui.components.FadingRow
-import app.exmusic.exilonium.utils.medium
 import app.exmusic.core.ui.Dimensions
 import app.exmusic.core.ui.LocalAppearance
 import app.exmusic.core.ui.shimmer
+import app.exmusic.exilonium.ui.components.FadingRow
+import app.exmusic.exilonium.utils.medium
 import kotlin.random.Random
 
 @Composable

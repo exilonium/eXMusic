@@ -13,12 +13,12 @@ import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
+import app.exmusic.core.ui.utils.SongBundleAccessor
 import app.exmusic.exilonium.R
 import app.exmusic.exilonium.models.Song
 import app.exmusic.exilonium.preferences.AppearancePreferences
 import app.exmusic.exilonium.service.LOCAL_KEY_PREFIX
 import app.exmusic.exilonium.service.isLocal
-import app.exmusic.core.ui.utils.SongBundleAccessor
 import app.exmusic.providers.innertube.Innertube
 import app.exmusic.providers.innertube.models.bodies.ContinuationBody
 import app.exmusic.providers.innertube.models.resizedThumbnail

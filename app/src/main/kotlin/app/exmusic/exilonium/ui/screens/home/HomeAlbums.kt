@@ -23,6 +23,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import app.exmusic.compose.persist.persist
+import app.exmusic.core.data.enums.AlbumSortBy
+import app.exmusic.core.data.enums.SortOrder
+import app.exmusic.core.ui.Dimensions
+import app.exmusic.core.ui.LocalAppearance
 import app.exmusic.exilonium.Database
 import app.exmusic.exilonium.LocalPlayerAwareWindowInsets
 import app.exmusic.exilonium.R
@@ -33,11 +38,6 @@ import app.exmusic.exilonium.ui.components.themed.Header
 import app.exmusic.exilonium.ui.components.themed.HeaderIconButton
 import app.exmusic.exilonium.ui.items.AlbumItem
 import app.exmusic.exilonium.ui.screens.Route
-import app.exmusic.compose.persist.persist
-import app.exmusic.core.data.enums.AlbumSortBy
-import app.exmusic.core.data.enums.SortOrder
-import app.exmusic.core.ui.Dimensions
-import app.exmusic.core.ui.LocalAppearance
 
 @Route
 @Composable

@@ -21,13 +21,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import app.exmusic.core.ui.LocalAppearance
 import app.exmusic.exilonium.LocalPlayerAwareWindowInsets
 import app.exmusic.exilonium.R
 import app.exmusic.exilonium.utils.align
 import app.exmusic.exilonium.utils.disabled
 import app.exmusic.exilonium.utils.secondary
 import app.exmusic.exilonium.utils.semiBold
-import app.exmusic.core.ui.LocalAppearance
 
 @Composable
 fun Attribution(

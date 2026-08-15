@@ -14,8 +14,8 @@ import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.unit.dp
-import app.exmusic.exilonium.utils.drawCircle
 import app.exmusic.core.ui.LocalAppearance
+import app.exmusic.exilonium.utils.drawCircle
 
 @Composable
 fun Switch(

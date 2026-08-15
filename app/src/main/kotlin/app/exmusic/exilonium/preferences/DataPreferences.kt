@@ -2,10 +2,10 @@ package app.exmusic.exilonium.preferences
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import app.exmusic.exilonium.GlobalPreferencesHolder
-import app.exmusic.exilonium.R
 import app.exmusic.core.data.enums.CoilDiskCacheSize
 import app.exmusic.core.data.enums.ExoPlayerDiskCacheSize
+import app.exmusic.exilonium.GlobalPreferencesHolder
+import app.exmusic.exilonium.R
 import app.exmusic.providers.innertube.Innertube
 import app.exmusic.providers.innertube.VisitorData
 import kotlin.time.Duration

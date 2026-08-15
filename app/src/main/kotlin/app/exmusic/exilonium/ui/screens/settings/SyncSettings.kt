@@ -30,6 +30,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.credentials.CredentialManager
+import app.exmusic.compose.persist.persistList
+import app.exmusic.core.ui.LocalAppearance
 import app.exmusic.exilonium.Database
 import app.exmusic.exilonium.LocalCredentialManager
 import app.exmusic.exilonium.R
@@ -47,8 +49,6 @@ import app.exmusic.exilonium.utils.center
 import app.exmusic.exilonium.utils.get
 import app.exmusic.exilonium.utils.semiBold
 import app.exmusic.exilonium.utils.upsert
-import app.exmusic.compose.persist.persistList
-import app.exmusic.core.ui.LocalAppearance
 import app.exmusic.providers.piped.Piped
 import app.exmusic.providers.piped.models.Instance
 import io.ktor.http.Url
