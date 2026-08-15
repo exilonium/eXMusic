@@ -18,7 +18,7 @@ import kotlinx.coroutines.isActive
 private suspend fun Innertube.tryContexts(
     body: PlayerBody,
     checkIsValid: Boolean,
-    vararg contexts: Context
+    contexts: List<Context>
 ): PlayerResponse? {
     contexts.forEach { context ->
         if (!currentCoroutineContext().isActive) return null
@@ -42,7 +42,7 @@ private suspend fun Innertube.tryContexts(
             }.body<PlayerResponse>().also { logger.info("Got $it") }
         }
             ?.getOrNull()
-            ?.takeIf { checkIsValid && it.isValid }
+            ?.takeIf { !checkIsValid || it.isValid }
             ?.let {
                 return it.copy(
                     cpn = cpn,
@@ -60,14 +60,17 @@ private val PlayerResponse.isValid
 
 suspend fun Innertube.player(
     body: PlayerBody,
-    checkIsValid: Boolean = true
-): Result<PlayerResponse?>? = runCatchingCancellable {
-    tryContexts(
-        body = body,
-        checkIsValid = checkIsValid,
+    checkIsValid: Boolean = true,
+    contexts: List<Context> = listOf(
         Context.DefaultIOS,
         Context.DefaultWeb,
         Context.DefaultAndroidMusic,
         Context.DefaultTV
+    )
+): Result<PlayerResponse?>? = runCatchingCancellable {
+    tryContexts(
+        body = body,
+        checkIsValid = checkIsValid,
+        contexts = contexts
     )
 }

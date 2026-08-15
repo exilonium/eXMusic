@@ -172,6 +172,73 @@ data class Context(
                 music = false
             )
         )
+
+        /**
+         * Clients below hand out plain, unciphered stream URLs, so they can be used for playback
+         * without solving the JavaScript signature challenge.
+         */
+
+        val DefaultVisionOS = Context(
+            client = Client(
+                clientId = 101,
+                clientName = "VISIONOS",
+                clientVersion = "0.1",
+                deviceMake = "Apple",
+                deviceModel = "RealityDevice14,1",
+                osName = "visionOS",
+                osVersion = "1.3.21O771",
+                userAgent = UserAgents.VISION_OS,
+                music = false
+            )
+        )
+
+        val DefaultAndroidVR = Context(
+            client = Client(
+                clientId = 28,
+                clientName = "ANDROID_VR",
+                clientVersion = "1.65.10",
+                platform = "MOBILE",
+                deviceMake = "Oculus",
+                deviceModel = "Quest 3",
+                osName = "Android",
+                osVersion = "12L",
+                androidSdkVersion = 32,
+                userAgent = UserAgents.ANDROID_VR,
+                music = false
+            )
+        )
+
+        /**
+         * Older VR client: constant bitrate only, which works around audio stuttering on streams
+         * the newer client hands out as adaptive.
+         */
+        val DefaultAndroidVRLegacy = Context(
+            client = Client(
+                clientId = 28,
+                clientName = "ANDROID_VR",
+                clientVersion = "1.43.32",
+                platform = "MOBILE",
+                deviceMake = "Oculus",
+                deviceModel = "Quest 3",
+                osName = "Android",
+                osVersion = "12",
+                androidSdkVersion = 32,
+                userAgent = UserAgents.ANDROID_VR_LEGACY,
+                music = false
+            )
+        )
+
+        /**
+         * Ordered by how reliably they return a directly playable audio stream.
+         */
+        val PlaybackContexts
+            get() = listOf(
+                DefaultVisionOS,
+                DefaultAndroidVR,
+                DefaultAndroidVRLegacy,
+                DefaultIOS,
+                DefaultTV
+            )
     }
 }
 
@@ -193,4 +260,10 @@ object UserAgents {
         "com.google.android.apps.youtube.music/7.27.52 (Linux; U; Android 11) gzip"
     const val IOS = "com.google.ios.youtube/20.03.02 (iPhone16,2; U; CPU iOS 18_2_1 like Mac OS X;)"
     const val TV = "Mozilla/5.0 (ChromiumStylePlatform) Cobalt/Version"
+    const val VISION_OS =
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15"
+    const val ANDROID_VR =
+        "com.google.android.apps.youtube.vr.oculus/1.65.10 (Linux; U; Android 12L; eureka-user Build/SQ3A.220605.009.A1) gzip"
+    const val ANDROID_VR_LEGACY =
+        "com.google.android.apps.youtube.vr.oculus/1.43.32 (Linux; U; Android 12; en_US; Quest 3; Build/SQ3A.220605.009.A1; Cronet/107.0.5284.2)"
 }

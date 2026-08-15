@@ -42,11 +42,24 @@ data class PlayerResponse(
         val expiresInSeconds: Long?
     ) {
         val highestQualityFormat: AdaptiveFormat?
-            get() = adaptiveFormats?.filter { it.url != null || it.signatureCipher != null }
-                ?.let { formats ->
-                    formats.findLast { it.itag == 251 || it.itag == 140 }
-                        ?: formats.maxBy { it.bitrate ?: 0L }
-                }
+            get() = adaptiveFormats
+                ?.filter { it.url != null || it.signatureCipher != null }
+                ?.bestAudioFormat
+
+        /**
+         * Only formats carrying a plain URL, i.e. those playable without solving the JavaScript
+         * signature challenge.
+         */
+        val highestQualityPlayableFormat: AdaptiveFormat?
+            get() = adaptiveFormats
+                ?.filter { it.url != null }
+                ?.bestAudioFormat
+
+        private val List<AdaptiveFormat>.bestAudioFormat: AdaptiveFormat?
+            get() = filter { it.isAudio }.ifEmpty { this }.let { formats ->
+                formats.findLast { it.itag == 251 || it.itag == 140 }
+                    ?: formats.maxByOrNull { it.bitrate ?: 0L }
+            }
 
         @Serializable
         data class AdaptiveFormat(
@@ -62,7 +75,9 @@ data class PlayerResponse(
             val audioSampleRate: Int?,
             val url: String?,
             val signatureCipher: String?
-        )
+        ) {
+            val isAudio get() = mimeType.startsWith("audio/")
+        }
     }
 
     @Serializable
