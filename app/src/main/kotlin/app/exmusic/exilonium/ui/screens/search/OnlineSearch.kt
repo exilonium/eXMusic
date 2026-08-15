@@ -57,6 +57,12 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 
+/** Past this the queries push the songs, which are what is usually wanted, off the screen. */
+private const val MAX_QUERY_ROWS = 5
+
+/** Kept below the total, so that there is always room for a couple of fresh suggestions. */
+private const val MAX_HISTORY_ROWS = 3
+
 @Composable
 fun OnlineSearch(
     textFieldValue: TextFieldValue,
@@ -102,6 +108,12 @@ fun OnlineSearch(
 
     val suggestions = suggestionsResult?.getOrNull()
 
+    val recentQueries = history.take(MAX_HISTORY_ROWS)
+    val suggestedQueries = suggestions
+        ?.queries
+        .orEmpty()
+        .take(MAX_QUERY_ROWS - recentQueries.size)
+
     LazyColumn(
         state = lazyListState,
         contentPadding = LocalPlayerAwareWindowInsets.current
@@ -110,7 +122,7 @@ fun OnlineSearch(
         modifier = Modifier.fillMaxSize()
     ) {
         items(
-            items = history,
+            items = recentQueries,
             key = SearchQuery::id
         ) { searchQuery ->
             QueryRow(
@@ -135,7 +147,7 @@ fun OnlineSearch(
         }
 
         items(
-            items = suggestions?.queries.orEmpty(),
+            items = suggestedQueries,
             key = { "suggestion/$it" }
         ) { suggestion ->
             QueryRow(
@@ -201,7 +213,8 @@ private fun QueryRow(
         modifier = modifier
             .clickable(onClick = onClick)
             .fillMaxWidth()
-            .padding(all = 16.dp)
+            // tight enough that five of these leave the songs in view, tall enough to still hit
+            .padding(horizontal = 16.dp, vertical = 10.dp)
     ) {
         Spacer(
             modifier = Modifier
