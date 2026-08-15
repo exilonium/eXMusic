@@ -1,0 +1,71 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build ${{ matrix.variant }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - variant: debug
+            task: assembleDebug
+          - variant: release
+            task: assembleRelease
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+
+      # Chaquopy compiles the app's Python sources with the build machine's
+      # interpreter, so it has to match the version the app ships with
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Set up the Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          accept-android-sdk-licenses: true
+
+      - name: Install the NDK and CMake
+        run: sdkmanager --install "ndk;29.0.14206865" "cmake;4.1.2"
+
+      - name: Cache the QuickJS source archive
+        uses: actions/cache@v4
+        with:
+          path: app/src/main/cpp/.quickjs_cache
+          key: quickjs-${{ hashFiles('app/src/main/cpp/CMakeLists.txt') }}
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build
+        run: ./gradlew ${{ matrix.task }} --stacktrace
+
+      - name: Upload APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: vitune-${{ matrix.variant }}
+          path: app/build/outputs/apk/${{ matrix.variant }}/*.apk
+          if-no-files-found: error
