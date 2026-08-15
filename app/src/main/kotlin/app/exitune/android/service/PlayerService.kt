@@ -1535,19 +1535,25 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             val mediaId = dataSpec.key?.removePrefix("https://youtube.com/watch?v=")
                 ?: error("A key must be set")
 
+            /**
+             * Bounds this read to a single chunk starting where the player asked, so a seek costs
+             * one chunk rather than the rest of the song.
+             *
+             * The offset handed to [DataSpec.subrange] is relative to the position already on the
+             * spec, so it has to stay zero: adding the position to itself would send the request to
+             * twice the offset the player is waiting on, which reads as a seek where the bar keeps
+             * moving and nothing plays. Only the length is ours to set, and it is measured from
+             * that same position so the final chunk stops at the end of the stream.
+             */
             fun DataSpec.ranged(meta: StreamMeta): DataSpec {
                 val spec =
                     if (meta.headers.isEmpty()) this else withAdditionalHeaders(meta.headers)
 
                 if (chunkLength == null || meta.contentLength == null) return spec
 
-                val start = dataSpec.uriPositionOffset
-                val length = (meta.contentLength - start).coerceAtMost(chunkLength)
-                val rangeText = "$start-${start + length}"
+                val length = (meta.contentLength - position).coerceAtMost(chunkLength)
 
-                return spec
-                    .subrange(start, length)
-                    .withAdditionalHeaders(mapOf("Range" to "bytes=$rangeText"))
+                return spec.subrange(0, length)
             }
 
             if (
