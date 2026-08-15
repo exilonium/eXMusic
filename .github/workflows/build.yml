@@ -13,6 +13,43 @@ permissions:
   contents: read
 
 jobs:
+  detekt:
+    name: Detekt
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+
+      - name: Set up the Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          accept-android-sdk-licenses: true
+
+      # Configuring :app resolves its native build, so the NDK has to be present
+      - name: Install the NDK and CMake
+        run: sdkmanager --install "ndk;29.0.14206865" "cmake;4.1.2"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Run detekt
+        run: ./gradlew detekt --continue
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: detekt-reports
+          path: '**/build/reports/detekt/*'
+          if-no-files-found: ignore
+
   build:
     name: Build ${{ matrix.variant }}
     runs-on: ubuntu-latest
