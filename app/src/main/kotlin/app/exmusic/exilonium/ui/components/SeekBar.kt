@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -259,12 +260,15 @@ private fun WavySeekBarBody(
     val currentScrubberHeight by transition.animateDp(label = "") { if (it) 20.dp else 15.dp }
 
     val fraction = (position - range.start) / (range.endInclusive - range.start).toFloat()
-    val progress by rememberInfiniteTransition(label = "").animateFloat(
+
+    // The infinite transition keeps producing frames as long as it is composed, so only run it
+    // while the wave is actually animating; when paused the amplitude is 0 and the wave is flat
+    val progress by if (isActive) rememberInfiniteTransition(label = "").animateFloat(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(tween(2000, easing = LinearEasing)),
         label = ""
-    )
+    ) else remember { mutableFloatStateOf(0f) }
 
     Box(
         modifier = modifier

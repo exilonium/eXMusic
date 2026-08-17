@@ -111,6 +111,7 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 private const val UPDATE_DELAY = 50L
+private const val MAX_UPDATE_DELAY = 500L
 
 @Composable
 fun Lyrics(
@@ -414,7 +415,17 @@ fun Lyrics(
                     )
 
                     while (true) {
-                        delay(UPDATE_DELAY)
+                        // Sleep until the next sentence is due instead of polling at 20 Hz; the
+                        // cap keeps seeks and speed changes from stalling the scroll for long
+                        val speed = binder?.player?.playbackParameters?.speed
+                            ?.takeIf { it > 0f } ?: 1f
+
+                        delay(
+                            currentSynchronizedLyrics.millisUntilNextSentence()
+                                ?.let { (it / speed).toLong() }
+                                ?.coerceIn(UPDATE_DELAY, MAX_UPDATE_DELAY)
+                                ?: MAX_UPDATE_DELAY
+                        )
                         if (!currentSynchronizedLyrics.update()) continue
 
                         lazyListState.animateScrollToItem(

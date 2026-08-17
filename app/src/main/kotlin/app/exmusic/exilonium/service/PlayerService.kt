@@ -1060,7 +1060,14 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     // legacy behavior may cause inconsistencies, but not available on sdk 24 or lower
     @Suppress("DEPRECATION")
     override fun onEvents(player: Player, events: Player.Events) {
-        if (player.duration != C.TIME_UNSET) {
+        // Metadata lives in the timeline/media item; pushing it over IPC on every event is wasteful
+        if (
+            events.containsAny(
+                Player.EVENT_MEDIA_METADATA_CHANGED,
+                Player.EVENT_MEDIA_ITEM_TRANSITION,
+                Player.EVENT_TIMELINE_CHANGED
+            ) && player.duration != C.TIME_UNSET
+        ) {
             mediaSession.setMetadata(
                 metadataBuilder
                     .putText(
@@ -1080,7 +1087,17 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             )
         }
 
-        updatePlaybackState()
+        if (
+            events.containsAny(
+                Player.EVENT_PLAYBACK_STATE_CHANGED,
+                Player.EVENT_PLAY_WHEN_READY_CHANGED,
+                Player.EVENT_IS_PLAYING_CHANGED,
+                Player.EVENT_POSITION_DISCONTINUITY,
+                Player.EVENT_IS_LOADING_CHANGED,
+                Player.EVENT_MEDIA_ITEM_TRANSITION,
+                Player.EVENT_PLAYBACK_PARAMETERS_CHANGED
+            )
+        ) updatePlaybackState()
 
         if (
             !events.containsAny(

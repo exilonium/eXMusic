@@ -34,6 +34,12 @@ class SynchronizedLyrics(
             true
         } else false
     }
+
+    fun millisUntilNextSentence(): Long? {
+        val position = positionProvider()
+        for ((key) in sentences) if (key > position) return key - position
+        return null
+    }
 }
 
 @Parcelize
