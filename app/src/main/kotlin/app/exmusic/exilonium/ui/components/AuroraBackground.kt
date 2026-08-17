@@ -1,5 +1,6 @@
 package app.exmusic.exilonium.ui.components
 
+import android.graphics.Bitmap
 import android.graphics.RenderEffect
 import android.graphics.Shader
 import android.net.Uri
@@ -25,7 +26,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageShader
+import androidx.compose.ui.graphics.ShaderBrush
+import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.asComposeRenderEffect
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
@@ -40,9 +45,12 @@ import coil3.request.ImageRequest
 import coil3.request.SuccessResult
 import coil3.request.allowHardware
 import coil3.size.Scale
+import kotlin.random.Random
 
 private const val PALETTE_THUMBNAIL_SIZE = 200
 private const val PALETTE_MAXIMUM_COLOR_COUNT = 16
+private const val NOISE_SIZE = 64
+private const val NOISE_ALPHA = 0.02f
 
 private val blurSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 
@@ -211,6 +219,38 @@ fun AuroraBackground(
             modifier = Modifier
                 .fillMaxSize()
                 .background(fallbackColor.copy(alpha = 0.45f))
+        )
+
+        // Dithers the blurred gradients, which would otherwise band on 8-bit displays
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(brush = rememberNoiseBrush(), alpha = NOISE_ALPHA)
+        )
+    }
+}
+
+@Composable
+private fun rememberNoiseBrush(): Brush {
+    val noise = remember {
+        val random = Random(seed = 0)
+        val pixels = IntArray(NOISE_SIZE * NOISE_SIZE) {
+            val luminance = random.nextInt(from = 0, until = 256)
+            (0xff shl 24) or (luminance shl 16) or (luminance shl 8) or luminance
+        }
+
+        Bitmap
+            .createBitmap(pixels, NOISE_SIZE, NOISE_SIZE, Bitmap.Config.ARGB_8888)
+            .asImageBitmap()
+    }
+
+    return remember(noise) {
+        ShaderBrush(
+            ImageShader(
+                image = noise,
+                tileModeX = TileMode.Repeated,
+                tileModeY = TileMode.Repeated
+            )
         )
     }
 }

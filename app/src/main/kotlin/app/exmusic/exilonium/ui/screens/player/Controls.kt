@@ -147,6 +147,7 @@ private fun ClassicControls(
             binder = binder,
             position = position,
             media = media,
+            backgroundColor = colorPalette.playerControl,
             alwaysShowDuration = true
         )
         Spacer(modifier = Modifier.weight(1f))
@@ -187,7 +188,7 @@ private fun ClassicControls(
                             binder.player.play()
                         }
                     }
-                    .background(colorPalette.background2)
+                    .background(colorPalette.playerControl)
                     .size(64.dp)
             ) {
                 AnimatedPlayPauseButton(
@@ -235,6 +236,8 @@ private fun ModernControls(
     modifier: Modifier = Modifier,
     controlHeight: Dp = 64.dp
 ) {
+    val (colorPalette) = LocalAppearance.current
+
     val previousButtonContent: @Composable RowScope.() -> Unit = {
         SkipButton(
             iconId = R.drawable.play_skip_back,
@@ -250,6 +253,7 @@ private fun ModernControls(
             onClick = {
                 setLikedAt(if (likedAt == null) System.currentTimeMillis() else null)
             },
+            backgroundColor = colorPalette.playerControl,
             modifier = Modifier.weight(1f)
         )
     }
@@ -295,7 +299,8 @@ private fun ModernControls(
                 SeekBar(
                     binder = binder,
                     position = position,
-                    media = media
+                    media = media,
+                    backgroundColor = colorPalette.playerControl
                 )
             }
         }
@@ -311,6 +316,8 @@ private fun SkipButton(
     modifier: Modifier = Modifier,
     offsetOnPress: Dp = DefaultOffset
 ) {
+    val (colorPalette) = LocalAppearance.current
+
     val interactionSource = remember { MutableInteractionSource() }
     val pressed by interactionSource.collectIsPressedAsState()
     val offset by animateDpAsState(
@@ -320,6 +327,7 @@ private fun SkipButton(
 
     BigIconButton(
         iconId = iconId,
+        backgroundColor = colorPalette.playerControl,
         modifier = modifier
             .clickable(
                 interactionSource = interactionSource,
