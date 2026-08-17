@@ -18,11 +18,16 @@ val List<Thumbnail>.largest get() = maxByOrNull { (it.width ?: 0) * (it.height ?
  * A host that is not listed here is handed back untouched, so leaving one out is silent — every
  * image on it keeps the size it was listed at, however large it ends up drawn. YouTube Music now
  * serves nearly all of its artwork from yt3.googleusercontent.com and lists it at 60x60.
+ *
+ * `-p` is the smart crop YouTube itself asks for: without it the CDN fits the artwork inside the
+ * box and hands back whatever aspect it was stored at, so an artist's banner — listed at 2880x1200
+ * — arrives as a wide strip and sits letterboxed in the square it is drawn in. With it the subject
+ * is cropped to fill the box, and square artwork such as an album cover is unaffected.
  */
 fun String.resizedThumbnail(size: Int) = when {
     startsWith("https://lh3.googleusercontent.com") ||
         startsWith("https://yt3.googleusercontent.com") ->
-        "${substringBefore('=')}=w$size-h$size-l90-rj"
+        "${substringBefore('=')}=w$size-h$size-p-l90-rj"
 
     startsWith("https://yt3.ggpht.com") -> "${substringBefore('=')}=s$size"
 

@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -74,6 +75,9 @@ fun ArtistItem(
     AsyncImage(
         model = thumbnailUrl?.thumbnail(thumbnailSize.px),
         contentDescription = null,
+        // an artist is stored with the banner off their page, which is wider than it is tall: it
+        // fills the circle rather than sitting letterboxed in it
+        contentScale = ContentScale.Crop,
         modifier = Modifier
             .clip(CircleShape)
             .requiredSize(thumbnailSize)

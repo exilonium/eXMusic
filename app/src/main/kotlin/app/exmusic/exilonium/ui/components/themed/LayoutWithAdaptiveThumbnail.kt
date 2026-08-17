@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import app.exmusic.core.ui.Dimensions
 import app.exmusic.core.ui.LocalAppearance
@@ -68,6 +69,9 @@ fun adaptiveThumbnailContent(
         ) else AsyncImage(
             model = url?.thumbnail(thumbnailSize.px),
             contentDescription = null,
+            // artwork that is not square — an artist's banner, above all — fills the box rather than
+            // sitting letterboxed in it, so the circle an artist is drawn in is never a thin strip
+            contentScale = ContentScale.Crop,
             modifier = innerModifier.background(colorPalette.background1)
         )
     }
