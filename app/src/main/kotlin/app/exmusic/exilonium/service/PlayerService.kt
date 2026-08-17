@@ -474,8 +474,11 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         super.onTaskRemoved(rootIntent)
     }
 
-    override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) =
-        maybeSavePlayerQueue()
+    override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+        // Saving rewrites the whole queue table; on resume nothing changed since the pause-time
+        // save, so only persist when playback stops advancing
+        if (!playWhenReady) maybeSavePlayerQueue()
+    }
 
     override fun onDestroy() {
         runCatching {

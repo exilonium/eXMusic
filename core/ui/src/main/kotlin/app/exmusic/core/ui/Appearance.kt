@@ -7,7 +7,9 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -63,20 +65,33 @@ fun appearance(
         mode == ColorMode.Dark || (mode == ColorMode.System && isSystemInDarkTheme)
     }
 
-    val colorPalette = rememberSaveable(
+    // Palette extraction from the sample bitmap is too expensive for the main thread, so compute
+    // it in the background and keep showing the previous palette until the new one is ready
+    val colorPalette by produceState(
+        initialValue = remember {
+            colorPaletteOf(
+                source = source,
+                darkness = darkness,
+                isDark = isDark,
+                materialAccentColor = materialAccentColor,
+                sampleBitmap = null
+            )
+        },
         source,
         darkness,
         isDark,
         materialAccentColor,
         sampleBitmap
     ) {
-        colorPaletteOf(
-            source = source,
-            darkness = darkness,
-            isDark = isDark,
-            materialAccentColor = materialAccentColor,
-            sampleBitmap = sampleBitmap
-        )
+        value = withContext(Dispatchers.Default) {
+            colorPaletteOf(
+                source = source,
+                darkness = darkness,
+                isDark = isDark,
+                materialAccentColor = materialAccentColor,
+                sampleBitmap = sampleBitmap
+            )
+        }
     }
 
     return rememberAppearance(

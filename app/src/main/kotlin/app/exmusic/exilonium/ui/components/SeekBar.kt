@@ -306,6 +306,9 @@ private fun WavySeekBarBody(
                     .align(Alignment.CenterEnd)
             )
 
+            // Reused across frames; allocating a fresh Path 60 times a second churns the GC
+            val path = remember { Path() }
+
             Canvas(
                 modifier = Modifier
                     .fillMaxWidth(fraction)
@@ -314,6 +317,7 @@ private fun WavySeekBarBody(
             ) {
                 drawPath(
                     path = wavePath(
+                        path = path,
                         size = size,
                         progress = progress
                     ),
@@ -472,10 +476,13 @@ private fun Duration(
 }
 
 private fun Density.wavePath(
+    path: Path,
     size: Size,
     progress: Float,
     quality: Float = PlayerPreferences.wavySeekBarQuality.quality
-) = Path().apply {
+) = path.apply {
+    rewind()
+
     val (width, height) = size
     val progressTau = progress * 2 * PI.toFloat()
     val scale = 7.dp.toPx()
