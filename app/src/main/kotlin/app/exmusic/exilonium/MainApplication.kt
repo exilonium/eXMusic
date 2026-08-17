@@ -123,6 +123,7 @@ import coil3.decode.ExifOrientationStrategy
 import coil3.disk.DiskCache
 import coil3.disk.directory
 import coil3.memory.MemoryCache
+import coil3.network.ktor3.KtorNetworkFetcher
 import coil3.request.crossfade
 import coil3.util.DebugLogger
 import com.chaquo.python.Python
@@ -132,6 +133,9 @@ import com.kieronquinn.monetcompat.core.MonetCompat
 import com.kieronquinn.monetcompat.interfaces.MonetColorsChangedListener
 import com.valentinilk.shimmer.LocalShimmerTheme
 import dev.kdrag0n.monet.theme.ColorScheme
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.HttpTimeout
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
@@ -547,6 +551,21 @@ class MainApplication : Application(), SingletonImageLoader.Factory, Configurati
 
     override fun newImageLoader(context: PlatformContext) = ImageLoader.Builder(this)
         .crossfade(true)
+        .components {
+            // Google's image CDN can take >10s to derive an uncached artwork variant, which
+            // outlives the engine's default socket timeout and permanently blanks the thumbnail
+            add(
+                KtorNetworkFetcher.factory {
+                    HttpClient(OkHttp) {
+                        install(HttpTimeout) {
+                            connectTimeoutMillis = 10_000
+                            socketTimeoutMillis = 30_000
+                            requestTimeoutMillis = 60_000
+                        }
+                    }
+                }
+            )
+        }
         .memoryCache {
             MemoryCache.Builder()
                 .maxSizePercent(context, 0.1)

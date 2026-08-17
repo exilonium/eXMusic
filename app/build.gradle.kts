@@ -198,6 +198,7 @@ dependencies {
 
     implementation(libs.coil.compose)
     implementation(libs.coil.ktor)
+    implementation(libs.ktor.client.okhttp)
 
     implementation(libs.palette)
     implementation(libs.monet)
