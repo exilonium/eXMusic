@@ -7,6 +7,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -17,6 +18,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -37,6 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,6 +51,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -112,6 +116,9 @@ import kotlin.time.Duration.Companion.seconds
 
 private const val UPDATE_DELAY = 50L
 private const val MAX_UPDATE_DELAY = 500L
+
+// How much a synchronized lyrics line shrinks while it is being pressed, so a tap is visible
+private const val PRESSED_LINE_SCALE = 0.94f
 
 @Composable
 fun Lyrics(
@@ -405,7 +412,11 @@ fun Lyrics(
         ) { synchronized ->
             val lazyListState = rememberLazyListState()
             if (synchronized) {
-                LaunchedEffect(synchronizedLyrics, density, animatedHeight) {
+                // Bumped whenever a line is tapped, so the scroll loop restarts and re-centers on
+                // the line we just seeked to instead of waiting for the next poll
+                var seekTrigger by remember { mutableIntStateOf(0) }
+
+                LaunchedEffect(synchronizedLyrics, density, animatedHeight, seekTrigger) {
                     val currentSynchronizedLyrics = synchronizedLyrics ?: return@LaunchedEffect
                     val centerOffset = with(density) { (-animatedHeight / 3).roundToPx() }
 
@@ -448,24 +459,49 @@ fun Lyrics(
                         Spacer(modifier = Modifier.height(maxHeight))
                     }
                     itemsIndexed(
-                        items = synchronizedLyrics.sentences.values.toImmutableList()
-                    ) { index, sentence ->
+                        items = synchronizedLyrics.sentences.toList().toImmutableList()
+                    ) { index, (timestamp, sentence) ->
+                        val interactionSource = remember { MutableInteractionSource() }
+                        val pressed by interactionSource.collectIsPressedAsState()
+
                         val color by animateColorAsState(
-                            if (index == synchronizedLyrics.index) Color.White
+                            if (pressed || index == synchronizedLyrics.index) Color.White
                             else colorPalette.textDisabled
                         )
+                        val scale by animateFloatAsState(
+                            targetValue = if (pressed) PRESSED_LINE_SCALE else 1f,
+                            label = ""
+                        )
+
+                        val lineModifier = Modifier
+                            .fillMaxWidth()
+                            .clickable(
+                                interactionSource = interactionSource,
+                                indication = ripple(),
+                                enabled = binder?.player != null
+                            ) {
+                                binder?.player?.seekTo(
+                                    (timestamp - lyricsState.offset + (lyrics?.startTime ?: 0L))
+                                        .coerceAtLeast(0L)
+                                )
+                                synchronizedLyrics.update()
+                                seekTrigger++
+                            }
+                            .graphicsLayer {
+                                scaleX = scale
+                                scaleY = scale
+                            }
+                            .padding(vertical = 4.dp, horizontal = 32.dp)
 
                         if (sentence.isBlank()) Image(
                             painter = painterResource(R.drawable.musical_notes),
                             contentDescription = null,
                             colorFilter = ColorFilter.tint(color),
-                            modifier = Modifier
-                                .padding(vertical = 4.dp, horizontal = 32.dp)
-                                .size(typography.xs.fontSize.dp)
+                            modifier = lineModifier.height(typography.xs.fontSize.dp)
                         ) else BasicText(
                             text = sentence,
                             style = typography.xs.center.medium.color(color),
-                            modifier = Modifier.padding(vertical = 4.dp, horizontal = 32.dp)
+                            modifier = lineModifier
                         )
                     }
                     item(key = "footer", contentType = 0) {
