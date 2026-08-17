@@ -61,6 +61,10 @@ object PlayerPreferences : GlobalPreferencesHolder() {
     val sponsorBlockEnabledProperty = boolean(false)
     var sponsorBlockEnabled by sponsorBlockEnabledProperty
 
+    // Seconds; 0 turns the fade off
+    val crossfadeDurationProperty = int(0)
+    var crossfadeDuration by crossfadeDurationProperty
+
     /**
      * Where a playable stream URL comes from.
      */

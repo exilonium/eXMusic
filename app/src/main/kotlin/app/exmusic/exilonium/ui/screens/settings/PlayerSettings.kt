@@ -27,6 +27,7 @@ import app.exmusic.exilonium.ui.components.themed.SecondaryTextButton
 import app.exmusic.exilonium.ui.screens.Route
 import app.exmusic.exilonium.utils.rememberEqualizerLauncher
 import kotlinx.collections.immutable.toImmutableList
+import kotlin.math.roundToInt
 
 @OptIn(UnstableApi::class)
 @Route
@@ -91,6 +92,27 @@ fun PlayerSettings() = with(PlayerPreferences) {
             AnimatedVisibility(visible = changed) {
                 RestartPlayerSettingsEntry(
                     onRestart = { changed = false }
+                )
+            }
+
+            run {
+                var newValue by remember(crossfadeDuration) {
+                    mutableFloatStateOf(crossfadeDuration.toFloat())
+                }
+
+                SliderSettingsEntry(
+                    title = stringResource(R.string.crossfade),
+                    text = stringResource(R.string.crossfade_description),
+                    state = newValue,
+                    onSlide = { newValue = it },
+                    onSlideComplete = { crossfadeDuration = newValue.roundToInt() },
+                    toDisplay = {
+                        val seconds = it.roundToInt()
+                        if (seconds == 0) stringResource(R.string.crossfade_off)
+                        else stringResource(R.string.format_seconds, seconds)
+                    },
+                    range = 0f..12f,
+                    steps = 11
                 )
             }
 

@@ -272,6 +272,11 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     private val coroutineScope = CoroutineScope(Dispatchers.IO + Job())
     private var preferenceUpdaterJob: Job? = null
     private var volumeNormalizationJob: Job? = null
+    private var crossfadeJob: Job? = null
+
+    // Whether the current item was entered by an automatic transition, which is the only
+    // case that deserves a fade-in: manual skips should sound immediate
+    private var crossfadeIn = false
     private var sponsorBlockJob: Job? = null
 
     override var isInvincibilityEnabled by mutableStateOf(false)
@@ -436,6 +441,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             subscribe(PlayerPreferences.volumeNormalizationBaseGainProperty) { maybeNormalizeVolume() }
             subscribe(PlayerPreferences.volumeNormalizationProperty) { maybeNormalizeVolume() }
             subscribe(PlayerPreferences.sponsorBlockEnabledProperty) { maybeSponsorBlock() }
+            subscribe(PlayerPreferences.crossfadeDurationProperty) { maybeCrossfade() }
 
             launch {
                 val audioManager = getSystemService<AudioManager>()
@@ -540,6 +546,9 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     }
 
     override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+        crossfadeIn = reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO ||
+            reason == Player.MEDIA_ITEM_TRANSITION_REASON_REPEAT
+
         if (
             AppearancePreferences.hideExplicit &&
             mediaItem?.mediaMetadata?.extras?.songBundle?.explicit == true
@@ -737,7 +746,8 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             loudnessEnhancer = null
             volumeNormalizationJob?.cancel()
             volumeNormalizationJob?.invokeOnCompletion { volumeNormalizationJob = null }
-            player.volume = 1f
+            // The crossfade loop owns the volume while it runs
+            if (PlayerPreferences.crossfadeDuration == 0) player.volume = 1f
             return
         }
 
@@ -778,6 +788,41 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private fun maybeCrossfade() {
+        crossfadeJob?.cancel()
+
+        val seconds = PlayerPreferences.crossfadeDuration
+        if (seconds == 0) {
+            crossfadeJob = null
+            player.volume = 1f
+            return
+        }
+
+        val fadeMs = seconds * 1000f
+        crossfadeJob = coroutineScope.launch(Dispatchers.Main) {
+            while (isActive) {
+                val duration = player.duration
+                val position = player.currentPosition
+
+                player.volume = when {
+                    duration == C.TIME_UNSET -> 1f
+
+                    duration - position <= fadeMs ->
+                        ((duration - position) / fadeMs).coerceIn(0f, 1f)
+
+                    crossfadeIn && position <= fadeMs -> (position / fadeMs).coerceIn(0f, 1f)
+
+                    else -> {
+                        crossfadeIn = false
+                        1f
+                    }
+                }
+
+                delay(50.milliseconds)
             }
         }
     }

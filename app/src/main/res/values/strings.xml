@@ -7,6 +7,7 @@
     <string name="format_db">%1$s dB</string>
     <string name="format_kbps">%1$s kbps</string>
     <string name="format_ms">%1$s ms</string>
+    <string name="format_seconds">%1$d s</string>
     <string name="format_px">%1$spx</string>
     <string name="format_go_to_artist">More from %1$s</string>
     <string name="format_top_playlist">Top %1$s</string>
@@ -276,6 +277,9 @@
     <string name="pause_minimum_volume">Pause on minimum volume</string>
     <string name="pause_minimum_volume_description">Pause the player when you set your device volume to zero</string>
     <string name="audio">Audio</string>
+    <string name="crossfade">Crossfade</string>
+    <string name="crossfade_description">Fade the ending song out and the next one in on automatic song changes</string>
+    <string name="crossfade_off">Off</string>
     <string name="skip_silence">Skip silence</string>
     <string name="skip_silence_description">Skip silent parts during playback</string>
     <string name="minimum_silence_length">Minimum silence length</string>
