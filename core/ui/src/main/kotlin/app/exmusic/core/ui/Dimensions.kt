@@ -14,10 +14,15 @@ object Dimensions {
         val player = Player
 
         object Player {
+            /**
+             * This size ends up baked into the artwork url (and thereby Coil's cache key), so it
+             * must not change with orientation. `screenWidthDp`/`screenHeightDp` exclude whichever
+             * system bars the current orientation has, so their min shifts by a few dp on rotation
+             * — enough for a different url, a cold cache and a full refetch. `smallestScreenWidthDp`
+             * is orientation-invariant by definition.
+             */
             val song
-                @Composable get() = with(LocalConfiguration.current) {
-                    minOf(screenHeightDp, screenWidthDp)
-                }.dp
+                @Composable get() = LocalConfiguration.current.smallestScreenWidthDp.dp
         }
     }
 
