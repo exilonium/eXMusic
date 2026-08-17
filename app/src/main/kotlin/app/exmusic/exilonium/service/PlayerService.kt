@@ -169,7 +169,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.yield
 import java.io.IOException
 import kotlin.math.roundToInt
 import kotlin.time.Clock
@@ -807,6 +806,8 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             while (isActive) {
                 val duration = player.duration
                 val position = player.currentPosition
+                val inFadeZone = duration != C.TIME_UNSET &&
+                    (duration - position <= fadeMs || (crossfadeIn && position <= fadeMs))
 
                 player.volume = when {
                     duration == C.TIME_UNSET -> 1f
@@ -822,7 +823,23 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                     }
                 }
 
-                delay(50.milliseconds)
+                // Fine-grained ticks are only needed while actually fading; otherwise
+                // sleep until the fade zone can plausibly be reached
+                delay(
+                    when {
+                        !player.isPlaying -> 500.milliseconds
+
+                        inFadeZone -> 50.milliseconds
+
+                        else -> {
+                            val speed = player.playbackParameters.speed.coerceAtLeast(0.1f)
+                            ((duration - position - fadeMs) / speed)
+                                .toLong()
+                                .coerceIn(50L, 500L)
+                                .milliseconds
+                        }
+                    }
+                )
             }
         }
     }
@@ -873,13 +890,18 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                         @Suppress("LoopWithTooManyJumpStatements")
                         do {
                             if (lastSegmentEnd < posMillis()) {
-                                yield()
+                                // All segments passed; only a backwards seek can bring one back
+                                delay(1.seconds)
                                 continue
                             }
 
                             val nextSegment =
                                 segments.firstOrNull { posMillis() < it.end.inWholeMilliseconds }
-                                    ?: continue
+
+                            if (nextSegment == null) {
+                                delay(1.seconds)
+                                continue
+                            }
 
                             // Wait for next segment
                             if (nextSegment.start.inWholeMilliseconds > posMillis()) {
@@ -891,7 +913,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
                             if (posMillis().milliseconds !in nextSegment.start..nextSegment.end) {
                                 // Player is not in the segment for some reason, maybe the user seeked in the meantime
-                                yield()
+                                delay(500.milliseconds)
                                 continue
                             }
 
