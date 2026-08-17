@@ -51,7 +51,7 @@ object PlayerPreferences : GlobalPreferencesHolder() {
     var lyricsKeepScreenAwake by boolean(false)
     var lyricsShowSystemBars by boolean(true)
 
-    var skipOnError by boolean(false)
+    var skipOnError by boolean(true)
     var handleAudioFocus by boolean(true)
 
     var pauseCache by boolean(false)

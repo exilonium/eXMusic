@@ -286,6 +286,10 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     private val binder = Binder()
 
     private var isNotificationStarted = false
+
+    // Media id of the item the error handler already re-prepared once, so a persistent
+    // failure skips instead of retrying forever
+    private var errorRecoveryMediaId: String? = null
     override val notificationId get() = ServiceNotifications.default.notificationId!!
     private val notificationActionReceiver = NotificationActionReceiver()
 
@@ -562,6 +566,11 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         }
     }
 
+    override fun onPlaybackStateChanged(playbackState: Int) {
+        // The item plays again, so a later error on it deserves a fresh retry
+        if (playbackState == Player.STATE_READY) errorRecoveryMediaId = null
+    }
+
     override fun onTimelineChanged(timeline: Timeline, reason: Int) {
         if (reason != Player.TIMELINE_CHANGE_REASON_PLAYLIST_CHANGED) return
         updateMediaSessionQueue(timeline)
@@ -575,6 +584,16 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             error.findCause<InvalidResponseCodeException>()?.responseCode == 416
         ) {
             player.pause()
+            player.prepare()
+            player.play()
+            return
+        }
+
+        // Retry in place once per item: prepare() keeps the position, and a re-resolve can
+        // outlive an expired stream URL. An item that fails twice falls through to the skip
+        val mediaId = player.currentMediaItem?.mediaId
+        if (mediaId != null && mediaId != errorRecoveryMediaId) {
+            errorRecoveryMediaId = mediaId
             player.prepare()
             player.play()
             return
