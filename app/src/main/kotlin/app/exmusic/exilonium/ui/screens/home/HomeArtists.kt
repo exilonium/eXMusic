@@ -36,6 +36,7 @@ import app.exmusic.exilonium.LocalPlayerAwareWindowInsets
 import app.exmusic.exilonium.R
 import app.exmusic.exilonium.models.Artist
 import app.exmusic.exilonium.preferences.OrderPreferences
+import app.exmusic.exilonium.ui.components.screenBackground
 import app.exmusic.exilonium.ui.components.themed.FloatingActionsContainerWithScrollToTop
 import app.exmusic.exilonium.ui.components.themed.Header
 import app.exmusic.exilonium.ui.components.themed.HeaderIconButton
@@ -79,7 +80,7 @@ fun HomeArtistList(
                 .asPaddingValues(),
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier
-                .background(colorPalette.background0)
+                .background(colorPalette.screenBackground)
                 .fillMaxSize()
         ) {
             item(

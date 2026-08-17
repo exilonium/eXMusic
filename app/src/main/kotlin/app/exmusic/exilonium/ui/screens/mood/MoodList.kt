@@ -29,6 +29,7 @@ import app.exmusic.exilonium.LocalPlayerAwareWindowInsets
 import app.exmusic.exilonium.R
 import app.exmusic.exilonium.models.Mood
 import app.exmusic.exilonium.ui.components.ShimmerHost
+import app.exmusic.exilonium.ui.components.screenBackground
 import app.exmusic.exilonium.ui.components.themed.Header
 import app.exmusic.exilonium.ui.components.themed.HeaderPlaceholder
 import app.exmusic.exilonium.ui.components.themed.TextPlaceholder
@@ -89,7 +90,7 @@ fun MoodList(
             state = lazyListState,
             contentPadding = contentPadding,
             modifier = Modifier
-                .background(colorPalette.background0)
+                .background(colorPalette.screenBackground)
                 .fillMaxSize()
         ) {
             item(

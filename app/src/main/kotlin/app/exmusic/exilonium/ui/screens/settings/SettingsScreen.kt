@@ -42,6 +42,7 @@ import app.exmusic.compose.routing.RouteHandler
 import app.exmusic.core.ui.LocalAppearance
 import app.exmusic.exilonium.LocalPlayerAwareWindowInsets
 import app.exmusic.exilonium.R
+import app.exmusic.exilonium.ui.components.screenBackground
 import app.exmusic.exilonium.ui.components.themed.Header
 import app.exmusic.exilonium.ui.components.themed.NumberFieldDialog
 import app.exmusic.exilonium.ui.components.themed.Scaffold
@@ -337,7 +338,7 @@ fun SettingsCategoryScreen(
 
     Column(
         modifier = modifier
-            .background(colorPalette.background0)
+            .background(colorPalette.screenBackground)
             .fillMaxSize()
             .let { if (scrollState != null) it.verticalScroll(state = scrollState) else it }
             .padding(

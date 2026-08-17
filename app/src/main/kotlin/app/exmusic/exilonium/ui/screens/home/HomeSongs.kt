@@ -68,6 +68,7 @@ import app.exmusic.exilonium.query
 import app.exmusic.exilonium.service.isLocal
 import app.exmusic.exilonium.transaction
 import app.exmusic.exilonium.ui.components.LocalMenuState
+import app.exmusic.exilonium.ui.components.screenBackground
 import app.exmusic.exilonium.ui.components.themed.ConfirmationDialog
 import app.exmusic.exilonium.ui.components.themed.FloatingActionsContainerWithScrollToTop
 import app.exmusic.exilonium.ui.components.themed.Header
@@ -153,7 +154,7 @@ fun HomeSongs(
 
     Box(
         modifier = Modifier
-            .background(colorPalette.background0)
+            .background(colorPalette.screenBackground)
             .fillMaxSize()
     ) {
         LazyColumn(

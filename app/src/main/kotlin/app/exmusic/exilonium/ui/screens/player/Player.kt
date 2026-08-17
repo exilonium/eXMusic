@@ -72,6 +72,7 @@ import app.exmusic.exilonium.Database
 import app.exmusic.exilonium.LocalPlayerServiceBinder
 import app.exmusic.exilonium.R
 import app.exmusic.exilonium.models.ui.toUiMedia
+import app.exmusic.exilonium.preferences.AppearancePreferences
 import app.exmusic.exilonium.preferences.PlayerPreferences
 import app.exmusic.exilonium.query
 import app.exmusic.exilonium.service.PlayerService
@@ -355,12 +356,17 @@ fun Player(
             expandedBound = layoutState.expandedBound
         )
 
-        AuroraBackground(
+        if (AppearancePreferences.aurora) AuroraBackground(
             artworkUri = metadata?.artworkUri,
             fallbackColor = colorPalette.background0,
             modifier = Modifier
                 .fillMaxSize()
                 .clip(shape)
+        ) else Spacer(
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(shape)
+                .background(colorPalette.background0)
         )
 
         val containerModifier = Modifier

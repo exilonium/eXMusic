@@ -56,6 +56,7 @@ import app.exmusic.exilonium.R
 import app.exmusic.exilonium.ui.components.FadingRow
 import app.exmusic.exilonium.ui.components.LocalMenuState
 import app.exmusic.exilonium.ui.components.ShimmerHost
+import app.exmusic.exilonium.ui.components.screenBackground
 import app.exmusic.exilonium.ui.components.themed.FloatingActionsContainerWithScrollToTop
 import app.exmusic.exilonium.ui.components.themed.Header
 import app.exmusic.exilonium.ui.components.themed.NonQueuedMediaItemMenu
@@ -125,7 +126,7 @@ fun HomeDiscovery(
 
         Column(
             modifier = Modifier
-                .background(colorPalette.background0)
+                .background(colorPalette.screenBackground)
                 .fillMaxSize()
                 .verticalScroll(scrollState)
                 .padding(

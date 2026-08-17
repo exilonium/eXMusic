@@ -50,6 +50,7 @@ import app.exmusic.exilonium.preferences.DataPreferences
 import app.exmusic.exilonium.query
 import app.exmusic.exilonium.ui.components.LocalMenuState
 import app.exmusic.exilonium.ui.components.ShimmerHost
+import app.exmusic.exilonium.ui.components.screenBackground
 import app.exmusic.exilonium.ui.components.themed.FloatingActionsContainerWithScrollToTop
 import app.exmusic.exilonium.ui.components.themed.Header
 import app.exmusic.exilonium.ui.components.themed.NonQueuedMediaItemMenu
@@ -160,7 +161,7 @@ fun QuickPicks(
 
         Column(
             modifier = Modifier
-                .background(colorPalette.background0)
+                .background(colorPalette.screenBackground)
                 .fillMaxSize()
                 .verticalScroll(scrollState)
                 .padding(

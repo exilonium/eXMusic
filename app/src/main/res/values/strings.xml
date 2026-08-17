@@ -40,6 +40,8 @@
     <string name="about">About</string>
     <string name="appearance">Appearance</string>
     <string name="colors">Colors</string>
+    <string name="aurora">Aurora mode</string>
+    <string name="aurora_description">Tint the app with a soft gradient, and animate it from the artwork colors in the player</string>
     <string name="shapes">Shapes</string>
     <string name="skip_back">Skip back</string>
     <string name="skip_forward">Skip forward</string>

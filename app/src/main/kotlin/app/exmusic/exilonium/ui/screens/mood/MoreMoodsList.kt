@@ -28,6 +28,7 @@ import app.exmusic.core.ui.LocalAppearance
 import app.exmusic.exilonium.LocalPlayerAwareWindowInsets
 import app.exmusic.exilonium.R
 import app.exmusic.exilonium.ui.components.ShimmerHost
+import app.exmusic.exilonium.ui.components.screenBackground
 import app.exmusic.exilonium.ui.components.themed.Header
 import app.exmusic.exilonium.ui.components.themed.HeaderPlaceholder
 import app.exmusic.exilonium.ui.items.SongItemPlaceholder
@@ -82,7 +83,7 @@ fun MoreMoodsList(
             .only(WindowInsetsSides.Vertical + WindowInsetsSides.End)
             .asPaddingValues(),
         modifier = modifier
-            .background(colorPalette.background0)
+            .background(colorPalette.screenBackground)
             .fillMaxSize()
     ) {
         item(

@@ -48,6 +48,7 @@ import app.exmusic.exilonium.preferences.DataPreferences
 import app.exmusic.exilonium.query
 import app.exmusic.exilonium.transaction
 import app.exmusic.exilonium.ui.components.LocalMenuState
+import app.exmusic.exilonium.ui.components.screenBackground
 import app.exmusic.exilonium.ui.components.themed.CircularProgressIndicator
 import app.exmusic.exilonium.ui.components.themed.ConfirmationDialog
 import app.exmusic.exilonium.ui.components.themed.FloatingActionsContainerWithScrollToTop
@@ -156,7 +157,7 @@ fun LocalPlaylistSongs(
                     .only(WindowInsetsSides.Vertical + WindowInsetsSides.End)
                     .asPaddingValues(),
                 modifier = Modifier
-                    .background(colorPalette.background0)
+                    .background(colorPalette.screenBackground)
                     .fillMaxSize()
             ) {
                 item(

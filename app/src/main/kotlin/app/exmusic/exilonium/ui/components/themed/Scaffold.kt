@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.IntOffset
 import app.exmusic.core.ui.LocalAppearance
 import app.exmusic.exilonium.R
 import app.exmusic.exilonium.preferences.UIStatePreferences
+import app.exmusic.exilonium.ui.components.screenBackground
 import kotlinx.collections.immutable.toImmutableList
 
 @Composable
@@ -47,7 +48,7 @@ fun Scaffold(
 
     Row(
         modifier = modifier
-            .background(colorPalette.background0)
+            .background(colorPalette.screenBackground)
             .fillMaxSize()
     ) {
         NavigationRail(

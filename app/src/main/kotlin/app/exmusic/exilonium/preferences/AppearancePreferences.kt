@@ -31,6 +31,7 @@ object AppearancePreferences : GlobalPreferencesHolder() {
             ColorPaletteName.AMOLED -> Darkness.AMOLED
         }
     )
+    var aurora by boolean(true)
     var thumbnailRoundness by enum(ThumbnailRoundness.Medium)
     var fontFamily by enum(BuiltInFontFamily.Poppins)
     var applyFontPadding by boolean(false)

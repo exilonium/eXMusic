@@ -18,7 +18,6 @@ import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.LocalIndication
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
@@ -88,6 +87,7 @@ import app.exmusic.exilonium.service.downloadState
 import app.exmusic.exilonium.ui.components.BottomSheetMenu
 import app.exmusic.exilonium.ui.components.rememberBottomSheetState
 import app.exmusic.exilonium.ui.components.themed.LinearProgressIndicator
+import app.exmusic.exilonium.ui.modifiers.auroraGlow
 import app.exmusic.exilonium.ui.screens.albumRoute
 import app.exmusic.exilonium.ui.screens.artistRoute
 import app.exmusic.exilonium.ui.screens.home.HomeScreen
@@ -222,7 +222,7 @@ class MainActivity : ComponentActivity(), MonetColorsChangedListener {
         SystemBarAppearance(palette = appearance.colorPalette)
 
         BoxWithConstraints(
-            modifier = Modifier.background(appearance.colorPalette.background0) then modifier.fillMaxSize()
+            modifier = Modifier.auroraGlow(appearance.colorPalette) then modifier.fillMaxSize()
         ) {
             CompositionLocalProvider(
                 LocalAppearance provides appearance,

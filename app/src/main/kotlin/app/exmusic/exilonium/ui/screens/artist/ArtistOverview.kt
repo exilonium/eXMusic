@@ -32,6 +32,7 @@ import app.exmusic.exilonium.LocalPlayerServiceBinder
 import app.exmusic.exilonium.R
 import app.exmusic.exilonium.ui.components.LocalMenuState
 import app.exmusic.exilonium.ui.components.ShimmerHost
+import app.exmusic.exilonium.ui.components.screenBackground
 import app.exmusic.exilonium.ui.components.themed.Attribution
 import app.exmusic.exilonium.ui.components.themed.FloatingActionsContainerWithScrollToTop
 import app.exmusic.exilonium.ui.components.themed.LayoutWithAdaptiveThumbnail
@@ -83,7 +84,7 @@ fun ArtistOverview(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .background(colorPalette.background0)
+                .background(colorPalette.screenBackground)
                 .fillMaxSize()
                 .verticalScroll(scrollState)
                 .padding(

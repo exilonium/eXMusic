@@ -46,6 +46,7 @@ import app.exmusic.exilonium.preferences.DataPreferences
 import app.exmusic.exilonium.preferences.OrderPreferences
 import app.exmusic.exilonium.preferences.UIStatePreferences
 import app.exmusic.exilonium.query
+import app.exmusic.exilonium.ui.components.screenBackground
 import app.exmusic.exilonium.ui.components.themed.FloatingActionsContainerWithScrollToTop
 import app.exmusic.exilonium.ui.components.themed.Header
 import app.exmusic.exilonium.ui.components.themed.HeaderIconButton
@@ -128,7 +129,7 @@ fun HomePlaylists(
             else Arrangement.Top,
             modifier = Modifier
                 .fillMaxSize()
-                .background(colorPalette.background0)
+                .background(colorPalette.screenBackground)
         ) {
             item(key = "header", contentType = 0, span = { GridItemSpan(maxLineSpan) }) {
                 Header(title = stringResource(R.string.playlists)) {

@@ -56,6 +56,12 @@ fun AppearanceSettings() = with(AppearancePreferences) {
                     valueText = { it.nameLocalized }
                 )
             }
+            SwitchSettingsEntry(
+                title = stringResource(R.string.aurora),
+                text = stringResource(R.string.aurora_description),
+                isChecked = aurora,
+                onCheckedChange = { aurora = it }
+            )
         }
         SettingsGroup(title = stringResource(R.string.shapes)) {
             EnumValueSelectorSettingsEntry(

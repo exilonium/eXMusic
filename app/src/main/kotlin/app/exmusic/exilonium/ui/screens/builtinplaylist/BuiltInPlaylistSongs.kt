@@ -36,6 +36,7 @@ import app.exmusic.exilonium.R
 import app.exmusic.exilonium.models.Song
 import app.exmusic.exilonium.preferences.DataPreferences
 import app.exmusic.exilonium.ui.components.LocalMenuState
+import app.exmusic.exilonium.ui.components.screenBackground
 import app.exmusic.exilonium.ui.components.themed.FloatingActionsContainerWithScrollToTop
 import app.exmusic.exilonium.ui.components.themed.Header
 import app.exmusic.exilonium.ui.components.themed.InHistoryMediaItemMenu
@@ -122,7 +123,7 @@ fun BuiltInPlaylistSongs(
                 .only(WindowInsetsSides.Vertical + WindowInsetsSides.End)
                 .asPaddingValues(),
             modifier = Modifier
-                .background(colorPalette.background0)
+                .background(colorPalette.screenBackground)
                 .fillMaxSize()
         ) {
             item(
