@@ -123,7 +123,8 @@ import coil3.decode.ExifOrientationStrategy
 import coil3.disk.DiskCache
 import coil3.disk.directory
 import coil3.memory.MemoryCache
-import coil3.network.ktor3.KtorNetworkFetcher
+import coil3.network.CacheStrategy
+import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.crossfade
 import coil3.util.DebugLogger
 import com.chaquo.python.Python
@@ -555,15 +556,20 @@ class MainApplication : Application(), SingletonImageLoader.Factory, Configurati
             // Google's image CDN can take >10s to derive an uncached artwork variant, which
             // outlives the engine's default socket timeout and permanently blanks the thumbnail
             add(
-                KtorNetworkFetcher.factory {
-                    HttpClient(OkHttp) {
-                        install(HttpTimeout) {
-                            connectTimeoutMillis = 10_000
-                            socketTimeoutMillis = 30_000
-                            requestTimeoutMillis = 60_000
+                // cacheStrategy restates its default: a second argument is needed to pick the
+                // four-parameter overload over the deprecated single-parameter one
+                KtorNetworkFetcherFactory(
+                    httpClient = {
+                        HttpClient(OkHttp) {
+                            install(HttpTimeout) {
+                                connectTimeoutMillis = 10_000
+                                socketTimeoutMillis = 30_000
+                                requestTimeoutMillis = 60_000
+                            }
                         }
-                    }
-                }
+                    },
+                    cacheStrategy = { CacheStrategy.DEFAULT }
+                )
             )
         }
         .memoryCache {
