@@ -304,7 +304,13 @@ fun LocalPlaylistSongs(
                                 reorderingState = reorderingState,
                                 index = index
                             )
-                            .background(colorPalette.background0),
+                            // only the row being dragged needs a slab of its own, to hide the rows
+                            // it travels over; the rest stay transparent so the aurora carries
+                            // through the list the way it does on every other screen
+                            .background(
+                                if (reorderingState.isDragging(index)) colorPalette.background0
+                                else colorPalette.screenBackground
+                            ),
                         song = song,
                         thumbnailSize = Dimensions.thumbnails.song,
                         trailingContent = {

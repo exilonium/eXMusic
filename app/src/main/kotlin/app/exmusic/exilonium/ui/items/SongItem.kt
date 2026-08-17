@@ -33,6 +33,7 @@ import app.exmusic.core.ui.utils.songBundle
 import app.exmusic.exilonium.R
 import app.exmusic.exilonium.models.Song
 import app.exmusic.exilonium.preferences.AppearancePreferences
+import app.exmusic.exilonium.ui.components.songHighlight
 import app.exmusic.exilonium.ui.components.themed.TextPlaceholder
 import app.exmusic.exilonium.utils.medium
 import app.exmusic.exilonium.utils.secondary
@@ -207,7 +208,7 @@ fun SongItem(
     val (colorPalette, typography, _, thumbnailShape) = LocalAppearance.current
 
     val backgroundColor by animateColorAsState(
-        targetValue = if (isPlaying) colorPalette.background2 else Color.Transparent,
+        targetValue = if (isPlaying) colorPalette.songHighlight else Color.Transparent,
         label = ""
     )
 

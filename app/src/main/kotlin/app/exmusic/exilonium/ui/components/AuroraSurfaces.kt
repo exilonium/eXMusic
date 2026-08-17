@@ -11,3 +11,13 @@ import app.exmusic.exilonium.preferences.AppearancePreferences
  */
 val ColorPalette.screenBackground
     get() = if (AppearancePreferences.aurora) Color.Transparent else background0
+
+private const val HIGHLIGHT_ALPHA = 0.12f
+
+/**
+ * The pill drawn behind the song that is playing. While aurora mode is on it is a hue-neutral wash of
+ * [ColorPalette.text] rather than an opaque grey, matching the player's chrome: a slab of its own
+ * colour reads as pasted over the aurora instead of lit by it.
+ */
+val ColorPalette.songHighlight
+    get() = if (AppearancePreferences.aurora) text.copy(alpha = HIGHLIGHT_ALPHA) else background2

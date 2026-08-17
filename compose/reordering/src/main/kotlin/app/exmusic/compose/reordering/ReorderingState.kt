@@ -51,6 +51,9 @@ class ReorderingState(
     val isDragging: Boolean
         get() = draggingIndex != -1
 
+    /** Whether the item at [index] is the one being dragged, rather than one it is moving past. */
+    fun isDragging(index: Int) = draggingIndex == index
+
     fun onDragStart(index: Int) {
         overscrolled = 0
         itemInfo = lazyListState.layoutInfo.visibleItemsInfo
