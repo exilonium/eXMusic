@@ -47,7 +47,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
@@ -77,6 +76,7 @@ import app.exmusic.exilonium.preferences.PlayerPreferences
 import app.exmusic.exilonium.query
 import app.exmusic.exilonium.service.PlayerService
 import app.exmusic.exilonium.transaction
+import app.exmusic.exilonium.ui.components.AuroraBackground
 import app.exmusic.exilonium.ui.components.BottomSheet
 import app.exmusic.exilonium.ui.components.BottomSheetState
 import app.exmusic.exilonium.ui.components.LocalMenuState
@@ -355,14 +355,16 @@ fun Player(
             expandedBound = layoutState.expandedBound
         )
 
+        AuroraBackground(
+            artworkUri = metadata?.artworkUri,
+            fallbackColor = colorPalette.background0,
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(shape)
+        )
+
         val containerModifier = Modifier
             .clip(shape)
-            .background(
-                Brush.verticalGradient(
-                    0.5f to colorPalette.background1,
-                    1f to colorPalette.background0
-                )
-            )
             .padding(
                 windowInsets
                     .only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
