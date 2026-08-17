@@ -119,6 +119,7 @@ fun LyricsDialog(
                 mediaId = currentWindow.mediaItem.mediaId,
                 isDisplayed = true,
                 onDismiss = { },
+                onClose = onDismiss,
                 mediaMetadataProvider = currentWindow.mediaItem::mediaMetadata,
                 durationProvider = player::getDuration,
                 ensureSongInserted = { Database.insert(currentWindow.mediaItem) },

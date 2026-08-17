@@ -131,6 +131,7 @@ fun Lyrics(
     modifier: Modifier = Modifier,
     onMenuLaunch: () -> Unit = { },
     onOpenDialog: (() -> Unit)? = null,
+    onClose: () -> Unit = onDismiss,
     shouldShowSynchronizedLyrics: Boolean = PlayerPreferences.isShowingSynchronizedLyrics,
     setShouldShowSynchronizedLyrics: (Boolean) -> Unit = {
         PlayerPreferences.isShowingSynchronizedLyrics = it
@@ -532,6 +533,22 @@ fun Lyrics(
         }
 
         if (showControls) {
+            Image(
+                painter = painterResource(R.drawable.close),
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(colorPalette.onOverlay),
+                modifier = Modifier
+                    .padding(all = 4.dp)
+                    .clickable(
+                        indication = ripple(bounded = false),
+                        interactionSource = remember { MutableInteractionSource() },
+                        onClick = onClose
+                    )
+                    .padding(all = 8.dp)
+                    .size(20.dp)
+                    .align(Alignment.TopEnd)
+            )
+
             if (onOpenDialog != null) Image(
                 painter = painterResource(R.drawable.expand),
                 contentDescription = null,
