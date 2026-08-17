@@ -7,6 +7,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -14,7 +15,9 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.exmusic.core.ui.LocalAppearance
 import app.exmusic.core.ui.utils.roundedShape
@@ -28,15 +31,20 @@ fun TextToggle(
     name: String,
     modifier: Modifier = Modifier,
     onLabel: String = stringResource(R.string.on_label),
-    offLabel: String = stringResource(R.string.off_label)
+    offLabel: String = stringResource(R.string.off_label),
+    backgroundColor: Color = LocalAppearance.current.colorPalette.background1,
+    borderColor: Color = Color.Transparent
 ) {
-    val (colorPalette, typography) = LocalAppearance.current
+    val (_, typography) = LocalAppearance.current
+
+    val shape = 16.dp.roundedShape
 
     Row(
         modifier = modifier
-            .clip(16.dp.roundedShape)
+            .clip(shape)
             .clickable(onClick = toggleState)
-            .background(colorPalette.background1)
+            .background(color = backgroundColor, shape = shape)
+            .border(width = Dp.Hairline, color = borderColor, shape = shape)
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .animateContentSize()
     ) {

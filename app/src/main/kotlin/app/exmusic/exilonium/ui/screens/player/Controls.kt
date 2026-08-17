@@ -188,7 +188,11 @@ private fun ClassicControls(
                             binder.player.play()
                         }
                     }
-                    .background(colorPalette.playerControl)
+                    .playerGlass(
+                        colorPalette = colorPalette,
+                        fill = colorPalette.playerControl,
+                        shape = playButtonRadius.roundedShape
+                    )
                     .size(64.dp)
             ) {
                 AnimatedPlayPauseButton(
@@ -254,6 +258,7 @@ private fun ModernControls(
                 setLikedAt(if (likedAt == null) System.currentTimeMillis() else null)
             },
             backgroundColor = colorPalette.playerControl,
+            borderColor = colorPalette.playerEdge,
             modifier = Modifier.weight(1f)
         )
     }
@@ -328,6 +333,7 @@ private fun SkipButton(
     BigIconButton(
         iconId = iconId,
         backgroundColor = colorPalette.playerControl,
+        borderColor = colorPalette.playerEdge,
         modifier = modifier
             .clickable(
                 interactionSource = interactionSource,

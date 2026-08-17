@@ -1,22 +1,52 @@
 package app.exmusic.exilonium.ui.screens.player
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.unit.Dp
 import app.exmusic.core.ui.ColorPalette
 import app.exmusic.exilonium.preferences.AppearancePreferences
 
-private const val PANEL_ALPHA = 0.6f
-private const val BAR_ALPHA = 0.7f
-private const val CONTROL_ALPHA = 0.15f
+private const val SHEET_ALPHA = 0.35f
+private const val CONTROL_ALPHA = 0.12f
+private const val EDGE_ALPHA = 0.14f
+
+private val auroraEnabled get() = AppearancePreferences.aurora
 
 /**
- * Surfaces used by the expanded player. While aurora mode is on they are deliberately translucent so
- * the aurora behind them stays visible instead of being cut into flat, opaque slabs; with aurora off
- * there is nothing to show through, so they fall back to the plain palette backgrounds.
+ * Surfaces used by the expanded player. While aurora mode is on they are one frosted glass material
+ * instead of a stack of unrelated greys: the sheets share a single translucent tint, the chrome that
+ * can be tapped is a hue-neutral wash of [ColorPalette.text], and everything is separated by the
+ * same hairline edge, so the aurora reads through all of it. With aurora off there is nothing to show
+ * through, so they fall back to the plain palette backgrounds.
  */
 val ColorPalette.playerPanel
-    get() = if (AppearancePreferences.aurora) background1.copy(alpha = PANEL_ALPHA) else background1
+    get() = if (auroraEnabled) background1.copy(alpha = SHEET_ALPHA) else background1
 
 val ColorPalette.playerBar
-    get() = if (AppearancePreferences.aurora) background2.copy(alpha = BAR_ALPHA) else background2
+    get() = if (auroraEnabled) background1.copy(alpha = SHEET_ALPHA) else background2
 
 val ColorPalette.playerControl
-    get() = if (AppearancePreferences.aurora) text.copy(alpha = CONTROL_ALPHA) else background2
+    get() = if (auroraEnabled) text.copy(alpha = CONTROL_ALPHA) else background2
+
+/**
+ * Queue rows. They sit on [playerPanel], which already carries the tint, so painting them again would
+ * only stack another slab on top of it.
+ */
+val ColorPalette.playerItem
+    get() = if (auroraEnabled) Color.Transparent else background1
+
+/** Hairline that separates the glass surfaces from each other and from the aurora. */
+val ColorPalette.playerEdge
+    get() = if (auroraEnabled) text.copy(alpha = EDGE_ALPHA) else Color.Transparent
+
+/** [fill] plus the [ColorPalette.playerEdge] hairline that ties every glass surface together. */
+fun Modifier.playerGlass(
+    colorPalette: ColorPalette,
+    fill: Color,
+    shape: Shape = RectangleShape
+) = background(color = fill, shape = shape)
+    .border(width = Dp.Hairline, color = colorPalette.playerEdge, shape = shape)

@@ -225,7 +225,11 @@ fun Queue(
             Row(
                 modifier = Modifier
                     .clip(shape)
-                    .background(colorPalette.playerBar)
+                    .playerGlass(
+                        colorPalette = colorPalette,
+                        fill = colorPalette.playerBar,
+                        shape = shape
+                    )
                     .fillMaxSize()
                     .then(innerModifier)
                     .padding(horizontalBottomPaddingValues),
@@ -262,7 +266,11 @@ fun Queue(
             Box(
                 modifier = Modifier
                     .clip(shape)
-                    .background(colorPalette.playerPanel)
+                    .playerGlass(
+                        colorPalette = colorPalette,
+                        fill = colorPalette.playerPanel,
+                        shape = shape
+                    )
                     .weight(1f)
             ) {
                 LookaheadScope {
@@ -343,7 +351,7 @@ fun Queue(
                                         reorderingState = reorderingState,
                                         index = i
                                     )
-                                    .background(colorPalette.playerPanel)
+                                    .background(colorPalette.playerItem)
                                     .let {
                                         if (PlayerPreferences.horizontalSwipeToRemoveItem && !isPlayingThisMediaItem)
                                             it.swipeToClose(
@@ -452,7 +460,7 @@ fun Queue(
             Row(
                 modifier = Modifier
                     .clickable(onClick = layoutState::collapseSoft)
-                    .background(colorPalette.playerBar)
+                    .playerGlass(colorPalette = colorPalette, fill = colorPalette.playerBar)
                     .fillMaxWidth()
                     .padding(horizontal = 12.dp)
                     .padding(horizontalBottomPaddingValues)
@@ -464,7 +472,9 @@ fun Queue(
                     toggleState = {
                         PlayerPreferences.queueLoopEnabled = !PlayerPreferences.queueLoopEnabled
                     },
-                    name = stringResource(R.string.queue_loop)
+                    name = stringResource(R.string.queue_loop),
+                    backgroundColor = colorPalette.playerControl,
+                    borderColor = colorPalette.playerEdge
                 )
 
                 Spacer(modifier = Modifier.weight(1f))
@@ -576,7 +586,11 @@ fun Queue(
                                 }
                             }
                         }
-                        .background(colorPalette.playerControl)
+                        .playerGlass(
+                            colorPalette = colorPalette,
+                            fill = colorPalette.playerControl,
+                            shape = 16.dp.roundedShape
+                        )
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 )
             }

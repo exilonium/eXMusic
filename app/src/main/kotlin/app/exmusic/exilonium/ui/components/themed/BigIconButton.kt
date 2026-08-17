@@ -3,6 +3,7 @@ package app.exmusic.exilonium.ui.components.themed
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
@@ -15,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.exmusic.core.ui.LocalAppearance
 import app.exmusic.core.ui.utils.roundedShape
@@ -25,6 +27,7 @@ fun BigIconButton(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
     backgroundColor: Color = LocalAppearance.current.colorPalette.background2,
+    borderColor: Color = Color.Transparent,
     contentColor: Color = LocalAppearance.current.colorPalette.text,
     shape: Shape = 32.dp.roundedShape
 ) = Box(
@@ -34,6 +37,7 @@ fun BigIconButton(
             if (onClick == null) it else it.clickable(onClick = onClick)
         }
         .background(backgroundColor)
+        .border(width = Dp.Hairline, color = borderColor, shape = shape)
         .height(64.dp),
     contentAlignment = Alignment.Center
 ) {
