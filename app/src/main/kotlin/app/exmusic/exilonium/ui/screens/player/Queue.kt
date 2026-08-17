@@ -1,6 +1,7 @@
 package app.exmusic.exilonium.ui.screens.player
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,6 +29,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -51,7 +54,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -148,7 +150,11 @@ fun Queue(
     var shouldBePlaying by remember { mutableStateOf(binder.player.shouldBePlaying) }
     var previousMediaId by remember { mutableStateOf(windows[mediaItemIndex].mediaItem.mediaId) }
 
-    val lazyListState = rememberLazyListState()
+    val lazyListState = rememberLazyListState(
+        // Start on the playing song. Scrolling there from an effect instead cost a second layout
+        // pass on the frame the sheet began expanding, which is the frame that could least afford it
+        initialFirstVisibleItemIndex = mediaItemIndex.coerceAtLeast(0)
+    )
     val reorderingState = rememberReorderingState(
         lazyListState = lazyListState,
         key = windows,
@@ -258,8 +264,11 @@ fun Queue(
             label = ""
         )
 
+        // Re-centres on reopen; the list state outlives the collapsed sheet, so it may be parked
+        // wherever it was left. A no-op on the first open, where the state already starts there.
         LaunchedEffect(Unit) {
-            lazyListState.scrollToItem(mediaItemIndex.coerceAtLeast(0))
+            val target = mediaItemIndex.coerceAtLeast(0)
+            if (lazyListState.firstVisibleItemIndex != target) lazyListState.scrollToItem(target)
         }
 
         Column {
@@ -273,119 +282,132 @@ fun Queue(
                     )
                     .weight(1f)
             ) {
-                LookaheadScope {
-                    LazyColumn(
-                        state = lazyListState,
-                        contentPadding = windowInsets
-                            .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
-                            .asPaddingValues(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.nestedScroll(scrollConnection)
-                    ) {
-                        itemsIndexed(
-                            items = windows,
-                            key = { _, window -> window.uid.hashCode() },
-                            contentType = { _, _ -> ContentType.Window }
-                        ) { i, window ->
-                            val isPlayingThisMediaItem = mediaItemIndex == window.firstPeriodIndex
+                LazyColumn(
+                    state = lazyListState,
+                    contentPadding = windowInsets
+                        .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
+                        .add(WindowInsets(top = 16.dp, bottom = 8.dp))
+                        .asPaddingValues(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.nestedScroll(scrollConnection)
+                ) {
+                    itemsIndexed(
+                        items = windows,
+                        key = { _, window -> window.uid.hashCode() },
+                        contentType = { _, _ -> ContentType.Window }
+                    ) { i, window ->
+                        val isPlayingThisMediaItem = mediaItemIndex == window.firstPeriodIndex
 
-                            SongItem(
-                                song = window.mediaItem,
-                                thumbnailSize = Dimensions.thumbnails.song,
-                                onThumbnailContent = {
-                                    musicBarsTransition.AnimatedVisibility(
-                                        visible = { it == window.firstPeriodIndex },
-                                        enter = fadeIn(tween(800)),
-                                        exit = fadeOut(tween(800))
+                        // The playing song is an inset, rounded slab instead of another flush row,
+                        // so the list has a shape to read rather than one uniform column of text
+                        val rowFill by animateColorAsState(
+                            targetValue = if (isPlayingThisMediaItem) colorPalette.playerControl
+                            else colorPalette.playerItem,
+                            label = ""
+                        )
+
+                        SongItem(
+                            song = window.mediaItem,
+                            thumbnailSize = Dimensions.thumbnails.song,
+                            onThumbnailContent = {
+                                musicBarsTransition.AnimatedVisibility(
+                                    visible = { it == window.firstPeriodIndex },
+                                    enter = fadeIn(tween(800)),
+                                    exit = fadeOut(tween(800))
+                                ) {
+                                    Box(
+                                        contentAlignment = Alignment.Center,
+                                        modifier = Modifier
+                                            .background(
+                                                color = Color.Black.copy(alpha = 0.25f),
+                                                shape = thumbnailShape
+                                            )
+                                            .size(Dimensions.thumbnails.song)
                                     ) {
-                                        Box(
-                                            contentAlignment = Alignment.Center,
-                                            modifier = Modifier
-                                                .background(
-                                                    color = Color.Black.copy(alpha = 0.25f),
-                                                    shape = thumbnailShape
-                                                )
-                                                .size(Dimensions.thumbnails.song)
-                                        ) {
-                                            if (shouldBePlaying) MusicBars(
-                                                color = colorPalette.onOverlay,
-                                                modifier = Modifier.height(24.dp)
-                                            ) else Image(
-                                                painter = painterResource(R.drawable.play),
-                                                contentDescription = null,
-                                                colorFilter = ColorFilter.tint(colorPalette.onOverlay),
-                                                modifier = Modifier.size(24.dp)
+                                        if (shouldBePlaying) MusicBars(
+                                            color = colorPalette.onOverlay,
+                                            modifier = Modifier.height(24.dp)
+                                        ) else Image(
+                                            painter = painterResource(R.drawable.play),
+                                            contentDescription = null,
+                                            colorFilter = ColorFilter.tint(colorPalette.onOverlay),
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                    }
+                                }
+                            },
+                            trailingContent = {
+                                ReorderHandle(
+                                    reorderingState = reorderingState,
+                                    index = i
+                                )
+                            },
+                            modifier = Modifier
+                                .animateItemPlacement(reorderingState)
+                                .draggedItem(
+                                    reorderingState = reorderingState,
+                                    index = i
+                                )
+                                .padding(horizontal = 8.dp)
+                                .clip(thumbnailShape)
+                                .background(color = rowFill, shape = thumbnailShape)
+                                .combinedClickable(
+                                    onLongClick = {
+                                        menuState.display {
+                                            QueuedMediaItemMenu(
+                                                mediaItem = window.mediaItem,
+                                                indexInQueue = if (isPlayingThisMediaItem) null
+                                                else window.firstPeriodIndex,
+                                                onDismiss = menuState::hide
                                             )
                                         }
-                                    }
-                                },
-                                trailingContent = {
-                                    ReorderHandle(
-                                        reorderingState = reorderingState,
-                                        index = i
-                                    )
-                                },
-                                modifier = Modifier
-                                    .combinedClickable(
-                                        onLongClick = {
-                                            menuState.display {
-                                                QueuedMediaItemMenu(
-                                                    mediaItem = window.mediaItem,
-                                                    indexInQueue = if (isPlayingThisMediaItem) null
-                                                    else window.firstPeriodIndex,
-                                                    onDismiss = menuState::hide
-                                                )
-                                            }
-                                        },
-                                        onClick = {
-                                            if (isPlayingThisMediaItem) {
-                                                if (shouldBePlaying) binder.player.pause() else binder.player.play()
-                                            } else {
-                                                binder.player.seekToDefaultPosition(window.firstPeriodIndex)
-                                                binder.player.playWhenReady = true
-                                            }
-                                        }
-                                    )
-                                    .animateItemPlacement(reorderingState)
-                                    .draggedItem(
-                                        reorderingState = reorderingState,
-                                        index = i
-                                    )
-                                    .background(colorPalette.playerItem)
-                                    .let {
-                                        if (PlayerPreferences.horizontalSwipeToRemoveItem && !isPlayingThisMediaItem)
-                                            it.swipeToClose(
-                                                key = windows,
-                                                delay = 100.milliseconds,
-                                                requireUnconsumed = true
-                                            ) {
-                                                binder.player.removeMediaItem(window.firstPeriodIndex)
-                                            }
-                                        else it
                                     },
-                                clip = !reorderingState.isDragging,
-                                hideExplicit = !isPlayingThisMediaItem && AppearancePreferences.hideExplicit
-                            )
-                        }
+                                    onClick = {
+                                        if (isPlayingThisMediaItem) {
+                                            if (shouldBePlaying) binder.player.pause() else binder.player.play()
+                                        } else {
+                                            binder.player.seekToDefaultPosition(window.firstPeriodIndex)
+                                            binder.player.playWhenReady = true
+                                        }
+                                    }
+                                )
+                                .let {
+                                    if (PlayerPreferences.horizontalSwipeToRemoveItem && !isPlayingThisMediaItem)
+                                        it.swipeToClose(
+                                            key = windows,
+                                            delay = 100.milliseconds,
+                                            requireUnconsumed = true
+                                        ) {
+                                            binder.player.removeMediaItem(window.firstPeriodIndex)
+                                        }
+                                    else it
+                                },
+                            clip = !reorderingState.isDragging,
+                            hideExplicit = !isPlayingThisMediaItem && AppearancePreferences.hideExplicit
+                        )
+                    }
 
-                        item(
-                            key = "divider",
-                            contentType = { ContentType.Divider }
-                        ) {
-                            if (visibleSuggestions.isNotEmpty()) HorizontalDivider(
-                                modifier = Modifier.padding(start = 28.dp + Dimensions.thumbnails.song)
-                            )
-                        }
+                    item(
+                        key = "divider",
+                        contentType = { ContentType.Divider }
+                    ) {
+                        if (visibleSuggestions.isNotEmpty()) HorizontalDivider(
+                            modifier = Modifier.padding(start = 36.dp + Dimensions.thumbnails.song)
+                        )
+                    }
 
-                        items(
-                            items = visibleSuggestions,
-                            key = { "suggestion_${it.mediaId}" },
-                            contentType = { ContentType.Suggestion }
-                        ) {
-                            SongItem(
-                                song = it,
-                                thumbnailSize = Dimensions.thumbnails.song,
-                                modifier = Modifier.clickable {
+                    items(
+                        items = visibleSuggestions,
+                        key = { "suggestion_${it.mediaId}" },
+                        contentType = { ContentType.Suggestion }
+                    ) {
+                        SongItem(
+                            song = it,
+                            thumbnailSize = Dimensions.thumbnails.song,
+                            modifier = Modifier
+                                .padding(horizontal = 8.dp)
+                                .clip(thumbnailShape)
+                                .clickable {
                                     menuState.display {
                                         BaseMediaItemMenu(
                                             onDismiss = { menuState.hide() },
@@ -395,52 +417,64 @@ fun Queue(
                                         )
                                     }
                                 },
-                                trailingContent = {
-                                    Row(
-                                        horizontalArrangement = Arrangement.spacedBy(
-                                            space = 12.dp,
-                                            alignment = Alignment.End
-                                        )
-                                    ) {
-                                        IconButton(
-                                            icon = R.drawable.play_skip_forward,
-                                            color = colorPalette.text,
-                                            onClick = {
-                                                binder.player.addNext(it)
-                                            },
-                                            modifier = Modifier.size(18.dp)
-                                        )
-                                        IconButton(
-                                            icon = R.drawable.enqueue,
-                                            color = colorPalette.text,
-                                            onClick = {
-                                                binder.player.enqueue(it)
-                                            },
-                                            modifier = Modifier.size(18.dp)
-                                        )
-                                    }
+                            trailingContent = {
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(
+                                        space = 12.dp,
+                                        alignment = Alignment.End
+                                    )
+                                ) {
+                                    IconButton(
+                                        icon = R.drawable.play_skip_forward,
+                                        color = colorPalette.text,
+                                        onClick = {
+                                            binder.player.addNext(it)
+                                        },
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    IconButton(
+                                        icon = R.drawable.enqueue,
+                                        color = colorPalette.text,
+                                        onClick = {
+                                            binder.player.enqueue(it)
+                                        },
+                                        modifier = Modifier.size(18.dp)
+                                    )
                                 }
-                            )
-                        }
+                            }
+                        )
+                    }
 
-                        item(
-                            key = "loading",
-                            contentType = { ContentType.Placeholder }
-                        ) {
-                            if (binder.isLoadingRadio || suggestions == null)
-                                Column(modifier = Modifier.shimmer()) {
-                                    repeat(3) { index ->
-                                        SongItemPlaceholder(
-                                            thumbnailSize = Dimensions.thumbnails.song,
-                                            modifier = Modifier
-                                                .alpha(1f - index * 0.125f)
-                                                .fillMaxWidth()
-                                        )
-                                    }
+                    item(
+                        key = "loading",
+                        contentType = { ContentType.Placeholder }
+                    ) {
+                        if (binder.isLoadingRadio || suggestions == null)
+                            Column(modifier = Modifier.shimmer()) {
+                                repeat(3) { index ->
+                                    SongItemPlaceholder(
+                                        thumbnailSize = Dimensions.thumbnails.song,
+                                        modifier = Modifier
+                                            .alpha(1f - index * 0.125f)
+                                            .fillMaxWidth()
+                                    )
                                 }
-                        }
+                            }
                     }
                 }
+
+                // The queue is dragged shut as often as it is tapped shut, so say so
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .windowInsetsPadding(windowInsets.only(WindowInsetsSides.Top))
+                        .padding(top = 6.dp)
+                        .background(
+                            color = colorPalette.text.copy(alpha = 0.2f),
+                            shape = 2.dp.roundedShape
+                        )
+                        .size(width = 32.dp, height = 4.dp)
+                )
 
                 FloatingActionsContainerWithScrollToTop(
                     lazyListState = lazyListState,
@@ -460,7 +494,7 @@ fun Queue(
             Row(
                 modifier = Modifier
                     .clickable(onClick = layoutState::collapseSoft)
-                    .playerGlass(colorPalette = colorPalette, fill = colorPalette.playerBar)
+                    .playerGlass(colorPalette = colorPalette, fill = colorPalette.playerQueueBar)
                     .fillMaxWidth()
                     .padding(horizontal = 12.dp)
                     .padding(horizontalBottomPaddingValues)

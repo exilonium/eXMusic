@@ -18,6 +18,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -116,6 +117,9 @@ import kotlin.time.Duration.Companion.seconds
 
 private const val UPDATE_DELAY = 50L
 private const val MAX_UPDATE_DELAY = 500L
+
+// How long after a drag the lyrics stay where they were put before re-centering on the playing line
+private val AUTO_SCROLL_RESUME_DELAY = 4.seconds
 
 // How much a synchronized lyrics line shrinks while it is being pressed, so a tap is visible
 private const val PRESSED_LINE_SCALE = 0.94f
@@ -417,7 +421,22 @@ fun Lyrics(
                 // the line we just seeked to instead of waiting for the next poll
                 var seekTrigger by remember { mutableIntStateOf(0) }
 
-                LaunchedEffect(synchronizedLyrics, density, animatedHeight, seekTrigger) {
+                // Reading ahead means scrolling away from the playing line, so the automatic
+                // scrolling stands down while a drag is in progress and for a moment after it, then
+                // re-centers. Without the pause it would yank the list back mid-gesture.
+                val dragged by lazyListState.interactionSource.collectIsDraggedAsState()
+                var autoScroll by remember { mutableStateOf(true) }
+
+                LaunchedEffect(dragged) {
+                    if (dragged) autoScroll = false
+                    else if (!autoScroll) {
+                        delay(AUTO_SCROLL_RESUME_DELAY)
+                        autoScroll = true
+                    }
+                }
+
+                LaunchedEffect(synchronizedLyrics, density, animatedHeight, seekTrigger, autoScroll) {
+                    if (!autoScroll) return@LaunchedEffect
                     val currentSynchronizedLyrics = synchronizedLyrics ?: return@LaunchedEffect
                     val centerOffset = with(density) { (-animatedHeight / 3).roundToPx() }
 
@@ -449,7 +468,6 @@ fun Lyrics(
 
                 if (synchronizedLyrics != null) LazyColumn(
                     state = lazyListState,
-                    userScrollEnabled = false,
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                     modifier = Modifier
@@ -533,7 +551,10 @@ fun Lyrics(
         }
 
         if (showControls) {
-            Image(
+            // With no lyrics the overlay is a bare scrim, so a tap anywhere already dismisses it and
+            // an explicit close button is only clutter. It exists because tapping a synchronized
+            // line seeks instead of dismissing, which cannot happen when there are no lines.
+            if (!text.isNullOrBlank() && !error) Image(
                 painter = painterResource(R.drawable.close),
                 contentDescription = null,
                 colorFilter = ColorFilter.tint(colorPalette.onOverlay),

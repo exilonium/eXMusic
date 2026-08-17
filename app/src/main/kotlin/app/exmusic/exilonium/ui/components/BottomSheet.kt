@@ -39,6 +39,7 @@ import androidx.compose.ui.input.pointer.util.addPointerInputChange
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.coerceAtMost
@@ -59,7 +60,15 @@ fun BottomSheet(
     content: @Composable BoxScope.() -> Unit
 ) = Box(
     modifier = modifier
-        .offset(y = (state.expandedBound - state.value).coerceAtLeast(0.dp))
+        // Offset in the layout phase. Reading the animated value straight into `offset(y = ...)`
+        // read it during composition instead, so every frame of the slide recomposed this whole
+        // subtree - for the queue that means re-running the list on each frame of the expansion.
+        .offset {
+            IntOffset(
+                x = 0,
+                y = (state.expandedBound - state.value).coerceAtLeast(0.dp).roundToPx()
+            )
+        }
         .pointerInput(state) {
             val velocityTracker = VelocityTracker()
 
@@ -80,7 +89,7 @@ fun BottomSheet(
             )
         }
 ) {
-    if (state.value > state.collapsedBound) {
+    if (state.opened) {
         CallbackPredictiveBackHandler(
             enabled = !state.collapsing && backHandlerEnabled,
             onStart = { },
@@ -143,6 +152,12 @@ internal constructor(
 
     val dismissed by derivedStateOf { value == dismissedBound }
     val collapsed by derivedStateOf { value == collapsedBound }
+
+    /**
+     * Whether the sheet sits above its collapsed anchor. Derived, so observing it does not mean
+     * observing every frame of an ongoing animation.
+     */
+    val opened by derivedStateOf { value > collapsedBound }
     val expanded by derivedStateOf { value == expandedBound }
     val collapsing by derivedStateOf {
         animatable.targetValue == collapsedBound || animatable.targetValue == dismissedBound

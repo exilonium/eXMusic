@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,6 +37,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import androidx.palette.graphics.Palette
@@ -51,6 +54,14 @@ private const val PALETTE_THUMBNAIL_SIZE = 200
 private const val PALETTE_MAXIMUM_COLOR_COUNT = 16
 private const val NOISE_SIZE = 64
 private const val NOISE_ALPHA = 0.02f
+private val BLUR_RADIUS = 120.dp
+
+// A full cycle of the drift takes over half a minute, so at display rate consecutive frames differ
+// by a fraction of a pixel - each one paying for a fullscreen blur. Snapping the drivers to steps
+// this coarse is invisible under a 120dp blur and caps the redraws at roughly 36 per second, which
+// is what makes the aurora affordable to keep animating behind the player's sheets.
+private const val DRIFT_STEP = 0.002f
+private const val ROTATION_STEP = 0.25f
 
 private val blurSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 
@@ -126,7 +137,7 @@ fun AuroraBackground(
 
     val transition = rememberInfiniteTransition(label = "aurora")
 
-    val move1 by transition.animateFloat(
+    val move1 = transition.animateFloat(
         initialValue = 0.2f,
         targetValue = 0.8f,
         animationSpec = infiniteRepeatable(
@@ -134,8 +145,8 @@ fun AuroraBackground(
             repeatMode = RepeatMode.Reverse
         ),
         label = "move1"
-    )
-    val move2 by transition.animateFloat(
+    ).stepped(DRIFT_STEP)
+    val move2 = transition.animateFloat(
         initialValue = 0.1f,
         targetValue = 0.9f,
         animationSpec = infiniteRepeatable(
@@ -143,8 +154,8 @@ fun AuroraBackground(
             repeatMode = RepeatMode.Reverse
         ),
         label = "move2"
-    )
-    val move3 by transition.animateFloat(
+    ).stepped(DRIFT_STEP)
+    val move3 = transition.animateFloat(
         initialValue = 0.3f,
         targetValue = 0.7f,
         animationSpec = infiniteRepeatable(
@@ -152,8 +163,8 @@ fun AuroraBackground(
             repeatMode = RepeatMode.Reverse
         ),
         label = "move3"
-    )
-    val rotation by transition.animateFloat(
+    ).stepped(DRIFT_STEP)
+    val rotation = transition.animateFloat(
         initialValue = 0f,
         targetValue = 360f,
         animationSpec = infiniteRepeatable(
@@ -161,7 +172,18 @@ fun AuroraBackground(
             repeatMode = RepeatMode.Restart
         ),
         label = "rotation"
-    )
+    ).stepped(ROTATION_STEP)
+
+    // Built once: the layer block reruns on every step of the rotation, and rebuilding the blur
+    // there allocated a new RenderEffect each time
+    val density = LocalDensity.current
+    val blur = remember(density) {
+        if (blurSupported) with(density) {
+            RenderEffect
+                .createBlurEffect(BLUR_RADIUS.toPx(), BLUR_RADIUS.toPx(), Shader.TileMode.MIRROR)
+                .asComposeRenderEffect()
+        } else null
+    }
 
     Box(
         modifier = modifier
@@ -172,14 +194,8 @@ fun AuroraBackground(
             modifier = Modifier
                 .fillMaxSize()
                 .graphicsLayer {
-                    if (blurSupported) {
-                        val blurRadius = 120.dp.toPx()
-                        renderEffect = RenderEffect
-                            .createBlurEffect(blurRadius, blurRadius, Shader.TileMode.MIRROR)
-                            .asComposeRenderEffect()
-                    }
-
-                    rotationZ = rotation
+                    renderEffect = blur
+                    rotationZ = rotation.value
                     scaleX = 1.4f
                     scaleY = 1.4f
                 }
@@ -192,19 +208,19 @@ fun AuroraBackground(
             drawBlob(
                 color = color2,
                 radius = width * 0.6f,
-                center = Offset(x = width * move1, y = height * move2),
+                center = Offset(x = width * move1.value, y = height * move2.value),
                 alpha = 0.7f
             )
             drawBlob(
                 color = color3,
                 radius = width * 0.7f,
-                center = Offset(x = width * (1 - move2), y = height * move3),
+                center = Offset(x = width * (1 - move2.value), y = height * move3.value),
                 alpha = 0.6f
             )
             drawBlob(
                 color = color4,
                 radius = width * 0.5f,
-                center = Offset(x = width * move3, y = height * (1 - move1)),
+                center = Offset(x = width * move3.value, y = height * (1 - move1.value)),
                 alpha = 0.7f
             )
             drawBlob(
@@ -227,6 +243,19 @@ fun AuroraBackground(
                 .fillMaxSize()
                 .background(brush = rememberNoiseBrush(), alpha = NOISE_ALPHA)
         )
+    }
+}
+
+/**
+ * Rounds this to multiples of [step]. Kept as a [State] so it is read in the draw and layer phases:
+ * the aurora then only redraws when a blob has moved far enough to see, not on every frame.
+ */
+@Composable
+private fun State<Float>.stepped(step: Float): State<Float> {
+    val source = this
+
+    return remember(source, step) {
+        derivedStateOf { (source.value / step).toInt() * step }
     }
 }
 
