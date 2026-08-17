@@ -235,6 +235,7 @@
     <string name="restore">Restore</string>
     <string name="restore_warning">Existing data will be overwritten.\neXMusic will automatically close itself after restoring the database.</string>
     <string name="restore_description">Import the database from the external storage</string>
+    <string name="invalid_backup_file">Selected file isn\'t a valid eXMusic backup — nothing was changed</string>
     <string name="other">Other</string>
     <string name="android_auto">Android Auto</string>
     <string name="android_auto_description">Enable Android Auto support</string>

@@ -2,6 +2,8 @@ package app.exmusic.exilonium.ui.screens.settings
 
 import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
+import android.os.Handler
+import android.os.Looper
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -23,6 +25,7 @@ import app.exmusic.exilonium.ui.screens.Route
 import app.exmusic.exilonium.utils.intent
 import app.exmusic.exilonium.utils.toast
 import kotlinx.coroutines.flow.distinctUntilChanged
+import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
@@ -56,25 +59,46 @@ fun DatabaseSettings() = with(DataPreferences) {
         }
     }
 
+    val invalidBackupMsg = stringResource(R.string.invalid_backup_file)
+
     val restoreLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri ->
         if (uri == null) return@rememberLauncherForActivityResult
 
         query {
-            Database.checkpoint()
-            Database.internal.close()
+            val mainHandler = Handler(Looper.getMainLooper())
+            val tempFile = File.createTempFile("restore", ".db", context.cacheDir)
 
-            with(context) {
-                applicationContext.contentResolver.openInputStream(uri)
-                    ?.use { inputStream ->
-                        FileOutputStream(Database.internal.path).use { outputStream ->
-                            inputStream.copyTo(outputStream)
-                        }
-                    }
+            val restored = runCatching {
+                context.applicationContext.contentResolver.openInputStream(uri)?.use { input ->
+                    FileOutputStream(tempFile).use { output -> input.copyTo(output) }
+                } ?: return@runCatching false
 
-                stopService(intent<PlayerService>())
+                val header = ByteArray(16)
+                val isSqlite = FileInputStream(tempFile).use { it.read(header) } == 16 &&
+                    header.decodeToString() == "SQLite format 3\u0000"
+                if (!isSqlite) return@runCatching false
+
+                Database.checkpoint()
+                Database.internal.close()
+
+                val dbPath = requireNotNull(Database.internal.path)
+                tempFile.copyTo(File(dbPath), overwrite = true)
+                File("$dbPath-wal").delete()
+                File("$dbPath-shm").delete()
+
+                true
+            }.getOrDefault(false)
+
+            tempFile.delete()
+
+            if (!restored) {
+                mainHandler.post { context.toast(invalidBackupMsg) }
+                return@query
             }
+
+            with(context) { stopService(intent<PlayerService>()) }
 
             exitProcess(0)
         }
