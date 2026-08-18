@@ -23,4 +23,10 @@ data class MusicTwoRowItemRenderer(
     val isArtist: Boolean
         get() = navigationEndpoint?.browseEndpoint?.browseEndpointContextSupportedConfigs
             ?.browseEndpointContextMusicConfig?.pageType == "MUSIC_PAGE_TYPE_ARTIST"
+
+    /**
+     * A song shows up in a carousel with no browse id at all: tapping it plays rather than opens,
+     * so what it carries is a watch endpoint.
+     */
+    val isSong get() = navigationEndpoint?.watchEndpoint?.videoId != null
 }

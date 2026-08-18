@@ -366,6 +366,22 @@ object Innertube {
         )
     }
 
+    /**
+     * A page made of titled shelves, the way YouTube Music lays out its home feed and its charts.
+     * Each shelf holds whatever kinds of item YouTube chose to put there, so they are not split by
+     * kind the way a search page is.
+     */
+    data class FeedPage(
+        val sections: List<Shelf>,
+        val continuation: String?
+    ) {
+        data class Shelf(
+            val title: String?,
+            val strapline: String?,
+            val items: List<Item>
+        )
+    }
+
     data class Mood(
         val title: String,
         val items: List<Item>
