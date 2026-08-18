@@ -26,20 +26,22 @@ private suspend fun Innertube.tryContexts(
         logger.info("Trying ${context.client.clientName} ${context.client.clientVersion} ${context.client.platform}")
         val cpn = generateNonceSuspend(16)
         runCatchingCancellable {
-            client.post(if (context.client.music) PLAYER_MUSIC else PLAYER) {
-                setBody(
-                    body.copy(
-                        context = context,
-                        cpn = cpn
+            withRetry {
+                client.post(if (context.client.music) PLAYER_MUSIC else PLAYER) {
+                    setBody(
+                        body.copy(
+                            context = context,
+                            cpn = cpn
+                        )
                     )
-                )
 
-                context.apply()
+                    context.apply()
 
-                parameter("t", generateNonceSuspend(12))
-                header("X-Goog-Api-Format-Version", "2")
-                parameter("id", body.videoId)
-            }.body<PlayerResponse>().also { logger.info("Got $it") }
+                    parameter("t", generateNonceSuspend(12))
+                    header("X-Goog-Api-Format-Version", "2")
+                    parameter("id", body.videoId)
+                }.body<PlayerResponse>().also { logger.info("Got $it") }
+            }
         }
             ?.getOrNull()
             ?.takeIf { !checkIsValid || it.isValid }

@@ -42,30 +42,12 @@ data class Context(
         @Transient
         val music: Boolean = false
     ) {
-        @Serializable
-        data class Configuration(
-            @SerialName("PLAYER_JS_URL")
-            val playerUrl: String? = null,
-            @SerialName("WEB_PLAYER_CONTEXT_CONFIGS")
-            val contextConfigs: Map<String, ContextConfig>? = null,
-            @SerialName("VISITOR_DATA")
-            val visitorData: String? = null,
-            @SerialName("INNERTUBE_CONTEXT")
-            val innertubeContext: Context
-        ) {
-            @Serializable
-            data class ContextConfig(
-                val jsUrl: String? = null
-            )
-        }
-
-        @Transient
-        private var ytcfg: Configuration? = null
-
-        val visitorData
-            get() = ytcfg?.visitorData
-                ?: ytcfg?.innertubeContext?.client?.defaultVisitorData
-                ?: defaultVisitorData
+        /**
+         * Names one client exactly. Two clients can share a name and differ only in version — the
+         * VR ones do — and they succeed and fail independently, so the version belongs in anything
+         * that remembers which client did what.
+         */
+        val id get() = "$clientName/$clientVersion"
 
         context(builder: HttpMessageBuilder)
         fun apply() = with(builder) {
@@ -77,12 +59,30 @@ data class Context(
                 set("X-YouTube-Client-Name", clientId.toString())
                 set("X-YouTube-Client-Version", clientVersion)
                 apiKey?.let { set("X-Goog-Api-Key", it) }
-                set("X-Goog-Visitor-Id", visitorData)
+                set("X-Goog-Visitor-Id", defaultVisitorData)
             }
 
             parameters {
                 apiKey?.let { set("key", it) }
             }
+        }
+
+        /**
+         * The headers the CDN expects from whoever asks for a stream this client resolved. It ties
+         * a URL to the client that asked for it and truncates the response for a mismatched caller.
+         */
+        val streamHeaders: Map<String, String>
+            get() = buildMap {
+                userAgent?.let { put("User-Agent", it) }
+
+                val origin = if (music) MUSIC_ORIGIN else ORIGIN
+                put("Origin", origin)
+                put("Referer", "$origin/")
+            }
+
+        private companion object {
+            const val ORIGIN = "https://www.youtube.com"
+            const val MUSIC_ORIGIN = "https://music.youtube.com"
         }
     }
 
@@ -129,7 +129,7 @@ data class Context(
             client = Client(
                 clientId = 67,
                 clientName = "WEB_REMIX",
-                clientVersion = "1.20220606.03.00",
+                clientVersion = "1.20260114.03.00",
                 platform = "DESKTOP",
                 userAgent = UserAgents.DESKTOP,
                 referer = "https://music.youtube.com/",
@@ -141,14 +141,13 @@ data class Context(
             client = Client(
                 clientId = 5,
                 clientName = "IOS",
-                clientVersion = "20.03.02",
+                clientVersion = "21.03.1",
                 deviceMake = "Apple",
                 deviceModel = "iPhone16,2",
                 osName = "iPhone",
-                osVersion = "18.2.1.22C161",
+                osVersion = "18.2.22C152",
                 acceptHeader = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
                 userAgent = UserAgents.IOS,
-                apiKey = "AIzaSyB-63vPrdThhKuerbB2N_l7Kwwcxj6yUAc",
                 music = false
             )
         )
@@ -162,7 +161,6 @@ data class Context(
                 osVersion = "11",
                 androidSdkVersion = 30,
                 userAgent = UserAgents.ANDROID_MUSIC,
-                apiKey = "AIzaSyAOghZGza2MQSZkY_zfZ370N-PUdXEo8AI",
                 music = true
             )
         )
@@ -171,7 +169,7 @@ data class Context(
             client = Client(
                 clientId = 7,
                 clientName = "TVHTML5",
-                clientVersion = "7.20241201.18.00",
+                clientVersion = "7.20260114.12.00",
                 platform = "TV",
                 userAgent = UserAgents.TV,
                 referer = "https://www.youtube.com/",
@@ -242,6 +240,11 @@ data class Context(
          * picking it means about half a minute of audio and then a dead stop that re-resolving
          * cannot fix. TV no longer returns a playable URL at all. Both only ever shadow a client
          * that would have worked, or the yt-dlp fallback.
+         *
+         * WEB_REMIX is absent for a different reason: with a signature timestamp it answers where
+         * these are refused, but only with ciphered URLs, and nothing available today can solve
+         * that signature — NewPipe's own master cannot parse the current player, and yt-dlp's web
+         * client returns no audio formats either.
          */
         val PlaybackContexts
             get() = listOf(
@@ -265,11 +268,12 @@ val validCountryCodes =
 @Suppress("MaximumLineLength")
 object UserAgents {
     const val DESKTOP =
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36"
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:141.0) Gecko/20100101 Firefox/141.0"
     const val ANDROID_MUSIC =
         "com.google.android.apps.youtube.music/7.27.52 (Linux; U; Android 11) gzip"
-    const val IOS = "com.google.ios.youtube/20.03.02 (iPhone16,2; U; CPU iOS 18_2_1 like Mac OS X;)"
-    const val TV = "Mozilla/5.0 (ChromiumStylePlatform) Cobalt/Version"
+    const val IOS = "com.google.ios.youtube/21.03.1 (iPhone16,2; U; CPU iOS 18_2 like Mac OS X;)"
+    const val TV =
+        "Mozilla/5.0 (ChromiumStylePlatform) Cobalt/25.lts.30.1034943-gold (unlike Gecko), Unknown_TV_Unknown_0/Unknown (Unknown, Unknown)"
     const val VISION_OS =
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15"
     const val ANDROID_VR =

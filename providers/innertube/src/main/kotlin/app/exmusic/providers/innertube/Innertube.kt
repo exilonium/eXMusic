@@ -6,8 +6,11 @@ import app.exmusic.providers.innertube.models.Runs
 import app.exmusic.providers.innertube.models.Thumbnail
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.HttpRequestTimeoutException
 import io.ktor.client.plugins.HttpResponseValidator
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.ResponseException
+import io.ktor.client.plugins.ServerResponseException
 import io.ktor.client.plugins.api.createClientPlugin
 import io.ktor.client.plugins.compression.ContentEncoding
 import io.ktor.client.plugins.compression.brotli
@@ -24,10 +27,18 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.parameters
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.delay
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import okhttp3.ConnectionPool
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.io.IOException
+import java.util.concurrent.TimeUnit
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 internal val json = Json {
     ignoreUnknownKeys = true
@@ -61,6 +72,19 @@ object Innertube {
         }
     }
 
+    private val REQUEST_TIMEOUT = 30.seconds
+    private val CONNECT_TIMEOUT = 15.seconds
+    private val SOCKET_TIMEOUT = 30.seconds
+
+    private const val IDLE_CONNECTIONS = 10
+    private val KEEP_ALIVE = 5.minutes
+
+    /**
+     * Short on purpose: the probe stands between the user and the first note, so a CDN that will
+     * not answer quickly is better treated as unknown than waited on.
+     */
+    private val PROBE_TIMEOUT = 5.seconds
+
     val logger: Logger = LoggerFactory.getLogger(Innertube::class.java)
     val baseClient = HttpClient(OkHttp) {
         expectSuccess = true
@@ -70,6 +94,24 @@ object Innertube {
                 val ex = cause as? ResponseException ?: return@handleResponseExceptionWithRequest
                 val code = ex.response.status.value
                 if (code !in (100..<600)) throw InvalidHttpCodeException(code)
+            }
+        }
+
+        // Without a deadline a request that stalls stalls playback with it: the resolver waits on
+        // the socket rather than moving on to the next client
+        install(HttpTimeout) {
+            requestTimeoutMillis = REQUEST_TIMEOUT.inWholeMilliseconds
+            connectTimeoutMillis = CONNECT_TIMEOUT.inWholeMilliseconds
+            socketTimeoutMillis = SOCKET_TIMEOUT.inWholeMilliseconds
+        }
+
+        engine {
+            config {
+                retryOnConnectionFailure(true)
+
+                // Resolving a song is several requests to the same two hosts in a row, and holding
+                // the sockets open across them saves a handshake each time
+                connectionPool(ConnectionPool(IDLE_CONNECTIONS, KEEP_ALIVE.inWholeMinutes, TimeUnit.MINUTES))
             }
         }
 
@@ -105,6 +147,53 @@ object Innertube {
             }
         }
     }
+
+    /**
+     * Asks the CDN, rather than YouTube, whether a resolved stream URL actually serves bytes. It
+     * carries none of the API plumbing: the googlevideo hosts want the headers of the client the
+     * URL was minted for, and nothing else.
+     */
+    internal val probeClient = HttpClient(OkHttp) {
+        expectSuccess = false
+
+        install(HttpTimeout) {
+            requestTimeoutMillis = PROBE_TIMEOUT.inWholeMilliseconds
+            connectTimeoutMillis = PROBE_TIMEOUT.inWholeMilliseconds
+            socketTimeoutMillis = PROBE_TIMEOUT.inWholeMilliseconds
+        }
+    }
+
+    /**
+     * Runs [block], asking again when it fails in a way that asking again could fix: a dropped
+     * connection, a timeout, or a server error. A refusal YouTube meant — anything in the 4xx range
+     * — is passed straight on, as is a cancellation.
+     */
+    internal suspend fun <T> withRetry(
+        attempts: Int = 3,
+        initialDelay: Duration = 300.milliseconds,
+        factor: Int = 2,
+        block: suspend () -> T
+    ): T {
+        var delay = initialDelay
+
+        repeat(attempts - 1) {
+            val attempt = runCatching { block() }
+            val ex = attempt.exceptionOrNull() ?: return attempt.getOrThrow()
+
+            if (!ex.isTransient) throw ex
+
+            logger.info("Retrying after a transient failure: ${ex.message}")
+            delay(delay)
+            delay *= factor
+        }
+
+        return block()
+    }
+
+    private val Throwable.isTransient
+        get() = this is IOException ||
+            this is HttpRequestTimeoutException ||
+            this is ServerResponseException
 
     private const val API_KEY = "AIzaSyC9XL3ZjWddXya6X74dJoCTL-WEYFDNX30"
 

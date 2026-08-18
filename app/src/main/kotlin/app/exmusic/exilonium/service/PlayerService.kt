@@ -125,10 +125,13 @@ import app.exmusic.providers.innertube.InvalidHttpCodeException
 import app.exmusic.providers.innertube.models.NavigationEndpoint
 import app.exmusic.providers.innertube.models.bodies.PlayerBody
 import app.exmusic.providers.innertube.models.bodies.SearchBody
+import app.exmusic.providers.innertube.requests.BotGate
 import app.exmusic.providers.innertube.requests.LoginRequiredPlaybackException
 import app.exmusic.providers.innertube.requests.NoPlayableFormatException
 import app.exmusic.providers.innertube.requests.PlaybackStatusException
 import app.exmusic.providers.innertube.requests.UnplayablePlaybackException
+import app.exmusic.providers.innertube.requests.isBotCheck
+import app.exmusic.providers.innertube.requests.markPlaybackFailure
 import app.exmusic.providers.innertube.requests.playback
 import app.exmusic.providers.innertube.requests.player
 import app.exmusic.providers.innertube.requests.searchPage
@@ -187,7 +190,12 @@ private const val TAG = "PlayerService"
  */
 data class StreamMeta(
     val contentLength: Long?,
-    val headers: Map<String, String> = emptyMap()
+    val headers: Map<String, String> = emptyMap(),
+    /**
+     * Which YouTube client handed out the URL, so that one refused later can be skipped when the
+     * song is resolved again.
+     */
+    val clientKey: String? = null
 )
 
 /**
@@ -203,7 +211,8 @@ private data class ResolvedStream(
     val lastModified: Long?,
     val approxDurationMs: Long?,
     val validUntil: Instant?,
-    val headers: Map<String, String> = emptyMap()
+    val headers: Map<String, String> = emptyMap(),
+    val clientKey: String? = null
 )
 
 @get:OptIn(UnstableApi::class)
@@ -1543,6 +1552,10 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         ): ResolvedStream {
             var youTubeMusicError: Throwable? = null
 
+            // Read before resolving: the attempt below raises the gate itself, and what matters
+            // here is whether an earlier song had already run into it
+            val wasGated = BotGate.isUp
+
             if (source.useYouTubeMusic) runCatching {
                 resolveFromYouTubeMusic(mediaId)
             }.onSuccess { return it }.onFailure {
@@ -1551,6 +1564,11 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             }
 
             if (!source.useYouTubeDl) throw youTubeMusicError ?: UnplayableException()
+
+            // yt-dlp asks the same endpoint the same way, so while the bot check is up it spends
+            // several seconds of Python to arrive at the same refusal. Once one song has proved the
+            // gate is closed, the rest of the queue skips straight past it.
+            youTubeMusicError?.let { if (wasGated && it.isBotCheck) throw it }
 
             return runCatching {
                 resolveFromYouTubeDl(mediaId)
@@ -1585,7 +1603,8 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                 validUntil = playback.expiresInSeconds
                     ?.seconds
                     ?.let { Clock.System.now() + it },
-                headers = playback.streamHeaders
+                headers = playback.streamHeaders,
+                clientKey = playback.clientKey
             )
         }
 
@@ -1719,7 +1738,8 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
                     val meta = StreamMeta(
                         contentLength = stream.contentLength,
-                        headers = stream.headers
+                        headers = stream.headers,
+                        clientKey = stream.clientKey
                     )
 
                     uriCache.push(
@@ -1743,12 +1763,25 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             .retryIf(
                 maxRetries = 1,
                 printStackTrace = true
-            ) { ex ->
+            ) { dataSpec, ex ->
                 val isForbidden = ex.findCause<InvalidResponseCodeException>()?.responseCode == 403 ||
                     ex.findCause<ClientRequestException>()?.response?.status?.value == 403 ||
                     ex.findCause<InvalidHttpCodeException>() != null
 
-                if (isForbidden) uriCache.clear()
+                if (isForbidden) {
+                    // Blaming the client that produced the URL sends the retry to a different one,
+                    // where clearing the cache alone would resolve the same dead stream again
+                    dataSpec.key
+                        ?.removePrefix("https://youtube.com/watch?v=")
+                        ?.let { mediaId ->
+                            uriCache[mediaId]?.meta?.clientKey?.let {
+                                Innertube.markPlaybackFailure(videoId = mediaId, clientKey = it)
+                            }
+                        }
+
+                    uriCache.clear()
+                }
+
                 isForbidden
             }
             .handleRangeErrors()

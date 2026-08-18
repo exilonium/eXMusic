@@ -55,9 +55,15 @@ data class PlayerResponse(
                 ?.filter { it.url != null }
                 ?.bestAudioFormat
 
+        /**
+         * Opus at 160k first, AAC at 128k second, and only then whatever is loudest in bits: the
+         * two named itags are the ones YouTube ships for music, and asking for them by name keeps
+         * the choice from turning on where they happen to sit in the list.
+         */
         private val List<AdaptiveFormat>.bestAudioFormat: AdaptiveFormat?
             get() = filter { it.isAudio }.ifEmpty { this }.let { formats ->
-                formats.findLast { it.itag == 251 || it.itag == 140 }
+                formats.firstOrNull { it.itag == OPUS_ITAG }
+                    ?: formats.firstOrNull { it.itag == AAC_ITAG }
                     ?: formats.maxByOrNull { it.bitrate ?: 0L }
             }
 
@@ -77,6 +83,11 @@ data class PlayerResponse(
             val signatureCipher: String?
         ) {
             val isAudio get() = mimeType.startsWith("audio/")
+        }
+
+        private companion object {
+            const val OPUS_ITAG = 251
+            const val AAC_ITAG = 140
         }
     }
 

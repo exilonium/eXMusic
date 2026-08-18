@@ -1,14 +1,21 @@
 package app.exmusic.providers.innertube.requests
 
 import app.exmusic.providers.innertube.Innertube
+import app.exmusic.providers.innertube.PlayerJs
 import app.exmusic.providers.innertube.VisitorData
 import app.exmusic.providers.innertube.models.Context
 import app.exmusic.providers.innertube.models.PlayerResponse
 import app.exmusic.providers.innertube.models.bodies.PlayerBody
 import app.exmusic.providers.utils.runCatchingCancellable
+import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.statement.HttpResponse
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
+import java.util.concurrent.ConcurrentHashMap
+import kotlin.time.Duration.Companion.minutes
 
 /**
  * A directly playable stream, resolved straight from the YouTube Music API.
@@ -19,6 +26,11 @@ data class PlaybackData(
     val expiresInSeconds: Long?,
     val loudnessDb: Float?,
     val clientName: String,
+    /**
+     * Names the client exactly, version included. Hand it back to [markPlaybackFailure] if the
+     * stream turns out not to play.
+     */
+    val clientKey: String,
     val cpn: String?,
     /**
      * Must be sent when fetching [url]: the CDN ties a stream to the client that asked for it, and
@@ -27,15 +39,65 @@ data class PlaybackData(
     val streamHeaders: Map<String, String>
 )
 
-private val Context.streamHeaders: Map<String, String>
-    get() = buildMap {
-        client.userAgent?.let { put("User-Agent", it) }
+/**
+ * Which client last handed out a URL that turned out not to play, per video.
+ *
+ * A stream can be refused only once the player asks the CDN for it, by which time the client that
+ * resolved it is out of scope. Remembering the pairing for a while means the retry that follows
+ * starts at the next client instead of resolving the same dead URL again.
+ */
+private object RecentFailures {
+    private val TTL = 5.minutes
 
-        val origin =
-            if (client.music) "https://music.youtube.com" else "https://www.youtube.com"
-        put("Origin", origin)
-        put("Referer", "$origin/")
+    private val failedAt = ConcurrentHashMap<String, Long>()
+
+    private fun key(videoId: String, clientKey: String) = "$videoId/$clientKey"
+
+    fun mark(videoId: String, clientKey: String) {
+        failedAt[key(videoId, clientKey)] = System.nanoTime()
     }
+
+    fun isRecent(videoId: String, clientKey: String): Boolean {
+        val key = key(videoId, clientKey)
+        val at = failedAt[key] ?: return false
+
+        if (System.nanoTime() - at > TTL.inWholeNanoseconds) {
+            failedAt.remove(key, at)
+            return false
+        }
+
+        return true
+    }
+}
+
+/**
+ * Records that the stream the client named by [clientKey] resolved for [videoId] would not play, so
+ * the next resolution skips that client rather than handing back the same URL.
+ */
+fun Innertube.markPlaybackFailure(videoId: String, clientKey: String) {
+    logger.info("Client $clientKey produced an unplayable stream for $videoId")
+    RecentFailures.mark(videoId, clientKey)
+}
+
+/**
+ * Asks the CDN for the first two bytes of [url]. A client can answer with a URL the CDN then
+ * refuses, and finding that out here costs one short request, where finding it out in the player
+ * costs the user a song that will not start.
+ *
+ * Unknown counts as playable: a probe that times out says more about the network than the URL.
+ */
+private suspend fun Innertube.servesBytes(url: String, headers: Map<String, String>): Boolean =
+    runCatchingCancellable {
+        val response: HttpResponse = probeClient.get(url) {
+            headers.forEach { (name, value) -> header(name, value) }
+            header("Range", "bytes=0-1")
+        }
+
+        response.status == HttpStatusCode.PartialContent || response.status == HttpStatusCode.OK
+    }?.getOrElse {
+        logger.info("Could not probe a stream URL, assuming it plays: ${it.message}")
+        true
+    } ?: true
 
 /**
  * Resolves a playable audio stream by asking the player endpoint as a series of clients that hand
@@ -50,22 +112,65 @@ suspend fun Innertube.playback(
     contexts: List<Context> = Context.PlaybackContexts
 ): Result<PlaybackData>? = runCatchingCancellable {
     tryContexts(videoId, playlistId, contexts)
+        .onSuccess { BotGate.clear() }
         .recoverCatching { error ->
-            // Every client refusing the same way means YouTube rejected the visitor id rather than
-            // the video, and a new one is all that stands between here and a playable stream
             if (!error.isBotCheck) throw error
 
-            logger.info("Visitor id rejected as a bot, minting a new one and retrying $videoId")
-            VisitorData.invalidate()
+            BotGate.trip()
 
-            tryContexts(videoId, playlistId, contexts).getOrThrow()
+            // Rotating the visitor id is the only thing that changes the answer, so retrying
+            // without a new one just spends another round of requests on the same refusal
+            if (!VisitorData.invalidate()) throw error
+
+            logger.info("Visitor id rejected as a bot, minting a new one and retrying $videoId")
+
+            tryContexts(videoId, playlistId, contexts)
+                .onSuccess { BotGate.clear() }
+                .getOrThrow()
         }
         .getOrThrow()
 }
 
 /**
- * Asks each client in turn, giving up on the first one that resolves. Fails with the last client's
- * error.
+ * Whether YouTube is currently answering "confirm you're not a bot".
+ *
+ * The refusal is about the caller, not the song, so once one song has hit it the next few will too.
+ * Holding on to that for a short while keeps a queue of songs from turning one refusal into dozens
+ * of requests, which is what makes the check stay up rather than lift.
+ */
+object BotGate {
+    private val COOL_DOWN = 2.minutes
+
+    @Volatile
+    private var trippedAt: Long? = null
+
+    val isUp: Boolean
+        get() {
+            val at = trippedAt ?: return false
+
+            if (System.nanoTime() - at > COOL_DOWN.inWholeNanoseconds) {
+                trippedAt = null
+                return false
+            }
+
+            return true
+        }
+
+    internal fun trip() {
+        trippedAt = System.nanoTime()
+    }
+
+    internal fun clear() {
+        trippedAt = null
+    }
+}
+
+/**
+ * Asks each client in turn, giving up on the first one whose stream the CDN will serve. Fails with
+ * the last client's error.
+ *
+ * The last client is taken on trust: there is nothing left to fall back to, so a URL that might
+ * play beats none at all.
  */
 private suspend fun Innertube.tryContexts(
     videoId: String,
@@ -74,7 +179,16 @@ private suspend fun Innertube.tryContexts(
 ): Result<PlaybackData> {
     var lastError: Throwable = NoPlayableFormatException(videoId)
 
-    contexts.forEach { context ->
+    // Every client having failed recently says nothing about which one to pick, so the memo is
+    // dropped rather than allowed to rule out playback altogether
+    val worthTrying = contexts
+        .filterNot { RecentFailures.isRecent(videoId, it.client.id) }
+        .ifEmpty { contexts }
+        // While the bot check is up every client refuses, so asking all of them only deepens the
+        // hole. One is enough to find out whether it has lifted.
+        .let { if (BotGate.isUp) it.take(1) else it }
+
+    worthTrying.forEachIndexed { index, context ->
         currentCoroutineContext().ensureActive()
 
         val result = runCatchingCancellable {
@@ -85,7 +199,15 @@ private suspend fun Innertube.tryContexts(
             )
         } ?: throw CancellationException("Cancelled while resolving $videoId")
 
-        result.onSuccess { return result }.onFailure {
+        result.onSuccess { playback ->
+            val isLast = index == worthTrying.lastIndex
+
+            if (isLast || servesBytes(playback.url, playback.streamHeaders)) return result
+
+            logger.warn("Client ${context.client.id} resolved $videoId to a URL the CDN refused")
+            RecentFailures.mark(videoId, context.client.id)
+            lastError = UnservableStreamException(videoId, context.client.id)
+        }.onFailure {
             lastError = it
             logger.warn("Client ${context.client.clientName} could not resolve $videoId: ${it.message}")
         }
@@ -98,7 +220,7 @@ private suspend fun Innertube.tryContexts(
  * A bot check surfaces as either status, and its reason is localised, so a sign-in demand from a
  * client that never signs in is taken as one too.
  */
-private val Throwable.isBotCheck
+val Throwable.isBotCheck: Boolean
     get() = this is LoginRequiredPlaybackException ||
         (this is PlaybackResolutionException && message?.contains("not a bot", true) == true)
 
@@ -113,7 +235,12 @@ private suspend fun Innertube.resolve(
         body = PlayerBody(
             context = context,
             videoId = videoId,
-            playlistId = playlistId
+            playlistId = playlistId,
+            playbackContext = PlayerJs.signatureTimestamp()?.let {
+                PlayerBody.PlaybackContext(
+                    PlayerBody.PlaybackContext.ContentPlaybackContext(signatureTimestamp = it)
+                )
+            }
         ),
         checkIsValid = false,
         contexts = listOf(context)
@@ -132,6 +259,7 @@ private suspend fun Innertube.resolve(
     }
 
     val streamingData = response.streamingData ?: throw NoPlayableFormatException(videoId)
+
     val format = streamingData.highestQualityPlayableFormat
         ?: throw NoPlayableFormatException(videoId)
 
@@ -141,8 +269,9 @@ private suspend fun Innertube.resolve(
         expiresInSeconds = streamingData.expiresInSeconds,
         loudnessDb = response.playerConfig?.audioConfig?.normalizedLoudnessDb,
         clientName = context.client.clientName,
+        clientKey = context.client.id,
         cpn = response.cpn,
-        streamHeaders = context.streamHeaders
+        streamHeaders = context.client.streamHeaders
     )
 }
 
@@ -157,6 +286,9 @@ class NoPlayerResponseException(videoId: String) :
 
 class NoPlayableFormatException(videoId: String) :
     PlaybackResolutionException("No directly playable audio format for $videoId")
+
+class UnservableStreamException(videoId: String, clientKey: String) :
+    PlaybackResolutionException("$clientKey resolved $videoId to a URL the CDN would not serve")
 
 class VideoIdMismatchException(expected: String, actual: String) :
     PlaybackResolutionException("Expected video $expected, but got $actual")

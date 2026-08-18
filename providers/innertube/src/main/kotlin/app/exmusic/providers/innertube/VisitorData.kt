@@ -7,6 +7,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
+import kotlin.time.Duration.Companion.minutes
 
 /**
  * The visitor id that identifies this install to YouTube.
@@ -31,10 +32,23 @@ object VisitorData {
     /** Shortest a real visitor id could be; the ones YouTube hands out run to hundreds of chars. */
     private const val MIN_LENGTH = 20
 
+    /**
+     * How long a visitor id has to be in hand before it may be thrown away.
+     *
+     * A freshly minted id carries no history, so YouTube trusts it least; minting another one the
+     * moment it is refused reads as a caller rotating identities to get around a block, which is
+     * the behaviour the bot check is looking for. Riding out a refusal with the same id recovers,
+     * where churning through ids does not.
+     */
+    private val MIN_ROTATION_INTERVAL = 30.minutes
+
     private val mutex = Mutex()
 
     @Volatile
     private var current: String? = null
+
+    @Volatile
+    private var lastRotation: Long? = null
 
     /**
      * Handed every newly minted visitor id so the host app can persist it. An id that survives
@@ -69,11 +83,23 @@ object VisitorData {
     }
 
     /**
-     * Drops the current visitor id so the next [get] mints a new one. Call when YouTube refuses a
-     * request as coming from a bot.
+     * Drops the current visitor id so the next [get] mints a new one, unless the one in hand is too
+     * young to be worth replacing. Call when YouTube refuses a request as coming from a bot.
+     *
+     * Returns whether the id was actually dropped, so a caller can tell a retry that might now work
+     * from one that would repeat the same request with the same identity.
      */
-    fun invalidate() {
+    fun invalidate(): Boolean {
+        val last = lastRotation
+
+        if (last != null && System.nanoTime() - last < MIN_ROTATION_INTERVAL.inWholeNanoseconds) {
+            Innertube.logger.info("Keeping the visitor id: rotating again this soon reads as a bot")
+            return false
+        }
+
+        lastRotation = System.nanoTime()
         current = null
+        return true
     }
 
     private suspend fun mint(): String? = runCatching {

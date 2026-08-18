@@ -120,7 +120,7 @@ class RetryingDataSourceFactory(
     private val maxRetries: Int,
     private val printStackTrace: Boolean,
     private val exponential: Boolean,
-    private val predicate: (Throwable) -> Boolean
+    private val predicate: (DataSpec, Throwable) -> Boolean
 ) : DataSource.Factory {
     inner class Source(private val parent: DataSource) : DataSource by parent {
         override fun open(dataSpec: DataSpec): Long {
@@ -141,7 +141,7 @@ class RetryingDataSourceFactory(
                     // Counted as retries rather than attempts: asking for one retry has to leave
                     // room for a second call, or the only thing the policy does is sleep before
                     // rethrowing
-                    if (!predicate(ex)) {
+                    if (!predicate(dataSpec, ex)) {
                         Log.e(TAG, "Retry policy declined retry, throwing the last exception...")
                         throw ex
                     }
@@ -179,6 +179,17 @@ fun DataSource.Factory.retryIf(
     printStackTrace: Boolean = false,
     exponential: Boolean = true,
     predicate: (Throwable) -> Boolean
+): DataSource.Factory = retryIf(maxRetries, printStackTrace, exponential) { _, ex -> predicate(ex) }
+
+/**
+ * As [retryIf], but the decision also sees the spec that failed, so a caller can tell which song
+ * and which resolved URL the failure belongs to.
+ */
+fun DataSource.Factory.retryIf(
+    maxRetries: Int = 5,
+    printStackTrace: Boolean = false,
+    exponential: Boolean = true,
+    predicate: (DataSpec, Throwable) -> Boolean
 ): DataSource.Factory = RetryingDataSourceFactory(this, maxRetries, printStackTrace, exponential, predicate)
 
 val Cache.asDataSource: CacheDataSource.Factory get() = CacheDataSource.Factory().setCache(this)
