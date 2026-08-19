@@ -151,7 +151,7 @@
     <string name="view_album">アルバムを見る</string>
     <string name="view_playlist">プレイリストを見る</string>
     <string name="search_placeholder">キーワードを入力…</string>
-    <string name="format_version_credits">v%1$s by Huizengek &amp; vfsfitvnm</string>
+    <string name="format_version_credits">v%1$s by exilonium</string>
     <string name="social">知る</string>
     <string name="contact">つながる</string>
     <string name="github">GitHub</string>

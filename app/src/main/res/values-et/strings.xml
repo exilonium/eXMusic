@@ -152,7 +152,7 @@
     <string name="view_album">Vaata albumit</string>
     <string name="view_playlist">Vaata Esitusloendi</string>
     <string name="search_placeholder">Sisesta nimi</string>
-    <string name="format_version_credits">v%1$s autoriks Huizengek &amp; vfsfitvnm</string>
+    <string name="format_version_credits">v%1$s autoriks exilonium</string>
     <string name="social">Sotsiaalmeedia</string>
     <string name="contact">Kontakt</string>
     <string name="github">GitHub</string>
