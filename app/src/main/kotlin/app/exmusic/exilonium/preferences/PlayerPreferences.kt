@@ -43,7 +43,7 @@ object PlayerPreferences : GlobalPreferencesHolder() {
     var horizontalSwipeToClose by boolean(false)
     var horizontalSwipeToRemoveItem by boolean(false)
 
-    var playerLayout by enum(PlayerLayout.New)
+    var playerLayout by enum(PlayerLayout.Classic)
     var seekBarStyle by enum(SeekBarStyle.Wavy)
     var wavySeekBarQuality by enum(WavySeekBarQuality.Great)
     var showLike by boolean(false)
@@ -107,10 +107,7 @@ object PlayerPreferences : GlobalPreferencesHolder() {
     }
 
     @Suppress("unused")
-    enum class WavySeekBarQuality(
-        val quality: Float,
-        val displayName: @Composable () -> String
-    ) {
+    enum class WavySeekBarQuality(val quality: Float, val displayName: @Composable () -> String) {
         Poor(quality = 50f, displayName = { stringResource(R.string.seek_bar_quality_poor) }),
         Low(quality = 25f, displayName = { stringResource(R.string.seek_bar_quality_low) }),
         Medium(quality = 15f, displayName = { stringResource(R.string.seek_bar_quality_medium) }),
@@ -123,10 +120,7 @@ object PlayerPreferences : GlobalPreferencesHolder() {
     }
 
     @Suppress("unused")
-    enum class Reverb(
-        val preset: Short,
-        val displayName: @Composable () -> String
-    ) {
+    enum class Reverb(val preset: Short, val displayName: @Composable () -> String) {
         None(
             preset = PresetReverb.PRESET_NONE,
             displayName = { stringResource(R.string.none) }
