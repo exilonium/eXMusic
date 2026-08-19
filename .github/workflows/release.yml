@@ -56,12 +56,8 @@ jobs:
         run: |
           if [ -n "$ANDROID_KEYSTORE_BASE64" ]; then
             echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > release.keystore
-            cat << PROPERTIES > keystore.properties
-          storeFile=release.keystore
-          storePassword=$ANDROID_KEYSTORE_PASSWORD
-          keyAlias=$ANDROID_KEYSTORE_ALIAS
-          keyPassword=$ANDROID_KEYSTORE_PASSWORD
-          PROPERTIES
+            printf "storeFile=release.keystore\nstorePassword=%s\nkeyAlias=%s\nkeyPassword=%s\n" \
+              "$ANDROID_KEYSTORE_PASSWORD" "$ANDROID_KEYSTORE_ALIAS" "$ANDROID_KEYSTORE_PASSWORD" > keystore.properties
             echo "Keystore configured from repository secrets."
           else
             echo "No keystore secret found. Building unsigned release."
