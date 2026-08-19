@@ -567,7 +567,7 @@ fun Lyrics(
                     )
                     .padding(all = 8.dp)
                     .size(20.dp)
-                    .align(Alignment.TopEnd)
+                    .align(Alignment.BottomStart)
             )
 
             if (onOpenDialog != null) Image(
@@ -585,7 +585,7 @@ fun Lyrics(
                     )
                     .padding(all = 8.dp)
                     .size(20.dp)
-                    .align(Alignment.BottomStart)
+                    .align(Alignment.BottomEnd)
             )
 
             Image(
@@ -706,7 +706,7 @@ fun Lyrics(
                     )
                     .padding(all = 8.dp)
                     .size(20.dp)
-                    .align(Alignment.BottomEnd)
+                    .align(Alignment.TopEnd)
             )
         }
     }
