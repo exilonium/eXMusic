@@ -1,0 +1,103 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build & Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 25
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.14'
+
+      - name: Set up the Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          accept-android-sdk-licenses: true
+
+      - name: Install the NDK and CMake
+        run: sdkmanager --install "ndk;29.0.14206865" "cmake;4.1.2"
+
+      - name: Cache QuickJS source archive
+        uses: actions/cache@v6
+        with:
+          path: app/src/main/cpp/.quickjs_cache
+          key: quickjs-${{ hashFiles('app/src/main/cpp/CMakeLists.txt') }}
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Configure signing keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
+        run: |
+          if [ -n "$ANDROID_KEYSTORE_BASE64" ]; then
+            echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > release.keystore
+            cat << PROPERTIES > keystore.properties
+          storeFile=release.keystore
+          storePassword=$ANDROID_KEYSTORE_PASSWORD
+          keyAlias=$ANDROID_KEYSTORE_ALIAS
+          keyPassword=$ANDROID_KEYSTORE_PASSWORD
+          PROPERTIES
+            echo "Keystore configured from repository secrets."
+          else
+            echo "No keystore secret found. Building unsigned release."
+          fi
+
+      - name: Build release APKs
+        run: ./gradlew assembleRelease --stacktrace
+
+      - name: Prepare APKs
+        run: |
+          mkdir -p release_assets
+          for apk in app/build/outputs/apk/release/*.apk; do
+            cp "$apk" release_assets/
+          done
+          ls -la release_assets/
+
+      - name: Read changelog
+        run: |
+          VERSION_CODE=$(grep -oP 'versionCode\s*=\s*.*?(\d+)' app/build.gradle.kts | grep -oP '\d+' | tail -1)
+          CHANGELOG_FILE="fastlane/metadata/android/en-US/changelogs/${VERSION_CODE}.txt"
+          if [ -f "$CHANGELOG_FILE" ]; then
+            cat "$CHANGELOG_FILE" > release_notes.txt
+          else
+            echo "Release notes" > release_notes.txt
+          fi
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          if [ -z "$TAG" ] || [ "$TAG" = "main" ]; then
+            VERSION_NAME=$(grep -oP 'version\s*=\s*"\K[^"]+' build.gradle.kts)
+            TAG="v${VERSION_NAME}"
+          fi
+          gh release create "$TAG" release_assets/*.apk \
+            --title "$TAG" \
+            --notes-file release_notes.txt \
+            --latest

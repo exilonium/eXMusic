@@ -1,71 +1,64 @@
 <div align="center">
-    <img src="./app/src/main/ic_launcher-playstore.png" width="128" height="128" style="display: block; margin: 0 auto"/>
-    <h1>eXMusic</h1>
-    <p>An Android application for seamless music streaming</p>
+  <img src="./app/src/main/ic_launcher-playstore.png" width="128" height="128" alt="eXMusic icon" />
+  <h1>eXMusic</h1>
+  <p>An Android music player powered by YouTube Music.</p>
 </div>
 
 ---
 
-<p align="center">
-  <img src="./fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="30%" />
-  <img src="./fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="30%" />
-  <img src="./fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" width="30%" />
+## Screenshots
 
-  <img src="./fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" width="30%" />
-  <img src="./fastlane/metadata/android/en-US/images/phoneScreenshots/5.png" width="30%" />
-  <img src="./fastlane/metadata/android/en-US/images/phoneScreenshots/6.png" width="30%" />
-</p>
+<!-- Add your screenshots here -->
+
+---
+
+## What is eXMusic
+
+eXMusic is a fast, clean Android music player built on top of ViTune and ViMusic. It streams directly from YouTube Music with zero ads, supports background playback, and caches tracks locally so your music stays available offline.
+
+---
+
+## What we added
+
+- **Aurora theme.** Album artwork lights up the background with a soft, moving glow and frosted glass controls. You can keep the effect inside the player or spread the ambient glow across the entire app.
+- **Faster, lighter performance.** Color palette extraction runs in the background off the main thread, and background wakeups during playback were removed. The UI stays smooth while drawing less power and memory than other clients.
+- **Reliable playback.** Music starts quickly and keeps playing even if a stream drops or gets blocked. Smooth crossfade between tracks keeps the music going without awkward silence.
+- **Clickable synchronized lyrics.** Tap any line in time-synced lyrics to jump right to that part of the song. You can scroll through lyrics freely without the screen fighting you or snapping back.
+- **Home feed and charts.** Explore YouTube Music charts, trending releases, and mood playlists straight from the home screen instead of only seeing songs you already played.
+- **Instant search.** Results show up as you type into a single search bar, organized cleanly so you find artists, tracks, and albums faster.
+- **Clean look.** A refreshed icon and polished UI that fits right into modern Android, with full support for themed system icons.
+
+---
 
 ## Features
 
-- Play (almost) any song or video from YouTube Music
-- Play music from your device
-- Play songs in the background
-- Cache song for offline playback
-- Search for songs, albums, artists videos and playlists
-- Discover new songs by mood/genre
-- Import playlists from YouTube
-- Fetch, display and edit songs lyrics or synchronized lyrics
-- Manage your playlists locally or synchronize with the cloud
-- Highly customizable (dynamic theme, Material You, ...)
-- Normalize audio for the perfect listening experience
-- Listen from your car using Android Auto
-- Open YouTube/YouTube Music links (`watch`, `playlist`, `channel`, etc.) with eXMusic
-- Ridiculously lightweight APK
+- Play any song, album, or playlist from YouTube Music without ads
+- Background playback and Android Auto support
+- Cache songs for offline playback
+- Synchronized and plain text lyrics with search and time offset controls
+- Create local playlists or import them from YouTube
+- Audio normalization and skip silence
+- Open YouTube and YouTube Music links directly in the app
+- Lightweight installation with low memory usage
+
+---
 
 ## Installation
 
-[<img src="https://github.com/machiav3lli/oandbackupx/blob/034b226cea5c1b30eb4f6a6f313e4dadcbb0ece4/badge_github.png"
-alt="Get it on GitHub"
-height="80"
-align="center">](https://github.com/exilonium/exmusic/releases/latest)
+Download the latest APK from the [Releases](https://github.com/exilonium/exmusic/releases/latest) page, or install and track updates through [Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/exilonium/exmusic/).
 
-[<img src="https://github.com/ImranR98/Obtainium/blob/main/assets/graphics/badge_obtainium.png"
-alt="Get it on Obtainium"
-height="54"
-align="center">](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/exilonium/exmusic/)
-
-Every push is built by CI, so you can also grab an APK from the artifacts of a
-[build run](https://github.com/exilonium/exmusic/actions).
+---
 
 ## Acknowledgments
 
-- [**ViTune**](https://github.com/25huizengek1/ViTune): eXMusic is a fork of ViTune, which is itself
-  a fork of ViMusic.
-- [**Metrolist**](https://github.com/MetrolistGroup/Metrolist): the approach eXMusic uses to resolve
-  streams from YouTube Music directly.
+- [ViTune](https://github.com/25huizengek1/ViTune) and [ViMusic](https://github.com/vfsfitvnm/ViMusic), the original projects eXMusic builds upon.
+- [ZiMusic](https://github.com/Jigen-Ohtsusuki/ZiMusic), for the Aurora background inspiration and design.
+- [Metrolist](https://github.com/MetrolistGroup/Metrolist), for direct YouTube Music stream resolution concepts.
+- [YouTube-Internal-Clients](https://github.com/zerodytrash/YouTube-Internal-Clients), for reference material on client endpoints.
+- [ionicons](https://github.com/ionic-team/ionicons), for icons used throughout the interface.
 
-- [**YouTube-Internal-Clients**](https://github.com/zerodytrash/YouTube-Internal-Clients): A Python
-  script that discovers hidden YouTube API clients. Just a research project.
-- [**ionicons**](https://github.com/ionic-team/ionicons): Premium hand-crafted icons built by Ionic,
-  for Ionic apps and web apps everywhere.
-- [**Flaticon: Ilham Fitrotul Hayat**](https://www.flaticon.com/authors/ilham-fitrotul-hayat): the
-  app's logo uses a music note icon.
+---
 
 ## Disclaimer
 
-This project and its contents are not affiliated with, funded, authorized, endorsed by, or in any
-way associated with YouTube, Google LLC or any of its affiliates and subsidiaries.
-
-Any trademark, service mark, trade name, or other intellectual property rights used in this project
-are owned by the respective owners.
+This project is not affiliated with, funded by, or associated with YouTube or Google LLC. All trademarks and registered trademarks belong to their respective owners.

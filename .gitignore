@@ -20,3 +20,8 @@ jniLibs/
 /.direnv
 /result*
 /repl-result*
+
+*.keystore
+*.jks
+keystore.properties
+

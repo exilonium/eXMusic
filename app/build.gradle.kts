@@ -23,7 +23,7 @@ android {
         minSdk = 24
         targetSdk = 37
 
-        versionCode = System.getenv("ANDROID_VERSION_CODE")?.toIntOrNull() ?: 23
+        versionCode = System.getenv("ANDROID_VERSION_CODE")?.toIntOrNull() ?: 24
         versionName = project.version.toString()
 
         multiDexEnabled = true
@@ -56,6 +56,24 @@ android {
             keyAlias = System.getenv("ANDROID_NIGHTLY_KEYSTORE_ALIAS")
             keyPassword = System.getenv("ANDROID_NIGHTLY_KEYSTORE_PASSWORD")
         }
+
+        create("release") {
+            val keystorePropertiesFile = rootProject.file("keystore.properties")
+            if (keystorePropertiesFile.exists()) {
+                val properties = java.util.Properties().apply {
+                    keystorePropertiesFile.inputStream().use { load(it) }
+                }
+                storeFile = properties.getProperty("storeFile")?.let { rootProject.file(it) }
+                storePassword = properties.getProperty("storePassword")
+                keyAlias = properties.getProperty("keyAlias")
+                keyPassword = properties.getProperty("keyPassword")
+            } else if (System.getenv("ANDROID_KEYSTORE") != null) {
+                storeFile = System.getenv("ANDROID_KEYSTORE")?.let { file(it) }
+                storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("ANDROID_KEYSTORE_ALIAS")
+                keyPassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
@@ -70,6 +88,7 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             manifestPlaceholders["appName"] = "eXMusic"
+            signingConfig = signingConfigs.findByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
