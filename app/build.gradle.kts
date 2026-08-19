@@ -52,6 +52,9 @@ android {
         }
     }
 
+    val keystorePropertiesFile = rootProject.file("keystore.properties")
+    val hasReleaseKeystore = keystorePropertiesFile.exists() || System.getenv("ANDROID_KEYSTORE") != null
+
     signingConfigs {
         create("ci") {
             storeFile = System.getenv("ANDROID_NIGHTLY_KEYSTORE")?.let { file(it) }
@@ -60,20 +63,21 @@ android {
             keyPassword = System.getenv("ANDROID_NIGHTLY_KEYSTORE_PASSWORD")
         }
 
-        create("release") {
-            val keystorePropertiesFile = rootProject.file("keystore.properties")
-            if (keystorePropertiesFile.exists()) {
-                val properties = Properties()
-                FileInputStream(keystorePropertiesFile).use { properties.load(it) }
-                storeFile = properties.getProperty("storeFile")?.let { rootProject.file(it) }
-                storePassword = properties.getProperty("storePassword")
-                keyAlias = properties.getProperty("keyAlias")
-                keyPassword = properties.getProperty("keyPassword")
-            } else if (System.getenv("ANDROID_KEYSTORE") != null) {
-                storeFile = System.getenv("ANDROID_KEYSTORE")?.let { file(it) }
-                storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
-                keyAlias = System.getenv("ANDROID_KEYSTORE_ALIAS")
-                keyPassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
+        if (hasReleaseKeystore) {
+            create("release") {
+                if (keystorePropertiesFile.exists()) {
+                    val properties = Properties()
+                    FileInputStream(keystorePropertiesFile).use { properties.load(it) }
+                    storeFile = properties.getProperty("storeFile")?.let { rootProject.file(it) }
+                    storePassword = properties.getProperty("storePassword")
+                    keyAlias = properties.getProperty("keyAlias")
+                    keyPassword = properties.getProperty("keyPassword")
+                } else if (System.getenv("ANDROID_KEYSTORE") != null) {
+                    storeFile = System.getenv("ANDROID_KEYSTORE")?.let { file(it) }
+                    storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                    keyAlias = System.getenv("ANDROID_KEYSTORE_ALIAS")
+                    keyPassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                }
             }
         }
     }
@@ -90,7 +94,9 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             manifestPlaceholders["appName"] = "eXMusic"
-            signingConfig = signingConfigs.findByName("release")
+            if (hasReleaseKeystore) {
+                signingConfig = signingConfigs.findByName("release")
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
