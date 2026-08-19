@@ -96,4 +96,6 @@ jobs:
           gh release create "$TAG" release_assets/*.apk \
             --title "$TAG" \
             --notes-file release_notes.txt \
-            --latest
+            --latest \
+            --clobber || \
+          gh release upload "$TAG" release_assets/*.apk --clobber
