@@ -610,8 +610,12 @@ object Dependencies {
             .also { if (!it.canExecute()) it.setExecutable(true) }
     }
 
+    /**
+     * The visitor id goes along so yt-dlp asks YouTube as the same listener the rest of the app
+     * does, rather than as an unknown one that the bot check is quicker to refuse.
+     */
     fun runDownload(id: String): String = module
-        .callAttr("download", quickjsPath.absolutePath, id)
+        .callAttr("download", quickjsPath.absolutePath, id, VisitorData.peek())
         .toString()
 
     /**

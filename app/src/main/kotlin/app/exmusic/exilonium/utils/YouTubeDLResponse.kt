@@ -11,9 +11,18 @@ data class YouTubeDLResponse(
     val formatId: String? = null,
     val url: String? = null,
     val formats: List<Format>? = null,
+    /**
+     * Absent whenever yt-dlp only knows the size from the bitrate, so it cannot be required: a
+     * missing size has to read as "unknown length", not as a song that refused to play.
+     */
     @SerialName("filesize")
-    val fileSize: Long
+    val fileSize: Long? = null,
+    @SerialName("filesize_approx")
+    val fileSizeApprox: Long? = null
 ) {
+    /** Exact where yt-dlp knows it, estimated where it does not. */
+    val contentLength get() = fileSize ?: fileSizeApprox
+
     companion object {
         val json = Json {
             isLenient = true

@@ -1631,7 +1631,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
             return ResolvedStream(
                 uri = uri,
-                contentLength = info.fileSize,
+                contentLength = info.contentLength,
                 itag = info.formatId?.toIntOrNull(),
                 mimeType = youtubeFormat?.mimeType,
                 bitrate = format?.abr?.let { it * 1000 }?.toLong(),
