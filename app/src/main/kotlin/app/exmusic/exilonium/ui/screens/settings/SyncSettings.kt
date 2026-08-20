@@ -266,6 +266,8 @@ fun SyncSettings(
     SettingsCategoryScreen(title = stringResource(R.string.sync)) {
         SettingsDescription(text = stringResource(R.string.sync_description))
 
+        ImportSettingsGroup()
+
         SettingsGroup(title = stringResource(R.string.piped)) {
             SettingsEntry(
                 title = stringResource(R.string.add_account),
