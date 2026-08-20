@@ -51,7 +51,7 @@ Download the latest APK from the [Releases](https://github.com/exilonium/exmusic
 
 ## Acknowledgments
 
-- [ViTune](https://github.com/25huizengek1/ViTune) and [ViMusic](https://github.com/vfsfitvnm/ViMusic), the original projects eXMusic builds upon.
+- [ViTune](https://github.com/bartoostveen/ViTune) and [ViMusic](https://github.com/vfsfitvnm/ViMusic), the original projects eXMusic builds upon.
 - [ZiMusic](https://github.com/Jigen-Ohtsusuki/ZiMusic), for the Aurora background inspiration and design.
 - [Metrolist](https://github.com/MetrolistGroup/Metrolist), for direct YouTube Music stream resolution concepts.
 - [YouTube-Internal-Clients](https://github.com/zerodytrash/YouTube-Internal-Clients), for reference material on client endpoints.

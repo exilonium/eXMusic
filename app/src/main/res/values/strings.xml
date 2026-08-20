@@ -163,6 +163,11 @@
     <string name="contact">Contact</string>
     <string name="github">GitHub</string>
     <string name="view_source">View the source code</string>
+    <string name="main_contributors">Main contributors</string>
+    <string name="contributor_exilonium">Developer and maintainer of eXMusic</string>
+    <string name="contributor_vitune">ViTune, the upstream project eXMusic is built on</string>
+    <string name="contributor_vimusic">ViMusic, the project ViTune forked from</string>
+    <string name="contributor_zimusic">ZiMusic, whose Aurora background inspired ours and who helped us get it right</string>
     <string name="report_bug">Report an issue</string>
     <string name="report_bug_description">If you need help with a bug you can file an issue on GitHub (click to redirect)</string>
     <string name="request_feature">Request a feature or suggest an idea</string>

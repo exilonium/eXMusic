@@ -7,6 +7,7 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -62,6 +63,35 @@ import kotlin.time.toJavaDuration
 private val VERSION_NAME = BuildConfig.VERSION_NAME.substringBeforeLast("-")
 private const val REPO_OWNER = "exilonium"
 private const val REPO_NAME = "exmusic"
+
+private data class Contributor(
+    val name: String,
+    @field:StringRes val descriptionId: Int,
+    val url: String
+)
+
+private val contributors = listOf(
+    Contributor(
+        name = "exilonium",
+        descriptionId = R.string.contributor_exilonium,
+        url = "https://github.com/exilonium"
+    ),
+    Contributor(
+        name = "bartoostveen (formerly 25huizengek1)",
+        descriptionId = R.string.contributor_vitune,
+        url = "https://github.com/bartoostveen"
+    ),
+    Contributor(
+        name = "vfsfitvnm",
+        descriptionId = R.string.contributor_vimusic,
+        url = "https://github.com/vfsfitvnm"
+    ),
+    Contributor(
+        name = "Jigen-Ohtsusuki",
+        descriptionId = R.string.contributor_zimusic,
+        url = "https://github.com/Jigen-Ohtsusuki"
+    )
+)
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 private val permission = Manifest.permission.POST_NOTIFICATIONS
@@ -199,6 +229,16 @@ fun About() = SettingsCategoryScreen(
                 uriHandler.openUri("https://github.com/$REPO_OWNER/$REPO_NAME")
             }
         )
+    }
+
+    SettingsGroup(title = stringResource(R.string.main_contributors)) {
+        contributors.forEach { contributor ->
+            SettingsEntry(
+                title = contributor.name,
+                text = stringResource(contributor.descriptionId),
+                onClick = { uriHandler.openUri(contributor.url) }
+            )
+        }
     }
 
     SettingsGroup(title = stringResource(R.string.contact)) {
