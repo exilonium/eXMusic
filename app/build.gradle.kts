@@ -199,7 +199,6 @@ chaquopy {
         pip {
             install("yt-dlp>=2026.07.04")
             install("yt-dlp-ejs>=0.8.0")
-            install("pip")
         }
     }
 }

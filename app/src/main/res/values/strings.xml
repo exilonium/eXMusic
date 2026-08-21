@@ -393,9 +393,6 @@
     <string name="reverb_plate">Plate</string>
     <string name="tabs">Tabs</string>
     <string name="please_wait">Please wait, this may take some time</string>
-    <string name="yt_dlp_success">Upgrading yt-dlp succeeded</string>
-    <string name="yt_dlp_fail">Upgrading yt-dlp failed</string>
-    <string name="upgrade_yt_dlp">Upgrade yt-dlp</string>
     <string name="streaming">Streaming</string>
     <string name="stream_source">Stream source</string>
     <string name="stream_source_description">Where playable audio links come from. Change this if songs fail to play or take long to start.</string>

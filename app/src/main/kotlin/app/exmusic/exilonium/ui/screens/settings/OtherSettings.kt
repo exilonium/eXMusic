@@ -37,7 +37,6 @@ import app.exmusic.core.ui.utils.isAtLeastAndroid12
 import app.exmusic.core.ui.utils.isAtLeastAndroid6
 import app.exmusic.exilonium.Database
 import app.exmusic.exilonium.DatabaseDependency
-import app.exmusic.exilonium.Dependencies
 import app.exmusic.exilonium.LocalPlayerServiceBinder
 import app.exmusic.exilonium.R
 import app.exmusic.exilonium.preferences.AppearancePreferences
@@ -56,11 +55,9 @@ import app.exmusic.exilonium.utils.intent
 import app.exmusic.exilonium.utils.isIgnoringBatteryOptimizations
 import app.exmusic.exilonium.utils.smoothScrollToBottom
 import app.exmusic.exilonium.utils.toast
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
 import kotlin.system.exitProcess
 
@@ -270,37 +267,6 @@ fun OtherSettings() {
             ) {
                 val troubleshootScope = rememberCoroutineScope()
                 var reloading by rememberSaveable { mutableStateOf(false) }
-                var upgrading by rememberSaveable { mutableStateOf(false) }
-
-                SecondaryTextButton(
-                    text = stringResource(R.string.upgrade_yt_dlp),
-                    onClick = {
-                        upgrading = true
-                        context.toast(R.string.please_wait)
-                        val job = troubleshootScope.launch {
-                            val success = runCatching {
-                                withContext(Dispatchers.IO) {
-                                    Dependencies.upgradeYoutubeDl()
-                                }
-                            }.also { it.exceptionOrNull()?.printStackTrace() }.getOrNull()
-
-                            withContext(Dispatchers.Main) {
-                                context.toast(
-                                    if (success == true) R.string.yt_dlp_success
-                                    else R.string.yt_dlp_fail
-                                )
-                            }
-                        }
-                        job.invokeOnCompletion { upgrading = false }
-                    },
-                    enabled = !reloading && !upgrading,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 16.dp)
-                        .padding(horizontal = 16.dp)
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
 
                 SecondaryTextButton(
                     text = stringResource(R.string.reload_app_internals),
