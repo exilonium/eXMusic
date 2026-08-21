@@ -104,5 +104,6 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: exmusic-${{ matrix.variant }}
-          path: app/build/outputs/apk/${{ matrix.variant }}/*.apk
+          # Flavored builds land in apk/<flavor>/<buildType>/, not apk/<buildType>/
+          path: app/build/outputs/apk/*/${{ matrix.variant }}/*.apk
           if-no-files-found: error
