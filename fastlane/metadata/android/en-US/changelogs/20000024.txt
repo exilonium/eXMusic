@@ -1,7 +1,0 @@
-* Rebranded to eXMusic with updated app icon and identity
-* Added Aurora theme with animated background glow and frosted glass controls
-* Added YouTube Music home feed, trending charts, and mood playlists
-* Added clickable synchronized lyrics to seek directly to lines
-* Added instant single-bar search for tracks, artists, and albums
-* Moved color palette extraction to background workers for smoother UI performance
-* Improved playback stability and automatic track crossfade
