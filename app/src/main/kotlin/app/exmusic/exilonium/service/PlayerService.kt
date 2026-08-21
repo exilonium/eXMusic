@@ -93,7 +93,6 @@ import app.exmusic.exilonium.query
 import app.exmusic.exilonium.transaction
 import app.exmusic.exilonium.utils.ActionReceiver
 import app.exmusic.exilonium.utils.ConditionalCacheDataSourceFactory
-import app.exmusic.exilonium.utils.GlyphInterface
 import app.exmusic.exilonium.utils.InvincibleService
 import app.exmusic.exilonium.utils.TimerJob
 import app.exmusic.exilonium.utils.YouTubeDLResponse
@@ -112,7 +111,6 @@ import app.exmusic.exilonium.utils.handleRangeErrors
 import app.exmusic.exilonium.utils.handleUnknownErrors
 import app.exmusic.exilonium.utils.intent
 import app.exmusic.exilonium.utils.mediaItems
-import app.exmusic.exilonium.utils.progress
 import app.exmusic.exilonium.utils.readOnlyWhen
 import app.exmusic.exilonium.utils.retryIf
 import app.exmusic.exilonium.utils.setPlaybackPitch
@@ -144,7 +142,6 @@ import io.ktor.client.plugins.ClientRequestException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.currentCoroutineContext
@@ -156,7 +153,6 @@ import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.flowOf
@@ -164,7 +160,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -326,8 +321,6 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             initialValue = false
         )
 
-    private val glyphInterface by lazy { GlyphInterface(applicationContext) }
-
     private var poiTimestamp: Long? by mutableStateOf(null)
 
     override fun onBind(intent: Intent?): AndroidBinder {
@@ -339,7 +332,6 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     override fun onCreate() {
         super.onCreate()
 
-        glyphInterface.tryInit()
         notificationActionReceiver.register(flags = ContextCompat.RECEIVER_EXPORTED)
 
         bitmapProvider = BitmapProvider(
@@ -507,7 +499,6 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             preferenceUpdaterJob?.cancel()
 
             coroutineScope.cancel()
-            glyphInterface.close()
         }
 
         super.onDestroy()
@@ -1324,7 +1315,6 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
         fun setBitmapListener(listener: ((Bitmap?) -> Unit)?) = bitmapProvider.setListener(listener)
 
-        @kotlin.OptIn(FlowPreview::class)
         fun startSleepTimer(delayMillis: Long) {
             timerJob?.cancel()
 
@@ -1342,19 +1332,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                 handler.post {
                     player.pause()
                     player.stop()
-
-                    glyphInterface.glyph {
-                        turnOff()
-                    }
                 }
-            }.also { job ->
-                glyphInterface.progress(
-                    job
-                        .millisLeft
-                        .takeWhile { it != null }
-                        .debounce(500.milliseconds)
-                        .map { ((it ?: 0L) / delayMillis.toFloat() * 100).toInt() }
-                )
             }
         }
 
