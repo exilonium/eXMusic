@@ -69,14 +69,21 @@ jobs:
       - name: Prepare APKs
         run: |
           mkdir -p release_assets
-          for apk in app/build/outputs/apk/release/*.apk; do
-            cp "$apk" release_assets/
-          done
+          # Flavored builds land in apk/<flavor>/release/, not apk/release/. IzzyOnDroid rejects
+          # any file over 30 MB, so the per-ABI APKs are what gets published - never a fat one.
+          cp app/build/outputs/apk/*/release/*.apk release_assets/
           ls -la release_assets/
+          for apk in release_assets/*.apk; do
+            size=$(stat -c%s "$apk")
+            if [ "$size" -gt 31457280 ]; then
+              echo "::error::$apk is $((size / 1048576)) MB, over IzzyOnDroid's 30 MB limit"
+              exit 1
+            fi
+          done
 
       - name: Read changelog
         run: |
-          VERSION_CODE=$(grep -oP 'versionCode\s*=\s*.*?(\d+)' app/build.gradle.kts | grep -oP '\d+' | tail -1)
+          VERSION_CODE=$(grep -oP 'baseVersionCode\s*=.*?\?:\s*\K\d+' app/build.gradle.kts)
           CHANGELOG_FILE="fastlane/metadata/android/en-US/changelogs/${VERSION_CODE}.txt"
           if [ -f "$CHANGELOG_FILE" ]; then
             cat "$CHANGELOG_FILE" > release_notes.txt
