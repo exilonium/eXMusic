@@ -100,9 +100,10 @@ jobs:
             VERSION_NAME=$(grep -oP 'version\s*=\s*"\K[^"]+' build.gradle.kts)
             TAG="v${VERSION_NAME}"
           fi
+          # `gh release create` has no --clobber; only `gh release upload` does. Create first, and
+          # fall back to uploading when a release for the tag already exists (a re-run).
           gh release create "$TAG" release_assets/*.apk \
             --title "$TAG" \
             --notes-file release_notes.txt \
-            --latest \
-            --clobber || \
+            --latest || \
           gh release upload "$TAG" release_assets/*.apk --clobber
