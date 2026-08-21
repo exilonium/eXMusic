@@ -15,7 +15,7 @@ dependencies {
     implementation(libs.ktor.client.encoding)
     implementation(libs.ktor.client.serialization)
     implementation(libs.ktor.serialization.json)
-    implementation(libs.log4j)
+    implementation(libs.slf4j)
 }
 
 kotlin {

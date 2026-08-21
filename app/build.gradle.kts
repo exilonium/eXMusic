@@ -246,7 +246,6 @@ dependencies {
     implementation(libs.room)
     ksp(libs.room.compiler)
 
-    implementation(libs.log4j)
     implementation(libs.slf4j)
     implementation(libs.logback)
 
