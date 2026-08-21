@@ -8,7 +8,20 @@
 
 ## Screenshots
 
-<!-- Add your screenshots here -->
+<table>
+  <tr>
+    <td align="center"><img src="./docs/screenshots/home.png" width="200" alt="Home feed with quick picks" /><br /><sub>Home feed</sub></td>
+    <td align="center"><img src="./docs/screenshots/player.png" width="200" alt="Player with aurora background" /><br /><sub>Player</sub></td>
+    <td align="center"><img src="./docs/screenshots/lyrics.png" width="200" alt="Synchronized lyrics" /><br /><sub>Synced lyrics</sub></td>
+    <td align="center"><img src="./docs/screenshots/queue.png" width="200" alt="Playback queue" /><br /><sub>Queue</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="./docs/screenshots/search-suggestions.png" width="200" alt="Search suggestions while typing" /><br /><sub>Instant search</sub></td>
+    <td align="center"><img src="./docs/screenshots/search-results.png" width="200" alt="Search results grouped by type" /><br /><sub>Search results</sub></td>
+    <td align="center"><img src="./docs/screenshots/player-modern.png" width="200" alt="Modern player layout" /><br /><sub>Modern layout</sub></td>
+    <td align="center"><img src="./docs/screenshots/settings.png" width="200" alt="Player settings" /><br /><sub>Settings</sub></td>
+  </tr>
+</table>
 
 ---
 
@@ -56,6 +69,14 @@ Download the latest APK from the [Releases](https://github.com/exilonium/exmusic
 - [Metrolist](https://github.com/MetrolistGroup/Metrolist), for direct YouTube Music stream resolution concepts.
 - [YouTube-Internal-Clients](https://github.com/zerodytrash/YouTube-Internal-Clients), for reference material on client endpoints.
 - [ionicons](https://github.com/ionic-team/ionicons), for icons used throughout the interface.
+
+---
+
+## License
+
+eXMusic is released under the [GNU General Public License v3.0](LICENSE), the same license as
+ViTune and ViMusic, the projects it builds upon. Any redistributed or modified copy has to stay
+under GPL-3.0 and ship its source.
 
 ---
 
