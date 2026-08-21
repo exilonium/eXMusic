@@ -61,8 +61,6 @@ workmanager_ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "wo
 
 #noinspection LoginCredentials
 credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
-#noinspection LoginCredentials
-credentials_play = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentials" }
 
 ktor_http = { module = "io.ktor:ktor-http", version.ref = "ktor" }
 
