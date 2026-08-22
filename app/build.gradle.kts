@@ -42,28 +42,23 @@ android {
         }
     }
 
-    // One APK per ABI, plus a fat one. Chaquopy duplicates a whole Python runtime per ABI, so the
-    // fat build lands near 29 MB against IzzyOnDroid's 30 MB per-file limit - fine to hand out
-    // directly, too tight to rely on, which is why the per-ABI builds exist. Chaquopy insists on
-    // ndk.abiFilters, which AGP refuses to combine with splits.abi, so flavors carry the filter.
+    // One APK per ABI, and deliberately no universal one. Chaquopy duplicates a whole Python
+    // runtime per ABI, so a universal build lands near 28 MB against IzzyOnDroid's 30 MB per-file
+    // limit while the per-ABI builds sit near 21 MB. Chaquopy insists on ndk.abiFilters, which AGP
+    // refuses to combine with splits.abi, so the flavors carry the filter instead.
     //
-    // Version codes follow Google's ABI-split recipe: universal sits lowest and keeps the plain
-    // code, continuing the fat APKs already published, and each ABI gets its own decamillion range
-    // above it. Any store that ranks by version code therefore hands a device the ABI-specific
-    // build and falls back to universal only when nothing else fits.
+    // A universal APK would reach no device this pair doesn't already cover - an APK without a
+    // matching ABI is refused outright - so it only ever added a trap: it has to rank below the
+    // per-ABI builds for stores to prefer those, which means a device that installed an ABI build
+    // cannot install the universal one over it. Android reports that downgrade as a malformed
+    // package, so the file that looked like the safe choice was the one that failed.
+    //
+    // Each ABI gets its own decamillion range above baseVersionCode, per Google's ABI-split recipe,
+    // so anything ranking by version code keeps handing a device its own build. baseVersionCode is
+    // still the release anchor: it names the changelog file and matches the version tag.
     flavorDimensions += "abi"
 
     productFlavors {
-        create("universal") {
-            dimension = "abi"
-            versionCode = baseVersionCode
-
-            ndk {
-                //noinspection ChromeOsAbiSupport
-                abiFilters += abis
-            }
-        }
-
         abis.forEachIndexed { index, abi ->
             create(abiFlavorNames.getValue(abi)) {
                 dimension = "abi"
