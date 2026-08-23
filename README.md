@@ -85,12 +85,22 @@ Relative to ViTune:
 
 ## Building
 
-Needs JDK 25 and an Android SDK with API 37 installed.
+Needs JDK 25 and an Android SDK with API 37. The bundled yt-dlp and the QuickJS interpreter it
+shells out to also need NDK 29.0.14206865, CMake 4.1.2 and Python 3.14.
+
+The app splits into `arm64` and `x64` flavors, so most tasks carry a flavor name:
 
 ```sh
-./gradlew :app:assembleDebug   # APK in app/build/outputs/apk/debug/
-./gradlew detekt               # static analysis, report in build/reports/detekt/
+./gradlew :app:assembleDebug          # both flavors, APKs in app/build/outputs/apk/
+./gradlew :app:assembleArm64Debug     # just one, if you know your device
+./gradlew :app:compileX64DebugKotlin  # typecheck only, no packaging
+./gradlew :app:detekt                 # static analysis, report in build/reports/detekt/
 ```
+
+Release builds need a signing config. `app/build.gradle.kts` reads one from `keystore.properties`,
+or from the `ANDROID_KEYSTORE` environment variables. There is no universal APK. It would have to
+rank below the per-ABI builds for version codes to order correctly, which makes it uninstallable
+over either one.
 
 There is a Nix flake if you would rather not install the toolchain by hand:
 
