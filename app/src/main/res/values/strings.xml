@@ -365,6 +365,9 @@
     <string name="swipe_to_hide_song_description">When you swipe a song to the left, it gets removed from the database and cache</string>
     <string name="swipe_to_hide_song_confirm">Confirm swipe to hide song</string>
     <string name="swipe_to_hide_song_confirm_description">When you swipe to hide, you first have to confirm</string>
+    <string name="haptics">Haptic feedback</string>
+    <string name="haptic_feedback">Vibrate while reordering</string>
+    <string name="haptic_feedback_description">Your phone gives a short tick when a song is picked up, passes another one, and is dropped, while you reorder the queue or a playlist</string>
     <string name="hide_explicit">Hide explicit songs</string>
     <string name="hide_explicit_description">Hides all explicit songs, throughout the entire app. The player will also skip explicit songs when it encounters one and this setting is enabled.</string>
     <string name="version">Version</string>

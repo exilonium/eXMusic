@@ -54,6 +54,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -158,7 +159,8 @@ fun Queue(
     val reorderingState = rememberReorderingState(
         lazyListState = lazyListState,
         key = windows,
-        onDragEnd = binder.player::moveMediaItem
+        onDragEnd = binder.player::moveMediaItem,
+        hapticFeedback = LocalHapticFeedback.current.takeIf { AppearancePreferences.hapticFeedback }
     )
 
     val visibleSuggestions by remember {

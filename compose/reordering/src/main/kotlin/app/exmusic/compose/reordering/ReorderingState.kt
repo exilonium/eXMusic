@@ -1,5 +1,6 @@
 package app.exmusic.compose.reordering
 
+import android.os.Build
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.VectorConverter
@@ -17,7 +18,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.hapticfeedback.HapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.PointerInputChange
+import androidx.compose.ui.platform.LocalHapticFeedback
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -27,6 +31,20 @@ import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
 
 private const val MAX_AUTO_SCROLL_PER_FRAME = 24
+
+/**
+ * The tick a row passing another one plays, and the one a drop plays. Both segment constants only
+ * exist from Android 14 on; below it, the nearest thing that does.
+ */
+private val passedItemHaptics
+    get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        HapticFeedbackType.SegmentTick
+    } else HapticFeedbackType.TextHandleMove
+
+private val dropHaptics
+    get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        HapticFeedbackType.GestureEnd
+    } else HapticFeedbackType.Confirm
 
 @Stable
 class ReorderingState(
@@ -44,6 +62,9 @@ class ReorderingState(
     internal var draggingIndex by mutableIntStateOf(-1)
     internal var reachedIndex by mutableIntStateOf(-1)
     internal var draggingItemSize by mutableIntStateOf(0)
+
+    /** Set every composition by [rememberReorderingState]; null when haptics are turned off. */
+    var hapticFeedback: HapticFeedback? = null
 
     private lateinit var itemInfo: LazyListItemInfo
 
@@ -96,6 +117,7 @@ class ReorderingState(
             .find { it.index == index + extraItemCount } ?: return
 
         onDragStart()
+        hapticFeedback?.performHapticFeedback(HapticFeedbackType.LongPress)
         draggingIndex = index
         reachedIndex = index
         draggingItemSize = itemInfo.size
@@ -146,6 +168,7 @@ class ReorderingState(
         if (!isDragging) return
 
         stopAutoScroll()
+        hapticFeedback?.performHapticFeedback(dropHaptics)
 
         coroutineScope.launch {
             Animatable(travel.toFloat()).animateTo(settledTravel.toFloat()) {
@@ -191,6 +214,7 @@ class ReorderingState(
 
         while (travel > nextItemSize && reachedIndex < lastIndex) {
             reachedIndex += 1
+            hapticFeedback?.performHapticFeedback(passedItemHaptics)
             nextItemSize += draggingItemSize
             previousItemSize += draggingItemSize
 
@@ -204,6 +228,7 @@ class ReorderingState(
 
         while (travel < previousItemSize && reachedIndex > 0) {
             reachedIndex -= 1
+            hapticFeedback?.performHapticFeedback(passedItemHaptics)
             previousItemSize -= draggingItemSize
             nextItemSize -= draggingItemSize
 
@@ -312,7 +337,8 @@ fun rememberReorderingState(
     key: Any,
     onDragEnd: (Int, Int) -> Unit,
     onDragStart: () -> Unit = {},
-    extraItemCount: Int = 0
+    extraItemCount: Int = 0,
+    hapticFeedback: HapticFeedback? = LocalHapticFeedback.current
 ): ReorderingState {
     val coroutineScope = rememberCoroutineScope()
 
@@ -325,5 +351,5 @@ fun rememberReorderingState(
             onDragEnd = onDragEnd,
             extraItemCount = extraItemCount
         )
-    }
+    }.also { it.hapticFeedback = hapticFeedback }
 }

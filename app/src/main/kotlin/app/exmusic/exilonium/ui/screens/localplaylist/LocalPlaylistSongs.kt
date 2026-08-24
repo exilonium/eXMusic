@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -44,6 +45,7 @@ import app.exmusic.exilonium.R
 import app.exmusic.exilonium.models.Playlist
 import app.exmusic.exilonium.models.Song
 import app.exmusic.exilonium.models.SongPlaylistMap
+import app.exmusic.exilonium.preferences.AppearancePreferences
 import app.exmusic.exilonium.preferences.DataPreferences
 import app.exmusic.exilonium.query
 import app.exmusic.exilonium.transaction
@@ -118,7 +120,8 @@ fun LocalPlaylistSongs(
                 Database.move(playlist.id, fromIndex, toIndex)
             }
         },
-        extraItemCount = 1
+        extraItemCount = 1,
+        hapticFeedback = LocalHapticFeedback.current.takeIf { AppearancePreferences.hapticFeedback }
     )
 
     var isRenaming by rememberSaveable { mutableStateOf(false) }

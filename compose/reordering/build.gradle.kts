@@ -19,4 +19,5 @@ kotlin {
 dependencies {
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.foundation)
+    api(libs.compose.ui)
 }
