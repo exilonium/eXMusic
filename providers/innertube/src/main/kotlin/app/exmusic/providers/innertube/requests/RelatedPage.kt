@@ -3,12 +3,9 @@ package app.exmusic.providers.innertube.requests
 import app.exmusic.providers.innertube.Innertube
 import app.exmusic.providers.innertube.models.BrowseResponse
 import app.exmusic.providers.innertube.models.Context
-import app.exmusic.providers.innertube.models.MusicCarouselShelfRenderer
 import app.exmusic.providers.innertube.models.NextResponse
 import app.exmusic.providers.innertube.models.bodies.BrowseBody
 import app.exmusic.providers.innertube.models.bodies.NextBody
-import app.exmusic.providers.innertube.utils.findSectionByStrapline
-import app.exmusic.providers.innertube.utils.findSectionByTitle
 import app.exmusic.providers.innertube.utils.from
 import app.exmusic.providers.utils.runCatchingCancellable
 import io.ktor.client.call.body
@@ -62,39 +59,49 @@ suspend fun Innertube.relatedPage(body: NextBody) = runCatchingCancellable {
         Context.DefaultWebNoLang.apply()
         @Suppress("all")
         mask(
-            "contents.sectionListRenderer.contents.musicCarouselShelfRenderer(header.musicCarouselShelfBasicHeaderRenderer(title,strapline),contents($MUSIC_RESPONSIVE_LIST_ITEM_RENDERER_MASK,$MUSIC_TWO_ROW_ITEM_RENDERER_MASK))"
+            "contents.sectionListRenderer.contents.musicCarouselShelfRenderer.contents($MUSIC_RESPONSIVE_LIST_ITEM_RENDERER_MASK,$MUSIC_TWO_ROW_ITEM_RENDERER_MASK)"
         )
     }.body<BrowseResponse>()
 
-    val sectionListRenderer = response
+    val shelves = response
         .contents
         ?.sectionListRenderer
+        ?.contents
+        ?.mapNotNull { it.musicCarouselShelfRenderer }
+        .orEmpty()
+
+    val songs = mutableListOf<Innertube.SongItem>()
+    val albums = mutableListOf<Innertube.AlbumItem>()
+    val artists = mutableListOf<Innertube.ArtistItem>()
+    val playlists = mutableListOf<Innertube.PlaylistItem>()
+
+    // Shelves are picked apart by what their items are, not by their headers: YouTube translates
+    // the headers per region, so matching on "You might also like" empties the page for anyone
+    // outside an English locale
+    shelves.forEach { shelf ->
+        shelf.contents?.forEach { content ->
+            content.musicResponsiveListItemRenderer?.let { row ->
+                Innertube.SongItem.from(row)?.let(songs::add)
+            }
+
+            content.musicTwoRowItemRenderer?.let { tile ->
+                when {
+                    tile.isAlbum -> Innertube.AlbumItem.from(tile)?.let(albums::add)
+                    tile.isArtist -> Innertube.ArtistItem.from(tile)?.let(artists::add)
+                    tile.isPlaylist -> Innertube.PlaylistItem.from(tile)?.let(playlists::add)
+                    tile.isSong -> Innertube.SongItem.from(tile)?.let(songs::add)
+                }
+            }
+        }
+    }
 
     Innertube.RelatedPage(
-        songs = sectionListRenderer
-            ?.findSectionByTitle("You might also like")
-            ?.musicCarouselShelfRenderer
-            ?.contents
-            ?.mapNotNull(MusicCarouselShelfRenderer.Content::musicResponsiveListItemRenderer)
-            ?.mapNotNull(Innertube.SongItem::from),
-        playlists = sectionListRenderer
-            ?.findSectionByTitle("Recommended playlists")
-            ?.musicCarouselShelfRenderer
-            ?.contents
-            ?.mapNotNull(MusicCarouselShelfRenderer.Content::musicTwoRowItemRenderer)
-            ?.mapNotNull(Innertube.PlaylistItem::from)
-            ?.sortedByDescending { it.channel?.name == "YouTube Music" },
-        albums = sectionListRenderer
-            ?.findSectionByStrapline("MORE FROM")
-            ?.musicCarouselShelfRenderer
-            ?.contents
-            ?.mapNotNull(MusicCarouselShelfRenderer.Content::musicTwoRowItemRenderer)
-            ?.mapNotNull(Innertube.AlbumItem::from),
-        artists = sectionListRenderer
-            ?.findSectionByTitle("Similar artists")
-            ?.musicCarouselShelfRenderer
-            ?.contents
-            ?.mapNotNull(MusicCarouselShelfRenderer.Content::musicTwoRowItemRenderer)
-            ?.mapNotNull(Innertube.ArtistItem::from)
+        songs = songs.distinctBy { it.key }.takeIf { it.isNotEmpty() },
+        albums = albums.distinctBy { it.key }.takeIf { it.isNotEmpty() },
+        artists = artists.distinctBy { it.key }.takeIf { it.isNotEmpty() },
+        playlists = playlists
+            .distinctBy { it.key }
+            .sortedByDescending { it.channel?.name == "YouTube Music" }
+            .takeIf { it.isNotEmpty() }
     )
 }

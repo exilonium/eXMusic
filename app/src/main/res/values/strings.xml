@@ -234,6 +234,7 @@
     <string name="pause_playback_history_warning">Please note: this won\'t affect offline caching!</string>
     <string name="reset_quick_picks">Reset quick picks</string>
     <string name="quick_picks_empty">Quick picks are cleared</string>
+    <string name="quick_picks_nothing_yet">Play a few songs and quick picks will fill up</string>
     <string name="pause_playback_time">Pause playback time</string>
     <string name="format_pause_playback_time_description">Stops playback time from being saved. This pauses the statistics in the \'My Top %1$s\' playlist!</string>
     <string name="backup">Backup</string>
@@ -310,11 +311,7 @@
     <string name="audio_focus_description">Whether the player should request system-wide audio (media) focus</string>
     <string name="equalizer_description">Interact with the system equalizer</string>
     <string name="filter_placeholder">Filter…</string>
-    <string name="last_interaction">Last Played</string>
     <string name="trending">Trending</string>
-    <string name="quick_picks_source">Quick Picks Source</string>
-    <string name="quick_picks_cache">Cache quick picks data</string>
-    <string name="quick_picks_cache_description">Saves the quick picks data to disk for offline access</string>
     <string name="player_layout">Player layout</string>
     <string name="classic_player_layout_name">Classic</string>
     <string name="new_player_layout_name">Modern (new)</string>

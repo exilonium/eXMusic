@@ -22,9 +22,9 @@ object DataPreferences : GlobalPreferencesHolder() {
     var topListLength by topListLengthProperty
     val topListPeriodProperty = enum(TopListPeriod.AllTime)
     var topListPeriod by topListPeriodProperty
-    var quickPicksSource by enum(QuickPicksSource.Trending)
     var versionCheckPeriod by enum(VersionCheckPeriod.Daily)
-    var shouldCacheQuickPicks by boolean(true)
+
+    /** The shelves last shown under quick picks, so they survive going offline. */
     var cachedQuickPicks by json(Innertube.RelatedPage())
     var autoSyncPlaylists by boolean(true)
 
@@ -40,11 +40,6 @@ object DataPreferences : GlobalPreferencesHolder() {
         PastMonth(displayName = { stringResource(R.string.past_month) }, duration = 30.days),
         PastYear(displayName = { stringResource(R.string.past_year) }, 365.days),
         AllTime(displayName = { stringResource(R.string.all_time) })
-    }
-
-    enum class QuickPicksSource(val displayName: @Composable () -> String) {
-        Trending(displayName = { stringResource(R.string.trending) }),
-        LastInteraction(displayName = { stringResource(R.string.last_interaction) })
     }
 
     @Suppress("unused")

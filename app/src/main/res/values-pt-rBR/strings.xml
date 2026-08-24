@@ -292,11 +292,7 @@
     <string name="audio_focus_description">Se o reprodutor deve solicitar o foco de áudio (mídia) do sistema</string>
     <string name="equalizer_description">Interagir com o equalizador do sistema</string>
     <string name="filter_placeholder">Filtrar…</string>
-    <string name="last_interaction">Última tocada</string>
     <string name="trending">Em alta</string>
-    <string name="quick_picks_source">Fonte do \'Para você\'</string>
-    <string name="quick_picks_cache">Download de dados do \'Para você\'</string>
-    <string name="quick_picks_cache_description">Download de dados do \'Para você\' para acesso offline</string>
     <string name="player_layout">Layout do reprodutor</string>
     <string name="classic_player_layout_name">Clássico</string>
     <string name="new_player_layout_name">Moderno (novo)</string>

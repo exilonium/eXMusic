@@ -294,11 +294,7 @@
     <string name="audio_focus_description">Si le lecteur doit demander la mise au point audio (média) à l\'échelle du système</string>
     <string name="equalizer_description">Interagir avec l\'égaliseur du système</string>
     <string name="filter_placeholder">Filtre…</string>
-    <string name="last_interaction">Joués Dernièrement</string>
     <string name="trending">Tendance</string>
-    <string name="quick_picks_source">Source de Sélection Rapide</string>
-    <string name="quick_picks_cache">Mettre en cache les données de la sélection rapide</string>
-    <string name="quick_picks_cache_description">Enregistre les données de la sélection rapide sur le disque pour un accès hors-ligne</string>
     <string name="player_layout">Disposition du lecteur</string>
     <string name="classic_player_layout_name">Classique</string>
     <string name="new_player_layout_name">Moderne (nouveau)</string>

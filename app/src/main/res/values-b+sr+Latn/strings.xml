@@ -285,11 +285,7 @@
     <string name="audio_focus_description">Da li plejer treba da zahteva sistemski fokus na zvuk (medije)</string>
     <string name="equalizer_description">Interakcija sa sistemskim ekvilajzerom</string>
     <string name="filter_placeholder">Filter…</string>
-    <string name="last_interaction">Poslednje reprodukovano</string>
     <string name="trending">Popularno</string>
-    <string name="quick_picks_source">Izvor brzih izbora</string>
-    <string name="quick_picks_cache">Keš za brze izbore</string>
-    <string name="quick_picks_cache_description">Čuva podatke brzih izbora na disku za pristup van mreže</string>
     <string name="player_layout">Izgled plejera</string>
     <string name="classic_player_layout_name">Klasičan</string>
     <string name="new_player_layout_name">Moderan (nov)</string>

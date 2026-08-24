@@ -292,11 +292,7 @@
     <string name="audio_focus_description">Si el reproductor debe solicitar el enfoque de audio (multimedia) en todo el sistema</string>
     <string name="equalizer_description">Interactuar con el ecualizador del sistema</string>
     <string name="filter_placeholder">Filtrar…</string>
-    <string name="last_interaction">Última reproducción</string>
     <string name="trending">Tendencias</string>
-    <string name="quick_picks_source">Fuente de selecciones rápidas</string>
-    <string name="quick_picks_cache">Almacenar en caché datos de selecciones rápidas</string>
-    <string name="quick_picks_cache_description">Guarda los datos de selecciones rápidas en el disco para acceso sin conexión</string>
     <string name="player_layout">Diseño del reproductor</string>
     <string name="classic_player_layout_name">Clásico</string>
     <string name="new_player_layout_name">Moderno (nuevo)</string>

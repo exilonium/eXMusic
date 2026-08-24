@@ -339,11 +339,7 @@
 
     <string name="filter_placeholder">Filtra…</string>
 
-    <string name="last_interaction">Ultimo ascolto</string>
     <string name="trending">Di tendenza</string>
-    <string name="quick_picks_source">Fonte selezioni rapide</string>
-    <string name="quick_picks_cache">Cache dei dati delle selezioni rapide</string>
-    <string name="quick_picks_cache_description">Salva i dati delle selezioni rapide su disco per l\'accesso offline</string>
 
     <string name="player_layout">Layout player</string>
     <string name="classic_player_layout_name">Classico</string>

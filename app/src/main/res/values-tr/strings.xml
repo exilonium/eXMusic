@@ -271,11 +271,7 @@
     <string name="bass_boost_level_description">Düşük frekansları artırma seviyesi (0 -1000); kendi riski altında kullanın!</string>
     <string name="equalizer_description">Sistem ekolayzırı ile etkileşim</string>
     <string name="filter_placeholder">Filtrele…</string>
-    <string name="last_interaction">Son Oynanan</string>
     <string name="trending">Popüler</string>
-    <string name="quick_picks_source">Hızlı Seçim Kaynağı</string>
-    <string name="quick_picks_cache">Hızlı seçim verilerini önbelleğe al</string>
-    <string name="quick_picks_cache_description">Çevrimdışı erişim için hızlı seçim verilerini diske kaydeder</string>
     <string name="player_layout">Oyuncu düzeni</string>
     <string name="classic_player_layout_name">Klasik</string>
     <string name="new_player_layout_name">Modern (yeni)</string>

@@ -115,6 +115,7 @@ import app.exmusic.exilonium.utils.readOnlyWhen
 import app.exmusic.exilonium.utils.retryIf
 import app.exmusic.exilonium.utils.setPlaybackPitch
 import app.exmusic.exilonium.utils.shouldBePlaying
+import app.exmusic.exilonium.utils.storeRelatedPage
 import app.exmusic.exilonium.utils.thumbnail
 import app.exmusic.exilonium.utils.timer
 import app.exmusic.exilonium.utils.toast
@@ -544,6 +545,22 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                     )
                 }
             }
+        }
+
+        maybeHarvestRelatedSongs(mediaItem)
+    }
+
+    /** Keeps what YouTube would play next to this song, as material for quick picks. */
+    private fun maybeHarvestRelatedSongs(mediaItem: MediaItem) {
+        if (mediaItem.isLocal || DataPreferences.pauseHistory) return
+
+        val mediaId = mediaItem.mediaId
+
+        coroutineScope.launch {
+            val known = runCatching { Database.relatedSongsCount(mediaId) }.getOrDefault(1)
+            if (known > 0) return@launch
+
+            storeRelatedPage(mediaItem)
         }
     }
 

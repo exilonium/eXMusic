@@ -275,11 +275,7 @@
     <string name="bass_boost_level_description">自己責任でブーストレベルを0から1000の間で指定してください</string>
     <string name="equalizer_description">システムイコライザーを開く</string>
     <string name="filter_placeholder">フィルター…</string>
-    <string name="last_interaction">最後に再生した曲</string>
     <string name="trending">トレンド</string>
-    <string name="quick_picks_source">おすすめの取得元</string>
-    <string name="quick_picks_cache">おすすめのデータを一時保存する</string>
-    <string name="quick_picks_cache_description">オフラインでもおすすめの曲を聞けるように一時保存します</string>
     <string name="player_layout">プレーヤーのレイアウト</string>
     <string name="classic_player_layout_name">クラシック</string>
     <string name="new_player_layout_name">モダン (新しい)</string>

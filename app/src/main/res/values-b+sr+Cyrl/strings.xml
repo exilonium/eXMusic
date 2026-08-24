@@ -285,11 +285,7 @@
     <string name="audio_focus_description">Да ли плејер треба да захтева системски фокус на звук (медије)</string>
     <string name="equalizer_description">Интеракција са системским еквилајзером</string>
     <string name="filter_placeholder">Филтер…</string>
-    <string name="last_interaction">Последње репродуковано</string>
     <string name="trending">Популарно</string>
-    <string name="quick_picks_source">Извор брзих избора</string>
-    <string name="quick_picks_cache">Кеш за брзе изборе</string>
-    <string name="quick_picks_cache_description">Чува податке брзих избора на диску за приступ ван мреже</string>
     <string name="player_layout">Изглед плејера</string>
     <string name="classic_player_layout_name">Класичан</string>
     <string name="new_player_layout_name">Модеран (нов)</string>

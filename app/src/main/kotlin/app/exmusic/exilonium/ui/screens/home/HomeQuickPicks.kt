@@ -30,6 +30,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,6 +47,7 @@ import app.exmusic.exilonium.LocalPlayerAwareWindowInsets
 import app.exmusic.exilonium.LocalPlayerServiceBinder
 import app.exmusic.exilonium.R
 import app.exmusic.exilonium.models.Song
+import app.exmusic.exilonium.preferences.AppearancePreferences
 import app.exmusic.exilonium.preferences.DataPreferences
 import app.exmusic.exilonium.query
 import app.exmusic.exilonium.ui.components.LocalMenuState
@@ -71,11 +73,23 @@ import app.exmusic.exilonium.utils.playingSong
 import app.exmusic.exilonium.utils.rememberSnapLayoutInfo
 import app.exmusic.exilonium.utils.secondary
 import app.exmusic.exilonium.utils.semiBold
+import app.exmusic.exilonium.utils.storeRelatedPage
 import app.exmusic.providers.innertube.Innertube
 import app.exmusic.providers.innertube.models.NavigationEndpoint
-import app.exmusic.providers.innertube.models.bodies.NextBody
-import app.exmusic.providers.innertube.requests.relatedPage
-import kotlinx.coroutines.flow.distinctUntilChanged
+import app.exmusic.providers.innertube.requests.discoverPage
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
+import kotlin.random.Random
+
+private const val QUICK_PICKS_SIZE = 24
+
+private val Innertube.RelatedPage.isEmpty
+    get() = songs.isNullOrEmpty() &&
+        albums.isNullOrEmpty() &&
+        artists.isNullOrEmpty() &&
+        playlists.isNullOrEmpty()
 
 @OptIn(ExperimentalFoundationApi::class)
 @Route
@@ -91,46 +105,70 @@ fun QuickPicks(
     val menuState = LocalMenuState.current
     val windowInsets = LocalPlayerAwareWindowInsets.current
 
-    var trending by persist<Song?>("home/trending")
+    var seed by persist<Song?>("home/quickPicksSeed")
+    var picks by persist<List<Song>?>("home/quickPicks")
+    var relatedPage by persist<Innertube.RelatedPage?>("home/relatedPage")
+    var failed by persist("home/quickPicksFailed", false)
+    var settled by persist("home/quickPicksSettled", false)
 
-    var relatedPageResult by persist<Result<Innertube.RelatedPage?>?>(tag = "home/relatedPageResult")
+    /** Kept for the lifetime of the screen so the picks do not reorder under a scrolling finger. */
+    val shuffleSeed = remember { Random.nextLong() }
 
-    LaunchedEffect(relatedPageResult, DataPreferences.shouldCacheQuickPicks) {
-        if (DataPreferences.shouldCacheQuickPicks)
-            relatedPageResult?.getOrNull()?.let { DataPreferences.cachedQuickPicks = it }
-        else DataPreferences.cachedQuickPicks = Innertube.RelatedPage()
+    // The shelves are asked for once per seed rather than once per launch: what YouTube recommends
+    // off a song does not change between two openings of the home screen, and the songs themselves
+    // are read from the library, which the player keeps filling in the background
+    LaunchedEffect(Unit) {
+        withContext(Dispatchers.IO) {
+            try {
+                val cached = DataPreferences.cachedQuickPicks
+                if (relatedPage == null && !cached.isEmpty) relatedPage = cached
+
+                val seedSong = Database.events().first().firstOrNull()?.song
+                    ?: Database.trending(limit = 1).first().firstOrNull()
+                seed = seedSong
+
+                // Nothing played yet: seed off what YouTube is pushing in this region rather than off a
+                // video id baked into the app, which hands every fresh install the same picks
+                val seedItem = seedSong?.asMediaItem
+                    ?: Innertube
+                        .discoverPage()
+                        ?.getOrNull()
+                        ?.trending
+                        ?.songs
+                        ?.firstOrNull()
+                        ?.asMediaItem
+
+                if (seedItem == null) return@withContext
+
+                val known = runCatching { Database.relatedSongsCount(seedItem.mediaId) }.getOrDefault(0)
+                if (known > 0 && relatedPage != null) return@withContext
+
+                val result = storeRelatedPage(seedItem)
+                result?.getOrNull()?.let { page ->
+                    if (page.isEmpty) return@let
+
+                    relatedPage = page
+                    DataPreferences.cachedQuickPicks = page
+                    failed = false
+                } ?: run { failed = relatedPage == null }
+            } finally {
+                settled = true
+            }
+        }
     }
 
-    LaunchedEffect(DataPreferences.quickPicksSource) {
-        if (
-            DataPreferences.shouldCacheQuickPicks && !DataPreferences.cachedQuickPicks.let {
-                it.albums.isNullOrEmpty() &&
-                    it.artists.isNullOrEmpty() &&
-                    it.playlists.isNullOrEmpty() &&
-                    it.songs.isNullOrEmpty()
-            }
-        ) relatedPageResult = Result.success(DataPreferences.cachedQuickPicks)
-
-        suspend fun handleSong(song: Song?) {
-            if (relatedPageResult == null || trending?.id != song?.id) relatedPageResult =
-                Innertube.relatedPage(
-                    body = NextBody(videoId = (song?.id ?: "J7p4bzqLvCw"))
-                )
-            trending = song
-        }
-
-        when (DataPreferences.quickPicksSource) {
-            DataPreferences.QuickPicksSource.Trending ->
-                Database
-                    .trending()
-                    .distinctUntilChanged()
-                    .collect { handleSong(it.firstOrNull()) }
-
-            DataPreferences.QuickPicksSource.LastInteraction ->
-                Database
-                    .events()
-                    .distinctUntilChanged()
-                    .collect { handleSong(it.firstOrNull()?.song) }
+    // Whatever the network did, the grid is fed from the library: recommendations harvested off
+    // recent plays and heavy rotation, topped up with favourites that have gone quiet
+    LaunchedEffect(shuffleSeed) {
+        combine(
+            Database.quickPicks(),
+            Database.forgottenFavorites()
+        ) { related, forgotten -> related + forgotten }.collect { songs ->
+            picks = songs
+                .filterNot { AppearancePreferences.hideExplicit && it.explicit }
+                .distinctBy { it.id }
+                .shuffled(Random(shuffleSeed))
+                .take(QUICK_PICKS_SIZE)
         }
     }
 
@@ -159,6 +197,10 @@ fun QuickPicks(
 
         val itemInHorizontalGridWidth = maxWidth * quickPicksLazyGridItemWidthFactor
 
+        val songs = picks.orEmpty()
+        val related = relatedPage
+        val loading = !settled && songs.isEmpty() && related == null
+
         Column(
             modifier = Modifier
                 .background(colorPalette.screenBackground)
@@ -175,174 +217,135 @@ fun QuickPicks(
                 modifier = Modifier.padding(endPaddingValues)
             )
 
-            relatedPageResult?.getOrNull()?.let { related ->
-                LazyHorizontalGrid(
-                    state = quickPicksLazyGridState,
-                    rows = GridCells.Fixed(4),
-                    flingBehavior = rememberSnapFlingBehavior(snapLayoutInfoProvider),
-                    contentPadding = endPaddingValues,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height((Dimensions.thumbnails.song + Dimensions.items.verticalPadding * 2) * 4)
-                ) {
-                    trending?.let { song ->
-                        item {
-                            SongItem(
-                                modifier = Modifier
-                                    .combinedClickable(
-                                        onLongClick = {
-                                            menuState.display {
-                                                NonQueuedMediaItemMenu(
-                                                    onDismiss = menuState::hide,
-                                                    mediaItem = song.asMediaItem,
-                                                    onRemoveFromQuickPicks = {
-                                                        query {
-                                                            Database.clearEventsFor(song.id)
-                                                        }
-                                                    }
-                                                )
+            if (songs.isNotEmpty()) LazyHorizontalGrid(
+                state = quickPicksLazyGridState,
+                rows = GridCells.Fixed(4),
+                flingBehavior = rememberSnapFlingBehavior(snapLayoutInfoProvider),
+                contentPadding = endPaddingValues,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height((Dimensions.thumbnails.song + Dimensions.items.verticalPadding * 2) * 4)
+            ) {
+                items(
+                    items = songs,
+                    key = Song::id
+                ) { song ->
+                    SongItem(
+                        song = song,
+                        thumbnailSize = Dimensions.thumbnails.song,
+                        modifier = Modifier
+                            .combinedClickable(
+                                onLongClick = {
+                                    menuState.display {
+                                        NonQueuedMediaItemMenu(
+                                            onDismiss = menuState::hide,
+                                            mediaItem = song.asMediaItem,
+                                            onRemoveFromQuickPicks = {
+                                                query {
+                                                    Database.clearEventsFor(song.id)
+                                                    Database.clearRelatedSongsFor(song.id)
+                                                }
+                                                picks = picks?.filterNot { it.id == song.id }
                                             }
-                                        },
-                                        onClick = {
-                                            val mediaItem = song.asMediaItem
-                                            binder?.stopRadio()
-                                            binder?.player?.forcePlay(mediaItem)
-                                            binder?.setupRadio(
-                                                NavigationEndpoint.Endpoint.Watch(videoId = mediaItem.mediaId)
-                                            )
-                                        }
-                                    )
-                                    .animateItem(fadeInSpec = null, fadeOutSpec = null)
-                                    .width(itemInHorizontalGridWidth),
-                                song = song,
-                                thumbnailSize = Dimensions.thumbnails.song,
-                                trailingContent = {
-                                    Image(
-                                        painter = painterResource(R.drawable.star),
-                                        contentDescription = null,
-                                        colorFilter = ColorFilter.tint(colorPalette.accent),
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                },
-                                showDuration = false,
-                                isPlaying = playing && currentMediaId == song.id
-                            )
-                        }
-                    }
-
-                    items(
-                        items = related.songs?.dropLast(if (trending == null) 0 else 1)
-                            ?: emptyList(),
-                        key = Innertube.SongItem::key
-                    ) { song ->
-                        SongItem(
-                            song = song,
-                            thumbnailSize = Dimensions.thumbnails.song,
-                            modifier = Modifier
-                                .combinedClickable(
-                                    onLongClick = {
-                                        menuState.display {
-                                            NonQueuedMediaItemMenu(
-                                                onDismiss = menuState::hide,
-                                                mediaItem = song.asMediaItem
-                                            )
-                                        }
-                                    },
-                                    onClick = {
-                                        val mediaItem = song.asMediaItem
-                                        binder?.stopRadio()
-                                        binder?.player?.forcePlay(mediaItem)
-                                        binder?.setupRadio(
-                                            NavigationEndpoint.Endpoint.Watch(videoId = mediaItem.mediaId)
                                         )
                                     }
+                                },
+                                onClick = {
+                                    val mediaItem = song.asMediaItem
+                                    binder?.stopRadio()
+                                    binder?.player?.forcePlay(mediaItem)
+                                    binder?.setupRadio(
+                                        NavigationEndpoint.Endpoint.Watch(videoId = mediaItem.mediaId)
+                                    )
+                                }
+                            )
+                            .animateItem(fadeInSpec = null, fadeOutSpec = null)
+                            .width(itemInHorizontalGridWidth),
+                        trailingContent = if (song.id == seed?.id) {
+                            {
+                                Image(
+                                    painter = painterResource(R.drawable.star),
+                                    contentDescription = null,
+                                    colorFilter = ColorFilter.tint(colorPalette.accent),
+                                    modifier = Modifier.size(16.dp)
                                 )
-                                .animateItem(fadeInSpec = null, fadeOutSpec = null)
-                                .width(itemInHorizontalGridWidth),
-                            showDuration = false,
-                            isPlaying = playing && currentMediaId == song.key
+                            }
+                        } else null,
+                        showDuration = false,
+                        isPlaying = playing && currentMediaId == song.id
+                    )
+                }
+            }
+
+            related?.albums?.let { albums ->
+                BasicText(
+                    text = stringResource(R.string.related_albums),
+                    style = typography.m.semiBold,
+                    modifier = sectionTextModifier
+                )
+
+                LazyRow(contentPadding = endPaddingValues) {
+                    items(
+                        items = albums,
+                        key = Innertube.AlbumItem::key
+                    ) { album ->
+                        AlbumItem(
+                            album = album,
+                            thumbnailSize = Dimensions.thumbnails.album,
+                            alternative = true,
+                            modifier = Modifier.clickable { onAlbumClick(album) }
                         )
                     }
                 }
+            }
 
-                related.albums?.let { albums ->
-                    BasicText(
-                        text = stringResource(R.string.related_albums),
-                        style = typography.m.semiBold,
-                        modifier = sectionTextModifier
-                    )
-
-                    LazyRow(contentPadding = endPaddingValues) {
-                        items(
-                            items = albums,
-                            key = Innertube.AlbumItem::key
-                        ) { album ->
-                            AlbumItem(
-                                album = album,
-                                thumbnailSize = Dimensions.thumbnails.album,
-                                alternative = true,
-                                modifier = Modifier.clickable { onAlbumClick(album) }
-                            )
-                        }
-                    }
-                }
-
-                related.artists?.let { artists ->
-                    BasicText(
-                        text = stringResource(R.string.similar_artists),
-                        style = typography.m.semiBold,
-                        modifier = sectionTextModifier
-                    )
-
-                    LazyRow(contentPadding = endPaddingValues) {
-                        items(
-                            items = artists,
-                            key = Innertube.ArtistItem::key
-                        ) { artist ->
-                            ArtistItem(
-                                artist = artist,
-                                thumbnailSize = Dimensions.thumbnails.artist,
-                                alternative = true,
-                                modifier = Modifier.clickable { onArtistClick(artist) }
-                            )
-                        }
-                    }
-                }
-
-                related.playlists?.let { playlists ->
-                    BasicText(
-                        text = stringResource(R.string.recommended_playlists),
-                        style = typography.m.semiBold,
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .padding(top = 24.dp, bottom = 8.dp)
-                    )
-
-                    LazyRow(contentPadding = endPaddingValues) {
-                        items(
-                            items = playlists,
-                            key = Innertube.PlaylistItem::key
-                        ) { playlist ->
-                            PlaylistItem(
-                                playlist = playlist,
-                                thumbnailSize = Dimensions.thumbnails.playlist,
-                                alternative = true,
-                                modifier = Modifier.clickable { onPlaylistClick(playlist) }
-                            )
-                        }
-                    }
-                }
-
-                Unit
-            } ?: relatedPageResult?.exceptionOrNull()?.let {
+            related?.artists?.let { artists ->
                 BasicText(
-                    text = stringResource(R.string.error_message),
-                    style = typography.s.secondary.center,
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .padding(all = 16.dp)
+                    text = stringResource(R.string.similar_artists),
+                    style = typography.m.semiBold,
+                    modifier = sectionTextModifier
                 )
-            } ?: ShimmerHost {
+
+                LazyRow(contentPadding = endPaddingValues) {
+                    items(
+                        items = artists,
+                        key = Innertube.ArtistItem::key
+                    ) { artist ->
+                        ArtistItem(
+                            artist = artist,
+                            thumbnailSize = Dimensions.thumbnails.artist,
+                            alternative = true,
+                            modifier = Modifier.clickable { onArtistClick(artist) }
+                        )
+                    }
+                }
+            }
+
+            related?.playlists?.let { playlists ->
+                BasicText(
+                    text = stringResource(R.string.recommended_playlists),
+                    style = typography.m.semiBold,
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 24.dp, bottom = 8.dp)
+                )
+
+                LazyRow(contentPadding = endPaddingValues) {
+                    items(
+                        items = playlists,
+                        key = Innertube.PlaylistItem::key
+                    ) { playlist ->
+                        PlaylistItem(
+                            playlist = playlist,
+                            thumbnailSize = Dimensions.thumbnails.playlist,
+                            alternative = true,
+                            modifier = Modifier.clickable { onPlaylistClick(playlist) }
+                        )
+                    }
+                }
+            }
+
+            if (loading) ShimmerHost {
                 repeat(4) {
                     SongItemPlaceholder(thumbnailSize = Dimensions.thumbnails.song)
                 }
@@ -379,7 +382,15 @@ fun QuickPicks(
                         )
                     }
                 }
-            }
+            } else if (songs.isEmpty() && related == null) BasicText(
+                text = stringResource(
+                    if (failed) R.string.error_message else R.string.quick_picks_nothing_yet
+                ),
+                style = typography.s.secondary.center,
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(all = 16.dp)
+            )
         }
 
         FloatingActionsContainerWithScrollToTop(

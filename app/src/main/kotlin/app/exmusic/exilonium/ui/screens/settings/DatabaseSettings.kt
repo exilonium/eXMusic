@@ -129,7 +129,12 @@ fun DatabaseSettings() = with(DataPreferences) {
                         eventsCount
                     )
                     else stringResource(R.string.quick_picks_empty),
-                    onClick = { query(Database::clearEvents) },
+                    onClick = {
+                        query {
+                            Database.clearEvents()
+                            Database.clearRelatedSongs()
+                        }
+                    },
                     isEnabled = eventsCount > 0
                 )
             }

@@ -292,11 +292,7 @@
     <string name="audio_focus_description">Si el reproductor ha de sollicitar l\'enfocament d\'àudio (multimèdia) a tot el sistema</string>
     <string name="equalizer_description">Interactuar amb l\'equalitzador del sistema</string>
     <string name="filter_placeholder">Filtrar…</string>
-    <string name="last_interaction">Última reproducció</string>
     <string name="trending">Tendències</string>
-    <string name="quick_picks_source">Font de seleccions ràpides</string>
-    <string name="quick_picks_cache">Emmagatzemar en memòria cau dades de seleccions ràpides</string>
-    <string name="quick_picks_cache_description">Desa les dades de seleccions ràpides al disc per accés sense connexió</string>
     <string name="player_layout">Disseny del reproductor</string>
     <string name="classic_player_layout_name">Clàssic</string>
     <string name="new_player_layout_name">Modern (nou)</string>

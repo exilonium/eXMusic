@@ -296,11 +296,7 @@
     <string name="audio_focus_description">क्या प्लेयर को सिस्टम-वाइड ऑडियो (मीडिया) फ़ोकस का अनुरोध करना चाहिए</string>
     <string name="equalizer_description">सिस्टम इक्वलाइज़र के साथ बातचीत करें</string>
     <string name="filter_placeholder">फ़िल्टर…</string>
-    <string name="last_interaction">पहले बजाया गया</string>
     <string name="trending">प्रचलित</string>
-    <string name="quick_picks_source">त्वरित चयन स्रोत</string>
-    <string name="quick_picks_cache">त्वरित चयन डेटा कैश करें</string>
-    <string name="quick_picks_cache_description">ऑफ़लाइन पहुँच के लिए त्वरित चयन डेटा को डिस्क पर सहेजता है</string>
     <string name="player_layout">प्लेयर लेआउट</string>
     <string name="classic_player_layout_name">क्लासिक</string>
     <string name="new_player_layout_name">आधुनिक (नया)</string>

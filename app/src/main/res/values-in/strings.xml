@@ -266,9 +266,7 @@
     <string name="bass_boost_level_description">Level (0–1000) peningkatan frekuensi rendah; gunakan dengan risiko sendiri!</string>
     <string name="equalizer_description">Interaksi dengan pengatur suara sistem</string>
     <string name="filter_placeholder">Filter…</string>
-    <string name="last_interaction">Terakhir diputar</string>
     <string name="trending">Trending</string>
-    <string name="quick_picks_source">Sumber Pilihan Cepat</string>
     <string name="player_layout">Tata letak pemutar</string>
     <string name="classic_player_layout_name">Klasik</string>
     <string name="new_player_layout_name">Modern (baru)</string>

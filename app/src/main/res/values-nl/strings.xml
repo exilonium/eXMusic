@@ -296,11 +296,7 @@
     <string name="audio_focus_description">Wanneer dit aanstaat vraagt de app systeembreed audiofocus</string>
     <string name="equalizer_description">Gebruik de equalizer van het systeem</string>
     <string name="filter_placeholder">Filteren…</string>
-    <string name="last_interaction">Laatst afgespeeld</string>
     <string name="trending">Trending</string>
-    <string name="quick_picks_source">Bron voor Snelle keuzes</string>
-    <string name="quick_picks_cache">Snelle keuzes opslaan</string>
-    <string name="quick_picks_cache_description">Slaat de Snelle keuzes op voor offline toegang</string>
     <string name="player_layout">Lay-out van de speler</string>
     <string name="classic_player_layout_name">Klassiek</string>
     <string name="new_player_layout_name">Modern (nieuw)</string>

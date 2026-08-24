@@ -289,11 +289,7 @@
     <string name="audio_focus_description">Kas mängija peaks küsima süsteemi tasandi audio (meedia) fookust</string>
     <string name="equalizer_description">Suhtle süsteemi ekvalaiseriga</string>
     <string name="filter_placeholder">Filtreeri…</string>
-    <string name="last_interaction">Viimati mängitud</string>
     <string name="trending">Populaarne</string>
-    <string name="quick_picks_source">Kiirvalikute allikas</string>
-    <string name="quick_picks_cache">Kiirvalikute andmete vahemälu</string>
-    <string name="quick_picks_cache_description">Salvestab kiirvalikute andmed kettale offline-juurdepääsu jaoks</string>
     <string name="player_layout">Mängija paigutus</string>
     <string name="classic_player_layout_name">Klassikaline</string>
     <string name="new_player_layout_name">Uus (modernne)</string>

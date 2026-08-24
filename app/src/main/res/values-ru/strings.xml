@@ -289,11 +289,7 @@
     <string name="audio_focus_description">Нужно ли плееру запрашивать системный медиафокус</string>
     <string name="equalizer_description">Открыть встроенный эквалайзер</string>
     <string name="filter_placeholder">Фильтр…</string>
-    <string name="last_interaction">Последнее воспроизведение</string>
     <string name="trending">Популярное</string>
-    <string name="quick_picks_source">Источник быстрого выбора</string>
-    <string name="quick_picks_cache">Кэш данных быстрого выбора</string>
-    <string name="quick_picks_cache_description">Сохраняет данные быстрого выбора на диск для доступа в оффлайн-режиме</string>
     <string name="player_layout">Макет плеера</string>
     <string name="classic_player_layout_name">Классический</string>
     <string name="new_player_layout_name">Современный (новый)</string>

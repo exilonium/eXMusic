@@ -59,6 +59,7 @@ import app.exmusic.exilonium.models.Playlist
 import app.exmusic.exilonium.models.PlaylistPreview
 import app.exmusic.exilonium.models.PlaylistWithSongs
 import app.exmusic.exilonium.models.QueuedMediaItem
+import app.exmusic.exilonium.models.RelatedSongMap
 import app.exmusic.exilonium.models.SearchQuery
 import app.exmusic.exilonium.models.Song
 import app.exmusic.exilonium.models.SongAlbumMap
@@ -107,7 +108,7 @@ interface Database {
 }
 
 @Dao
-@Suppress("TooManyFunctions")
+@Suppress("TooManyFunctions", "LargeClass")
 interface DatabaseAccessor {
     @Transaction
     @Query("SELECT * FROM Song WHERE id NOT LIKE '$LOCAL_KEY_PREFIX%' ORDER BY ROWID ASC")
@@ -688,6 +689,89 @@ interface DatabaseAccessor {
     @Query("DELETE FROM Event WHERE songId = :songId")
     fun clearEventsFor(songId: String)
 
+    /**
+     * Songs YouTube recommended off the back of what is actually listened to: the last few plays,
+     * the heaviest rotation of the past week, and the all-time favourites. A song recommended by
+     * several of those seeds at once ranks above one recommended by a single seed.
+     */
+    @Transaction
+    @Query(
+        """
+        SELECT Song.* FROM (
+            SELECT relatedSongId, COUNT(1) AS referredCount
+            FROM RelatedSongMap
+            WHERE songId IN (
+                SELECT songId FROM (SELECT songId FROM Event ORDER BY timestamp DESC LIMIT 5)
+                UNION
+                SELECT songId FROM (
+                    SELECT songId FROM Event
+                    WHERE (:now - timestamp) <= :period
+                    GROUP BY songId
+                    ORDER BY SUM(playTime) DESC
+                    LIMIT 5
+                )
+                UNION
+                SELECT id FROM (
+                    SELECT id FROM Song
+                    WHERE id NOT LIKE '$LOCAL_KEY_PREFIX%'
+                    ORDER BY totalPlayTimeMs DESC
+                    LIMIT 10
+                )
+            )
+            GROUP BY relatedSongId
+        ) related
+        JOIN Song ON Song.id = related.relatedSongId
+        WHERE Song.id NOT LIKE '$LOCAL_KEY_PREFIX%' AND Song.blacklisted = 0
+        ORDER BY related.referredCount DESC
+        LIMIT :limit
+        """
+    )
+    @RewriteQueriesToDropUnusedColumns
+    fun quickPicks(
+        now: Long = System.currentTimeMillis(),
+        period: Long = 7 * 24 * 60 * 60 * 1000L,
+        limit: Int = 100
+    ): Flow<List<Song>>
+
+    /** Songs that used to be played a lot and have gone quiet over [period]. */
+    @Transaction
+    @Query(
+        """
+        SELECT Song.* FROM (
+            SELECT songId,
+                SUM(CASE WHEN (:now - timestamp) > :period THEN playTime ELSE 0 END) AS oldPlayTime,
+                SUM(CASE WHEN (:now - timestamp) <= :period THEN playTime ELSE 0 END) AS recentPlayTime
+            FROM Event
+            GROUP BY songId
+        ) forgotten
+        JOIN Song ON Song.id = forgotten.songId
+        WHERE forgotten.oldPlayTime > 0 AND
+            forgotten.recentPlayTime * 5 < forgotten.oldPlayTime AND
+            Song.id NOT LIKE '$LOCAL_KEY_PREFIX%' AND
+            Song.blacklisted = 0
+        ORDER BY forgotten.oldPlayTime DESC
+        LIMIT :limit
+        """
+    )
+    @RewriteQueriesToDropUnusedColumns
+    fun forgottenFavorites(
+        now: Long = System.currentTimeMillis(),
+        period: Long = 30 * 24 * 60 * 60 * 1000L,
+        limit: Int = 10
+    ): Flow<List<Song>>
+
+    @Query("SELECT COUNT(1) FROM RelatedSongMap WHERE songId = :songId")
+    fun relatedSongsCount(songId: String): Int
+
+    @Query("DELETE FROM RelatedSongMap")
+    fun clearRelatedSongs()
+
+    @Query("DELETE FROM RelatedSongMap WHERE relatedSongId = :songId OR songId = :songId")
+    fun clearRelatedSongsFor(songId: String)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insert(relatedSongMap: RelatedSongMap)
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     @Throws(SQLException::class)
     fun insert(event: Event)
@@ -821,10 +905,11 @@ interface DatabaseAccessor {
         Format::class,
         Event::class,
         Lyrics::class,
-        PipedSession::class
+        PipedSession::class,
+        RelatedSongMap::class
     ],
     views = [SortedSongPlaylistMap::class],
-    version = 30,
+    version = 31,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
@@ -851,7 +936,8 @@ interface DatabaseAccessor {
         AutoMigration(from = 26, to = 27),
         AutoMigration(from = 27, to = 28),
         AutoMigration(from = 28, to = 29),
-        AutoMigration(from = 29, to = 30)
+        AutoMigration(from = 29, to = 30),
+        AutoMigration(from = 30, to = 31)
     ]
 )
 @TypeConverters(Converters::class)
