@@ -46,6 +46,17 @@ private val dropHaptics
         HapticFeedbackType.GestureEnd
     } else HapticFeedbackType.Confirm
 
+/**
+ * A row passes the one at [threshold] once it has travelled a full row past it, except for the step
+ * onto the first or the last row: travel is clamped to exactly the distance to that end of the list
+ * ([limit]), so that threshold can be reached but never passed. Let that one step land on it.
+ */
+private fun hasPassed(travel: Int, threshold: Int, limit: Int) =
+    travel > threshold || (travel == threshold && threshold == limit)
+
+private fun hasReturned(travel: Int, threshold: Int, limit: Int) =
+    travel < threshold || (travel == threshold && threshold == limit)
+
 @Stable
 class ReorderingState(
     val lazyListState: LazyListState,
@@ -212,7 +223,7 @@ class ReorderingState(
 
         if (settling != null) return
 
-        while (travel > nextItemSize && reachedIndex < lastIndex) {
+        while (hasPassed(travel, nextItemSize, maxTravel) && reachedIndex < lastIndex) {
             reachedIndex += 1
             hapticFeedback?.performHapticFeedback(passedItemHaptics)
             nextItemSize += draggingItemSize
@@ -226,7 +237,7 @@ class ReorderingState(
             )
         }
 
-        while (travel < previousItemSize && reachedIndex > 0) {
+        while (hasReturned(travel, previousItemSize, minTravel) && reachedIndex > 0) {
             reachedIndex -= 1
             hapticFeedback?.performHapticFeedback(passedItemHaptics)
             previousItemSize -= draggingItemSize
