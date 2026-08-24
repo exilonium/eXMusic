@@ -9,6 +9,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.LocalPinnableContainer
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -21,10 +23,12 @@ fun Modifier.draggedItem(
 ): Modifier = when (reorderingState.draggingIndex) {
     -1 -> this
 
-    index -> offset {
+    // Measure before offsetting, so this reports where the list put the row rather than where
+    // this modifier has since moved it
+    index -> onGloballyPositioned { reorderingState.onSlotPositioned(it.positionInRoot().y) }.offset {
         when (reorderingState.lazyListState.layoutInfo.orientation) {
-            Orientation.Vertical -> IntOffset(0, reorderingState.offset.value)
-            Orientation.Horizontal -> IntOffset(reorderingState.offset.value, 0)
+            Orientation.Vertical -> IntOffset(0, reorderingState.offset)
+            Orientation.Horizontal -> IntOffset(reorderingState.offset, 0)
         }
     }.zIndex(1f)
 
