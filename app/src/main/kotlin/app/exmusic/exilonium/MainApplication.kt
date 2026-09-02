@@ -118,6 +118,7 @@ import app.exmusic.providers.innertube.requests.song
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader
+import coil3.annotation.ExperimentalCoilApi
 import coil3.bitmapFactoryExifOrientationStrategy
 import coil3.decode.ExifOrientationStrategy
 import coil3.disk.DiskCache
@@ -550,6 +551,7 @@ class MainApplication : Application(), SingletonImageLoader.Factory, Configurati
         ServiceNotifications.createAll()
     }
 
+    @OptIn(ExperimentalCoilApi::class)
     override fun newImageLoader(context: PlatformContext) = ImageLoader.Builder(this)
         .crossfade(true)
         .components {
