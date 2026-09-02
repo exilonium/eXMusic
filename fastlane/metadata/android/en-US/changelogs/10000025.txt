@@ -1,7 +1,0 @@
-* Added a CSV playlist importer
-* Added a main contributors section to the About screen
-* The classic player layout is now the default
-* Search history is no longer capped
-* Fixed songs that failed to start by resolving streams through a different client
-* Releases now ship a separate APK per CPU architecture, about half the download size
-* Removed Nothing Glyph support and the in-app yt-dlp upgrade button

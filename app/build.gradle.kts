@@ -12,7 +12,7 @@ plugins {
 
 val abis = listOf("arm64-v8a", "x86_64")
 val abiFlavorNames = mapOf("arm64-v8a" to "arm64", "x86_64" to "x64")
-val baseVersionCode = System.getenv("ANDROID_VERSION_CODE")?.toIntOrNull() ?: 25
+val baseVersionCode = System.getenv("ANDROID_VERSION_CODE")?.toIntOrNull() ?: 26
 
 android {
     val appId = "${project.group}.exilonium"

@@ -1,0 +1,5 @@
+* Fixed queue and playlist rows drifting while dragging to reorder
+* Fixed dragged rows being unable to reach the first or last position
+* Added optional haptic feedback when reordering songs
+* Updated yt-dlp for improved stream extraction and playback stability
+* Updated Gradle wrapper and project dependencies
