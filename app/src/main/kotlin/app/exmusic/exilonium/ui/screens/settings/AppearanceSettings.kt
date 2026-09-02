@@ -215,6 +215,14 @@ fun AppearanceSettings() = with(AppearancePreferences) {
                 onCheckedChange = { openPlayer = it }
             )
         }
+        SettingsGroup(title = stringResource(R.string.haptics)) {
+            SwitchSettingsEntry(
+                title = stringResource(R.string.haptic_feedback),
+                text = stringResource(R.string.haptic_feedback_description),
+                isChecked = hapticFeedback,
+                onCheckedChange = { hapticFeedback = it }
+            )
+        }
         SettingsGroup(title = stringResource(R.string.songs)) {
             SwitchSettingsEntry(
                 title = stringResource(R.string.swipe_to_hide_song),
