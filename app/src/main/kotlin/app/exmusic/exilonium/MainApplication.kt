@@ -85,6 +85,7 @@ import app.exmusic.exilonium.service.PlayerService
 import app.exmusic.exilonium.service.ServiceNotifications
 import app.exmusic.exilonium.service.downloadState
 import app.exmusic.exilonium.ui.components.BottomSheetMenu
+import app.exmusic.exilonium.ui.components.UpdateDialog
 import app.exmusic.exilonium.ui.components.rememberBottomSheetState
 import app.exmusic.exilonium.ui.components.themed.LinearProgressIndicator
 import app.exmusic.exilonium.ui.modifiers.auroraGlow
@@ -95,6 +96,7 @@ import app.exmusic.exilonium.ui.screens.player.Player
 import app.exmusic.exilonium.ui.screens.player.Thumbnail
 import app.exmusic.exilonium.ui.screens.playlistRoute
 import app.exmusic.exilonium.ui.screens.searchResultRoute
+import app.exmusic.exilonium.ui.screens.settings.VersionCheckWorker
 import app.exmusic.exilonium.ui.screens.settingsRoute
 import app.exmusic.exilonium.utils.DisposableListener
 import app.exmusic.exilonium.utils.KeyedCrossfade
@@ -346,6 +348,8 @@ class MainActivity : ComponentActivity(), MonetColorsChangedListener {
                     BottomSheetMenu(
                         modifier = Modifier.align(Alignment.BottomCenter)
                     )
+
+                    UpdateDialog()
                 }
             }
 
@@ -549,6 +553,10 @@ class MainApplication : Application(), SingletonImageLoader.Factory, Configurati
 
         MonetCompat.enablePaletteCompat()
         ServiceNotifications.createAll()
+
+        val period = DataPreferences.versionCheckPeriod
+        VersionCheckWorker.upsert(this, period.period)
+        if (period.period != null) VersionCheckWorker.checkNow(this)
     }
 
     @OptIn(ExperimentalCoilApi::class)

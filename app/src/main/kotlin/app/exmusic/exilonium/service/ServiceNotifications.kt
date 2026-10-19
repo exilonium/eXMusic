@@ -178,4 +178,11 @@ object ServiceNotifications : NotificationChannels() {
     ) {
         setLightsEnabled(true).setVibrationEnabled(true)
     }
+
+    val updateDownload by channel(
+        name = "update_download",
+        description = R.string.update_download,
+        importance = NotificationManagerCompat.IMPORTANCE_LOW,
+        singleNotification = true
+    )
 }

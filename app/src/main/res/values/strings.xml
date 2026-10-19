@@ -377,6 +377,14 @@
     <string name="new_version_available">A new version is available</string>
     <string name="more_information">More information</string>
     <string name="up_to_date">You\'re currently up-to-date: no updates available</string>
+    <string name="update_download">Downloading update</string>
+    <string name="update_download_progress">Downloading update… %1$d%%</string>
+    <string name="update_ready">Update ready to install</string>
+    <string name="update_install">Tap to install</string>
+    <string name="update_install_failed">Update install failed</string>
+    <string name="update_download_failed">Update download failed</string>
+    <string name="update_download_now">Download now</string>
+    <string name="update_skip">Skip</string>
     <string name="dynamic_thumbnails">Dynamic thumbnails</string>
     <string name="max_dynamic_thumbnail_size">Max dynamic thumbnail size</string>
     <string name="max_dynamic_thumbnail_size_description">The maximum size of a thumbnail when a dynamic thumbnail is used</string>

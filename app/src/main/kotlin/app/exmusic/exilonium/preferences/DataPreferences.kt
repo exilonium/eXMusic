@@ -23,7 +23,7 @@ object DataPreferences : GlobalPreferencesHolder() {
     val topListPeriodProperty = enum(TopListPeriod.AllTime)
     var topListPeriod by topListPeriodProperty
     var quickPicksSource by enum(QuickPicksSource.Trending)
-    var versionCheckPeriod by enum(VersionCheckPeriod.Off)
+    var versionCheckPeriod by enum(VersionCheckPeriod.Daily)
     var shouldCacheQuickPicks by boolean(true)
     var cachedQuickPicks by json(Innertube.RelatedPage())
     var autoSyncPlaylists by boolean(true)

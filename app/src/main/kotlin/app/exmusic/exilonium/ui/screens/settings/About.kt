@@ -2,7 +2,6 @@ package app.exmusic.exilonium.ui.screens.settings
 
 import android.Manifest
 import android.content.Context
-import android.content.Intent
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -25,12 +24,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.app.NotificationCompat
-import androidx.core.net.toUri
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
@@ -41,16 +40,16 @@ import app.exmusic.core.ui.utils.isAtLeastAndroid13
 import app.exmusic.core.ui.utils.isCompositionLaunched
 import app.exmusic.exilonium.BuildConfig
 import app.exmusic.exilonium.R
+import app.exmusic.exilonium.UpdateState
 import app.exmusic.exilonium.preferences.DataPreferences
-import app.exmusic.exilonium.service.ServiceNotifications
+import app.exmusic.exilonium.setUpdateState
 import app.exmusic.exilonium.ui.components.themed.CircularProgressIndicator
 import app.exmusic.exilonium.ui.components.themed.DefaultDialog
-import app.exmusic.exilonium.ui.components.themed.SecondaryTextButton
 import app.exmusic.exilonium.ui.screens.Route
 import app.exmusic.exilonium.utils.bold
 import app.exmusic.exilonium.utils.center
+import app.exmusic.exilonium.utils.cleanupApk
 import app.exmusic.exilonium.utils.hasPermission
-import app.exmusic.exilonium.utils.pendingIntent
 import app.exmusic.exilonium.utils.semiBold
 import app.exmusic.providers.github.GitHub
 import app.exmusic.providers.github.models.Release
@@ -102,6 +101,7 @@ class VersionCheckWorker(
 ) : CoroutineWorker(context, params) {
     companion object {
         private const val WORK_TAG = "version_check_worker"
+        private const val LAUNCH_CHECK_TAG = "version_check_launch"
 
         fun upsert(context: Context, period: Duration?) = runCatching {
             val workManager = WorkManager.getInstance(context)
@@ -122,20 +122,32 @@ class VersionCheckWorker(
                 .build()
 
             workManager.enqueueUniquePeriodicWork(
-                /* uniqueWorkName = */
                 WORK_TAG,
-                /* existingPeriodicWorkPolicy = */
                 ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
-                /* periodicWork = */
                 request
             )
 
             Unit
         }.also { it.exceptionOrNull()?.printStackTrace() }
+
+        fun checkNow(context: Context) = runCatching {
+            val request = OneTimeWorkRequestBuilder<VersionCheckWorker>()
+                .addTag(LAUNCH_CHECK_TAG)
+                .setConstraints(Constraints(requiredNetworkType = NetworkType.CONNECTED))
+                .build()
+
+            WorkManager.getInstance(context).enqueueUniqueWork(
+                LAUNCH_CHECK_TAG,
+                ExistingWorkPolicy.REPLACE,
+                request
+            )
+        }.also { it.exceptionOrNull()?.printStackTrace() }
     }
 
     override suspend fun doWork(): Result = with(applicationContext) {
         if (isAtLeastAndroid13 && !hasPermission(permission)) return Result.retry()
+
+        cleanupApk(this)
 
         val result = withContext(Dispatchers.IO) {
             VERSION_NAME.version
@@ -144,31 +156,20 @@ class VersionCheckWorker(
         }
 
         result?.getOrNull()?.let { release ->
-            ServiceNotifications.version.sendNotification(applicationContext) {
-                this
-                    .setSmallIcon(R.drawable.download)
-                    .setContentTitle(getString(R.string.new_version_available))
-                    .setContentText(getString(R.string.redirect_github))
-                    .also {
-                        runCatching { release.frontendUrl.toString().toUri() }.getOrNull()
-                            ?.let { url ->
-                                it.setContentIntent(pendingIntent(Intent(Intent.ACTION_VIEW, url)))
-                            }
-                        it.setStyle(
-                            NotificationCompat
-                                .BigTextStyle(it)
-                                .bigText(getString(R.string.new_version_available))
-                        )
-                    }
-                    .setAutoCancel(true)
-                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+            val apkUrl = release.assets.firstOrNull {
+                it.contentType == "application/vnd.android.package-archive" &&
+                    it.state == Release.Asset.State.Uploaded
+            }?.downloadUrl?.toString()
+
+            if (apkUrl != null) {
+                setUpdateState(UpdateState.Available(release, apkUrl))
             }
         }
 
         return when {
             result == null || result.isFailure -> Result.retry()
             result.isSuccess -> Result.success()
-            else -> Result.failure() // Unreachable
+            else -> Result.failure()
         }
     }
 }
@@ -303,32 +304,27 @@ fun About() = SettingsCategoryScreen(
                 }
             }
 
-            newerVersion?.getOrNull()?.let {
-                BasicText(
-                    text = stringResource(R.string.new_version_available),
-                    style = typography.xs.semiBold.center
-                )
+            LaunchedEffect(newerVersion) {
+                newerVersion?.getOrNull()?.let { release ->
+                    val apkUrl = release.assets.firstOrNull {
+                        it.contentType == "application/vnd.android.package-archive" &&
+                            it.state == Release.Asset.State.Uploaded
+                    }?.downloadUrl?.toString()
 
-                Spacer(modifier = Modifier.height(12.dp))
+                    if (apkUrl != null) {
+                        setUpdateState(UpdateState.Available(release, apkUrl))
+                        newVersionDialogOpened = false
+                    }
+                }
+            }
 
-                BasicText(
-                    text = it.name ?: it.tag,
-                    style = typography.m.bold.center
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                SecondaryTextButton(
-                    text = stringResource(R.string.more_information),
-                    onClick = { uriHandler.openUri(it.frontendUrl.toString()) }
-                )
-            } ?: newerVersion?.exceptionOrNull()?.let {
+            newerVersion?.exceptionOrNull()?.let {
                 BasicText(
                     text = stringResource(R.string.error_github),
                     style = typography.xs.semiBold.center,
                     modifier = Modifier.padding(all = 24.dp)
                 )
-            } ?: if (newerVersion?.isSuccess == true) {
+            } ?: if (newerVersion?.getOrNull() == null && newerVersion?.isSuccess == true) {
                 BasicText(
                     text = stringResource(R.string.up_to_date),
                     style = typography.xs.semiBold.center
