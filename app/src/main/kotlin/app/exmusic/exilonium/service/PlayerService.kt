@@ -557,7 +557,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         val mediaId = mediaItem.mediaId
 
         coroutineScope.launch {
-            val known = runCatching { Database.relatedSongsCount(mediaId) }.getOrDefault(1)
+            val known = runCatching { Database.relatedSongsCount(mediaId) }.getOrDefault(0)
             if (known > 0) return@launch
 
             storeRelatedPage(mediaItem)

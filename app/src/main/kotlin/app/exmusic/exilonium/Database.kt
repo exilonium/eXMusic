@@ -713,7 +713,7 @@ interface DatabaseAccessor {
                 UNION
                 SELECT id FROM (
                     SELECT id FROM Song
-                    WHERE id NOT LIKE '$LOCAL_KEY_PREFIX%'
+                    WHERE id NOT LIKE '$LOCAL_KEY_PREFIX%' AND totalPlayTimeMs > 0
                     ORDER BY totalPlayTimeMs DESC
                     LIMIT 10
                 )
