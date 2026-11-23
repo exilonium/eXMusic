@@ -99,11 +99,11 @@ fun launchYouTubeMusic(
         context.startActivity(intent)
         true
     } catch (_: ActivityNotFoundException) {
-        if (tryWithoutBrowser) launchYouTubeMusic(
+        tryWithoutBrowser && launchYouTubeMusic(
             context = context,
             endpoint = endpoint,
             tryWithoutBrowser = false
-        ) else false
+        )
     }
 }
 

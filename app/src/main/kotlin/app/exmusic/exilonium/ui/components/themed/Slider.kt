@@ -2,7 +2,11 @@ package app.exmusic.exilonium.ui.components.themed
 
 import androidx.annotation.IntRange
 import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import app.exmusic.core.ui.LocalAppearance
@@ -19,14 +23,23 @@ fun Slider(
     showTicks: Boolean = steps != 0
 ) {
     val (colorPalette) = LocalAppearance.current
+    val sliderState = key(steps, range) {
+        rememberSliderState(
+            value = state,
+            steps = steps,
+            trackRange = range
+        )
+    }
+
+    LaunchedEffect(state) {
+        sliderState.value = state
+    }
 
     androidx.compose.material3.Slider(
-        value = state,
+        state = sliderState,
         onValueChange = setState,
         onValueChangeFinished = onSlideComplete,
-        valueRange = range,
         modifier = modifier,
-        steps = steps,
         colors = SliderDefaults.colors(
             thumbColor = colorPalette.onAccent,
             activeTrackColor = colorPalette.accent,

@@ -1,7 +1,6 @@
 package app.exmusic.exilonium.ui.components.themed
 
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -47,7 +46,6 @@ inline fun Menu(
     content = content
 )
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MenuEntry(
     @DrawableRes icon: Int,

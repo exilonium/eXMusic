@@ -350,7 +350,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         cache = createCache(this)
         player = ExoPlayer.Builder(this, createRendersFactory(), createMediaSourceFactory())
             .setHandleAudioBecomingNoisy(true)
-            .setWakeMode(C.WAKE_MODE_LOCAL)
+            .setWakeMode(C.WAKE_MODE_NETWORK)
             .setAudioAttributes(
                 /* audioAttributes = */
                 AudioAttributes.Builder()
@@ -656,38 +656,20 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         }
     }
 
-    private fun updateMediaSessionQueue(timeline: Timeline) {
-        val builder = MediaDescription.Builder()
-
-        val currentMediaItemIndex = player.currentMediaItemIndex
-        val lastIndex = timeline.windowCount - 1
-        var startIndex = currentMediaItemIndex - 7
-        var endIndex = currentMediaItemIndex + 7
-
-        if (startIndex < 0) endIndex -= startIndex
-
-        if (endIndex > lastIndex) {
-            startIndex -= (endIndex - lastIndex)
-            endIndex = lastIndex
+    private fun updateMediaSessionQueue(timeline: Timeline) = mediaSession.setQueue(
+        List(timeline.windowCount) { index ->
+            val mediaItem = timeline.getWindow(index, Timeline.Window()).mediaItem
+            MediaSession.QueueItem(
+                MediaDescription.Builder()
+                    .setMediaId(mediaItem.mediaId)
+                    .setTitle(mediaItem.mediaMetadata.title)
+                    .setSubtitle(mediaItem.mediaMetadata.artist)
+                    .setIconUri(mediaItem.mediaMetadata.artworkUri)
+                    .build(),
+                index.toLong()
+            )
         }
-
-        startIndex = startIndex.coerceAtLeast(0)
-
-        mediaSession.setQueue(
-            List(endIndex - startIndex + 1) { index ->
-                val mediaItem = timeline.getWindow(index + startIndex, Timeline.Window()).mediaItem
-                MediaSession.QueueItem(
-                    builder
-                        .setMediaId(mediaItem.mediaId)
-                        .setTitle(mediaItem.mediaMetadata.title)
-                        .setSubtitle(mediaItem.mediaMetadata.artist)
-                        .setIconUri(mediaItem.mediaMetadata.artworkUri)
-                        .build(),
-                    (index + startIndex).toLong()
-                )
-            }
-        )
-    }
+    )
 
     private fun maybeRecoverPlaybackError() {
         if (player.playerError != null) player.prepare()
@@ -1064,6 +1046,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             withContext(Dispatchers.Main) {
                 mediaSession.setPlaybackState(
                     stateBuilder
+                        .setActiveQueueItemId(player.currentMediaItemIndex.toLong())
                         .setState(
                             player.androidPlaybackState,
                             player.currentPosition,
@@ -1180,6 +1163,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         }
 
         return {
+            @Suppress("DEPRECATION")
             this
                 .setContentTitle(mediaMetadata.title?.toString().orEmpty())
                 .setContentText(mediaMetadata.artist?.toString().orEmpty())

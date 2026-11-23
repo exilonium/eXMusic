@@ -16,12 +16,10 @@ import io.ktor.client.request.parameter
 import io.ktor.http.ContentType
 import io.ktor.http.encodeURLParameter
 import io.ktor.serialization.kotlinx.json.json
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlin.io.encoding.Base64
 
 object KuGou {
-    @OptIn(ExperimentalSerializationApi::class)
     private val client by lazy {
         HttpClient(OkHttp) {
             BrowserUserAgent()

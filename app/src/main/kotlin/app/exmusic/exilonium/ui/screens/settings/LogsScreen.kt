@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalTime::class)
-
 package app.exmusic.exilonium.ui.screens.settings
 
 import android.content.Intent
@@ -59,7 +57,7 @@ import app.exmusic.exilonium.utils.logcat
 import app.exmusic.exilonium.utils.semiBold
 import app.exmusic.exilonium.utils.smoothScrollToTop
 import kotlinx.coroutines.delay
-import kotlin.time.ExperimentalTime
+import kotlin.time.Duration.Companion.milliseconds
 
 @Route
 @Composable
@@ -104,7 +102,7 @@ fun LogsList(modifier: Modifier = Modifier) = Box(modifier = modifier.fillMaxSiz
 
     LaunchedEffect(logs.size) {
         if (initial && logs.isNotEmpty()) {
-            delay(200)
+            delay(200.milliseconds)
             state.scrollToItem(0)
             initial = false
             return@LaunchedEffect

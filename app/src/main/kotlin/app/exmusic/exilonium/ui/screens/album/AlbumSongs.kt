@@ -1,6 +1,5 @@
 package app.exmusic.exilonium.ui.screens.album
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
@@ -42,7 +41,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
 // TODO: migrate to single impl for all 'song lists'
-@OptIn(ExperimentalFoundationApi::class)
+
 @Composable
 fun AlbumSongs(
     songs: ImmutableList<Song>,

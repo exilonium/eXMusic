@@ -1,6 +1,5 @@
 package app.exmusic.exilonium.ui.screens.searchresult
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -45,7 +44,6 @@ import app.exmusic.providers.innertube.models.bodies.SearchBody
 import app.exmusic.providers.innertube.requests.searchPage
 import app.exmusic.providers.innertube.utils.from
 
-@OptIn(ExperimentalFoundationApi::class)
 @Route
 @Composable
 fun SearchResultScreen(query: String, onSearchAgain: () -> Unit) {

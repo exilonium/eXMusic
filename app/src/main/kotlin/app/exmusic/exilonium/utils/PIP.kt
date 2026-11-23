@@ -129,7 +129,7 @@ data class PipHandler internal constructor(
     fun exitPictureInPictureMode() = exitPip() == true
 }
 
-private val Activity?.pip get() = if (isAtLeastAndroid7) this?.isInPictureInPictureMode == true else false
+private val Activity?.pip get() = isAtLeastAndroid7 && this?.isInPictureInPictureMode == true
 
 @Composable
 fun isInPip(

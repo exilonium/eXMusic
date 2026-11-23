@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalTime::class)
-
 package app.exmusic.providers.piped.models
 
 import io.ktor.http.Url
@@ -14,7 +12,6 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import java.util.UUID
-import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 object UrlSerializer : KSerializer<Url> {

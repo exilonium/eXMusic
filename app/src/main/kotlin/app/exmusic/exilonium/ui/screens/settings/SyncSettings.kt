@@ -43,6 +43,7 @@ import app.exmusic.exilonium.ui.components.themed.ConfirmationDialogBody
 import app.exmusic.exilonium.ui.components.themed.DefaultDialog
 import app.exmusic.exilonium.ui.components.themed.DialogTextButton
 import app.exmusic.exilonium.ui.components.themed.IconButton
+import app.exmusic.exilonium.ui.components.themed.SecureTextField
 import app.exmusic.exilonium.ui.components.themed.TextField
 import app.exmusic.exilonium.ui.screens.Route
 import app.exmusic.exilonium.utils.center
@@ -158,38 +159,33 @@ fun SyncSettings(
                     customInstance?.let { instance ->
                         Spacer(modifier = Modifier.height(8.dp))
                         TextField(
-                            value = instance,
+                            initialText = instance,
                             onValueChange = { customInstance = it },
-                            hintText = stringResource(R.string.base_api_url),
+                            modifier = Modifier.fillMaxWidth(),
                             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                            modifier = Modifier.fillMaxWidth()
+                            hintText = stringResource(R.string.base_api_url),
                         )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     TextField(
-                        value = username,
+                        initialText = username,
                         onValueChange = { username = it },
-                        hintText = stringResource(R.string.username),
+                        modifier = Modifier.fillMaxWidth(),
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                        modifier = Modifier.fillMaxWidth()
+                        hintText = stringResource(R.string.username),
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    TextField(
-                        value = password,
+                    SecureTextField(
+                        initialText = password,
                         onValueChange = { password = it },
                         hintText = stringResource(R.string.password),
-                        visualTransformation = PasswordVisualTransformation(),
                         keyboardOptions = KeyboardOptions(
                             autoCorrectEnabled = false,
                             keyboardType = KeyboardType.Password
                         ),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .semantics {
-                                password()
-                            }
+                        modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     DialogTextButton(

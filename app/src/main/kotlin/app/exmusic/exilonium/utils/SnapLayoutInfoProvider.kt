@@ -47,7 +47,7 @@ class GridSnapLayoutInfoProvider(
             // Find item that is closest to the center
             if (offset <= 0 && offset > lowerBoundOffset) lowerBoundOffset = offset
             // Find item that is closest to center, but after it
-            if (offset >= 0 && offset < upperBoundOffset) upperBoundOffset = offset
+            if (offset in 0f..<upperBoundOffset) upperBoundOffset = offset
         }
 
         return if (lowerBoundOffset * -1f > upperBoundOffset) upperBoundOffset else lowerBoundOffset

@@ -696,13 +696,13 @@ fun MediaItemMenu(
             }
 
             if (!isLocal) onGoToAlbum?.let {
-                albumInfo?.let { (albumId) ->
+                albumInfo?.let { (id) ->
                     MenuEntry(
                         icon = R.drawable.disc,
                         text = stringResource(R.string.go_to_album),
                         onClick = {
                             onDismiss()
-                            onGoToAlbum(albumId)
+                            onGoToAlbum(id)
                         }
                     )
                 }

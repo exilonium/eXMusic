@@ -1,6 +1,5 @@
 package app.exmusic.exilonium.ui.screens.artist
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
@@ -43,7 +42,6 @@ import app.exmusic.exilonium.utils.forcePlayAtIndex
 import app.exmusic.exilonium.utils.forcePlayFromBeginning
 import app.exmusic.exilonium.utils.playingSong
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ArtistLocalSongs(
     browseId: String,

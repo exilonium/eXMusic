@@ -3,7 +3,6 @@ package app.exmusic.exilonium.ui.components
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -52,7 +51,6 @@ class MenuState {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BottomSheetMenu(
     modifier: Modifier = Modifier,

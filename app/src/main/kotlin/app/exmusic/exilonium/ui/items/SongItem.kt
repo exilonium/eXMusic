@@ -81,7 +81,7 @@ fun SongItem(
 
     SongItem(
         modifier = modifier,
-        thumbnailUrl = song.mediaMetadata.artworkUri.thumbnail(thumbnailSize.px)?.toString(),
+        thumbnailUrl = song.mediaMetadata.artworkUri?.thumbnail(thumbnailSize.px)?.toString(),
         title = song.mediaMetadata.title?.toString(),
         authors = song.mediaMetadata.artist?.toString(),
         duration = extras?.durationText,

@@ -7,7 +7,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.updateTransition
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -178,7 +177,6 @@ sealed class Tab : Parcelable {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 inline fun NavigationRail(
     topIconButtonId: Int,

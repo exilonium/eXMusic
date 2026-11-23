@@ -21,6 +21,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -34,6 +35,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -202,7 +204,7 @@ fun Lyrics(
                                 withContext(Dispatchers.Main) { currentDurationProvider() }
 
                             while (duration == C.TIME_UNSET) {
-                                delay(100)
+                                delay(100.milliseconds)
                                 duration =
                                     withContext(Dispatchers.Main) { currentDurationProvider() }
                             }
@@ -251,7 +253,7 @@ fun Lyrics(
                                 fixed = fixed.orEmpty(),
                                 synced = synced.orEmpty()
                             ).also {
-                                ensureActive()
+                                this@withContext.ensureActive()
 
                                 transaction {
                                     runCatching {
@@ -277,8 +279,7 @@ fun Lyrics(
         hintText = stringResource(R.string.enter_lyrics),
         initialTextInput = (if (shouldShowSynchronizedLyrics) lyrics?.synced else lyrics?.fixed)
             .orEmpty(),
-        singleLine = false,
-        maxLines = 10,
+        lineLimits = TextFieldLineLimits.MultiLine(maxHeightInLines = 10),
         isTextInputValid = { true },
         onDismiss = { editing = false },
         onAccept = {
@@ -494,6 +495,7 @@ fun Lyrics(
 
                         val lineModifier = Modifier
                             .fillMaxWidth()
+                            .padding(horizontal = 48.dp)
                             .clickable(
                                 interactionSource = interactionSource,
                                 indication = ripple(),
@@ -510,7 +512,7 @@ fun Lyrics(
                                 scaleX = scale
                                 scaleY = scale
                             }
-                            .padding(vertical = 4.dp, horizontal = 32.dp)
+                            .padding(vertical = 4.dp)
 
                         if (sentence.isBlank()) Image(
                             painter = painterResource(R.drawable.musical_notes),
@@ -554,48 +556,53 @@ fun Lyrics(
             // With no lyrics the overlay is a bare scrim, so a tap anywhere already dismisses it and
             // an explicit close button is only clutter. It exists because tapping a synchronized
             // line seeks instead of dismissing, which cannot happen when there are no lines.
-            if (!text.isNullOrBlank() && !error) Image(
-                painter = painterResource(R.drawable.close),
-                contentDescription = null,
-                colorFilter = ColorFilter.tint(colorPalette.onOverlay),
+            if (!text.isNullOrBlank() && !error) Box(
+                contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .padding(all = 4.dp)
+                    .align(Alignment.BottomStart)
+                    .size(56.dp)
                     .clickable(
-                        indication = ripple(bounded = false),
+                        indication = ripple(bounded = false, radius = 24.dp),
                         interactionSource = remember { MutableInteractionSource() },
                         onClick = onClose
                     )
-                    .padding(all = 8.dp)
-                    .size(20.dp)
-                    .align(Alignment.BottomStart)
-            )
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.close),
+                    contentDescription = null,
+                    colorFilter = ColorFilter.tint(colorPalette.onOverlay),
+                    modifier = Modifier.size(20.dp)
+                )
+            }
 
-            if (onOpenDialog != null) Image(
-                painter = painterResource(R.drawable.expand),
-                contentDescription = null,
-                colorFilter = ColorFilter.tint(colorPalette.onOverlay),
+            if (onOpenDialog != null) Box(
+                contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .padding(all = 4.dp)
+                    .align(Alignment.BottomEnd)
+                    .size(56.dp)
                     .clickable(
-                        indication = ripple(bounded = false),
+                        indication = ripple(bounded = false, radius = 24.dp),
                         interactionSource = remember { MutableInteractionSource() },
                         onClick = {
                             onOpenDialog()
                         }
                     )
-                    .padding(all = 8.dp)
-                    .size(20.dp)
-                    .align(Alignment.BottomEnd)
-            )
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.expand),
+                    contentDescription = null,
+                    colorFilter = ColorFilter.tint(colorPalette.onOverlay),
+                    modifier = Modifier.size(20.dp)
+                )
+            }
 
-            Image(
-                painter = painterResource(R.drawable.ellipsis_horizontal),
-                contentDescription = null,
-                colorFilter = ColorFilter.tint(colorPalette.onOverlay),
+            Box(
+                contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .padding(all = 4.dp)
+                    .align(Alignment.TopEnd)
+                    .size(56.dp)
                     .clickable(
-                        indication = ripple(bounded = false),
+                        indication = ripple(bounded = false, radius = 24.dp),
                         interactionSource = remember { MutableInteractionSource() },
                         onClick = {
                             onMenuLaunch()
@@ -605,7 +612,7 @@ fun Lyrics(
                                         icon = R.drawable.time,
                                         text = stringResource(
                                             if (shouldShowSynchronizedLyrics) R.string.show_unsynchronized_lyrics
-                                            else R.string.show_synchronized_lyrics
+                                             else R.string.show_synchronized_lyrics
                                         ),
                                         secondaryText = if (shouldShowSynchronizedLyrics) null
                                         else stringResource(R.string.provided_lyrics_by),
@@ -704,10 +711,14 @@ fun Lyrics(
                             }
                         }
                     )
-                    .padding(all = 8.dp)
-                    .size(20.dp)
-                    .align(Alignment.TopEnd)
-            )
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.ellipsis_horizontal),
+                    contentDescription = null,
+                    colorFilter = ColorFilter.tint(colorPalette.onOverlay),
+                    modifier = Modifier.size(20.dp)
+                )
+            }
         }
     }
 }
@@ -734,7 +745,7 @@ fun LrcLibSearchDialog(
         loading = true
         error = false
 
-        delay(1000)
+        delay(1000.milliseconds)
 
         LrcLib.lyrics(
             query = query,
@@ -752,13 +763,12 @@ fun LrcLibSearchDialog(
     }
 
     TextField(
-        value = query,
+        initialText = query,
         onValueChange = setQuery,
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 24.dp),
-        maxLines = 1,
-        singleLine = true
+        lineLimits = TextFieldLineLimits.SingleLine,
     )
     Spacer(modifier = Modifier.height(8.dp))
 

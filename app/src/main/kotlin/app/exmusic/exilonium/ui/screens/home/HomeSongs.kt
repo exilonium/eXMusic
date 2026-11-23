@@ -5,7 +5,6 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
@@ -24,8 +23,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -111,7 +110,6 @@ fun HomeSongs(
     )
 }
 
-@kotlin.OptIn(ExperimentalFoundationApi::class)
 @OptIn(UnstableApi::class)
 @Route
 @Composable
@@ -182,14 +180,16 @@ fun HomeSongs(
                             }
 
                             TextField(
-                                value = filter.orEmpty(),
+                                initialText = filter.orEmpty(),
                                 onValueChange = { filter = it },
-                                singleLine = true,
+                                lineLimits = TextFieldLineLimits.SingleLine,
                                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                                keyboardActions = KeyboardActions(onSearch = {
+                                onKeyboardAction = { performDefaultAction ->
                                     if (filter.isNullOrBlank()) filter = ""
+
                                     focusManager.clearFocus()
-                                }),
+                                    performDefaultAction()
+                                },
                                 hintText = stringResource(R.string.filter_placeholder),
                                 modifier = Modifier
                                     .focusRequester(focusRequester)

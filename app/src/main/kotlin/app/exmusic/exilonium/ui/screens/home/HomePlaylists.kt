@@ -97,7 +97,7 @@ fun HomePlaylists(
     LaunchedEffect(Unit) {
         Database.pipedSessions().collect { sessions ->
             pipedSessions = sessions.associateWith { session ->
-                async {
+                this@LaunchedEffect.async {
                     Piped.playlist.list(session = session.toApiSession())?.getOrNull()
                 }
             }.mapValues { (_, value) -> value.await() }

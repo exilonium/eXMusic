@@ -209,11 +209,7 @@ fun About() = SettingsCategoryScreen(
 
     var hasPermission by remember(isCompositionLaunched()) {
         mutableStateOf(
-            if (isAtLeastAndroid13) {
-                context.applicationContext.hasPermission(permission)
-            } else {
-                true
-            }
+            !isAtLeastAndroid13 || context.applicationContext.hasPermission(permission)
         )
     }
 

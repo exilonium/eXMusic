@@ -216,8 +216,9 @@ composeCompiler {
 chaquopy {
     defaultConfig {
         version = "3.14"
+        buildPython("/usr/bin/python3")
         pip {
-            install("yt-dlp>=2026.08.19")
+            install("yt-dlp>=2026.10.26")
             install("yt-dlp-ejs>=0.8.0")
         }
     }
@@ -256,6 +257,7 @@ dependencies {
     implementation(libs.workmanager)
     implementation(libs.workmanager.ktx)
 
+    //noinspection LoginCredentials
     implementation(libs.credentials)
 
     implementation(libs.kotlin.coroutines)

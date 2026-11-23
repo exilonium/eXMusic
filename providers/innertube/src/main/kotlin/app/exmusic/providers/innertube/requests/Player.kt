@@ -10,7 +10,6 @@ import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import io.ktor.util.generateNonce
 import io.ktor.util.generateNonceSuspend
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.isActive
