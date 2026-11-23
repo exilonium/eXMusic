@@ -18,7 +18,7 @@ android {
     val appId = "${project.group}.exilonium"
 
     namespace = appId
-    compileSdk = 37
+    compileSdk { version = release(37) { minorApiLevel = 2 } }
 
     val cmakeVersion = "4.1.2"
     ndkVersion = "29.0.14206865"

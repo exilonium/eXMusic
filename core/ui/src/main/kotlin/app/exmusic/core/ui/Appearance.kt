@@ -25,8 +25,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.TypeParceler
 
 @Parcelize
+@TypeParceler<Dp, DpParceler>
 @Immutable
 data class Appearance(
     val colorPalette: ColorPalette,
