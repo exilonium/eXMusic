@@ -551,16 +551,23 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     }
 
     /** Keeps what YouTube would play next to this song, as material for quick picks. */
+    private val harvestingMediaIds = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
+
     private fun maybeHarvestRelatedSongs(mediaItem: MediaItem) {
         if (mediaItem.isLocal || DataPreferences.pauseHistory) return
 
         val mediaId = mediaItem.mediaId
+        if (!harvestingMediaIds.add(mediaId)) return
 
         coroutineScope.launch {
-            val known = runCatching { Database.relatedSongsCount(mediaId) }.getOrDefault(0)
-            if (known > 0) return@launch
+            try {
+                val known = runCatching { Database.relatedSongsCount(mediaId) }.getOrDefault(0)
+                if (known > 0) return@launch
 
-            storeRelatedPage(mediaItem)
+                storeRelatedPage(mediaItem)
+            } finally {
+                harvestingMediaIds.remove(mediaId)
+            }
         }
     }
 
@@ -577,6 +584,8 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         }
 
         mediaItemState.update { mediaItem }
+
+        mediaItem?.let(::maybeHarvestRelatedSongs)
 
         maybeRecoverPlaybackError()
         maybeNormalizeVolume()

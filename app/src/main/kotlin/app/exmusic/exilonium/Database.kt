@@ -701,7 +701,12 @@ interface DatabaseAccessor {
             SELECT relatedSongId, COUNT(1) AS referredCount
             FROM RelatedSongMap
             WHERE songId IN (
-                SELECT songId FROM (SELECT songId FROM Event ORDER BY timestamp DESC LIMIT 5)
+                SELECT songId FROM (
+                    SELECT songId FROM Event
+                    GROUP BY songId
+                    ORDER BY MAX(timestamp) DESC
+                    LIMIT 5
+                )
                 UNION
                 SELECT songId FROM (
                     SELECT songId FROM Event
@@ -765,6 +770,9 @@ interface DatabaseAccessor {
 
     @Query("DELETE FROM RelatedSongMap")
     fun clearRelatedSongs()
+
+    @Query("DELETE FROM RelatedSongMap WHERE songId = :songId")
+    fun clearRelatedSongsOf(songId: String)
 
     @Query("DELETE FROM RelatedSongMap WHERE relatedSongId = :songId OR songId = :songId")
     fun clearRelatedSongsFor(songId: String)

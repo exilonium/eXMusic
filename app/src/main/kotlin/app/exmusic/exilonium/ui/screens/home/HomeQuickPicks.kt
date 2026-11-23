@@ -67,23 +67,29 @@ import app.exmusic.exilonium.ui.items.SongItemPlaceholder
 import app.exmusic.exilonium.ui.screens.Route
 import app.exmusic.exilonium.utils.asMediaItem
 import app.exmusic.exilonium.utils.center
-import app.exmusic.exilonium.utils.enqueue
-import app.exmusic.exilonium.utils.forcePlay
+import app.exmusic.exilonium.utils.forcePlayAtIndex
+import app.exmusic.exilonium.utils.forcePlayFromBeginning
 import app.exmusic.exilonium.utils.playingSong
 import app.exmusic.exilonium.utils.rememberSnapLayoutInfo
 import app.exmusic.exilonium.utils.secondary
 import app.exmusic.exilonium.utils.semiBold
 import app.exmusic.exilonium.utils.storeRelatedPage
 import app.exmusic.providers.innertube.Innertube
-import app.exmusic.providers.innertube.models.NavigationEndpoint
-import app.exmusic.providers.innertube.requests.discoverPage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
-import kotlin.random.Random
 
 private const val QUICK_PICKS_SIZE = 24
+private const val DEFAULT_SEED_ID = "J7p4bzqLvCw"
+
+private val defaultSeed = Song(
+    id = DEFAULT_SEED_ID,
+    title = "Blinding Lights",
+    artistsText = "The Weeknd",
+    durationText = null,
+    thumbnailUrl = null
+)
 
 private val Innertube.RelatedPage.isEmpty
     get() = songs.isNullOrEmpty() &&
@@ -121,9 +127,6 @@ fun QuickPicks(
     var settled by persist("home/quickPicksSettled", false)
     var removedSongIds by rememberSaveable { mutableStateOf(emptySet<String>()) }
 
-    /** Kept for the lifetime of the screen so the picks do not reorder under a scrolling finger. */
-    val shuffleSeed = remember { Random.nextLong() }
-
     // The shelves are asked for once per seed rather than once per launch: what YouTube recommends
     // off a song does not change between two openings of the home screen, and the songs themselves
     // are read from the library, which the player keeps filling in the background
@@ -133,23 +136,11 @@ fun QuickPicks(
                 val cached = DataPreferences.cachedQuickPicks
                 if (relatedPage == null && !cached.isEmpty) relatedPage = cached
 
-                val seedSong = Database.events().first().firstOrNull()?.song
-                    ?: Database.trending(limit = 1).first().firstOrNull()
-                val seedChanged = seedSong?.id != seed?.id
+                val seedSong = Database.events().first().firstOrNull()?.song ?: defaultSeed
+                val seedChanged = seedSong.id != seed?.id
                 seed = seedSong
 
-                // Nothing played yet: seed off what YouTube is pushing in this region rather than off a
-                // video id baked into the app, which hands every fresh install the same picks
-                val seedItem = seedSong?.asMediaItem
-                    ?: Innertube
-                        .discoverPage()
-                        ?.getOrNull()
-                        ?.trending
-                        ?.songs
-                        ?.firstOrNull()
-                        ?.asMediaItem
-
-                if (seedItem == null) return@withContext
+                val seedItem = seedSong.asMediaItem
 
                 val known = runCatching { Database.relatedSongsCount(seedItem.mediaId) }.getOrDefault(0)
                 if (known > 0 && !seedChanged && relatedPage != null && !relatedPage!!.isEmpty) return@withContext
@@ -170,14 +161,13 @@ fun QuickPicks(
 
     // Whatever the network did, the grid is fed from the library: recommendations harvested off
     // recent plays and heavy rotation, topped up with favourites that have gone quiet
-    LaunchedEffect(shuffleSeed) {
+    LaunchedEffect(Unit) {
         combine(
             Database.quickPicks(),
             Database.forgottenFavorites()
         ) { related, forgotten -> (related + forgotten).distinctBy { it.id } }.collect { songs ->
             picks = songs
                 .filterNot { AppearancePreferences.hideExplicit && it.explicit }
-                .shuffled(Random(shuffleSeed))
                 .take(QUICK_PICKS_SIZE)
         }
     }
@@ -222,6 +212,12 @@ fun QuickPicks(
                 (local + fill).take(QUICK_PICKS_SIZE)
             }
         }
+
+        LaunchedEffect(songs) {
+            if (songs.isNotEmpty()) {
+                quickPicksLazyGridState.scrollToItem(0)
+            }
+        }
         val related = relatedPage
         val loading = !settled && songs.isEmpty() && related == null
 
@@ -244,12 +240,8 @@ fun QuickPicks(
                     SecondaryTextButton(
                         text = stringResource(R.string.play),
                         onClick = {
-                            val first = songs.first().asMediaItem
                             binder?.stopRadio()
-                            binder?.player?.forcePlay(first)
-                            if (songs.size > 1) {
-                                binder?.player?.enqueue(songs.drop(1).map(Song::asMediaItem))
-                            }
+                            binder?.player?.forcePlayFromBeginning(songs.map(Song::asMediaItem))
                         }
                     )
                 }
@@ -330,15 +322,14 @@ fun QuickPicks(
                                         }
                                     },
                                     onClick = {
-                                        val mediaItem = song.asMediaItem
+                                        val index = songs.indexOfFirst { it.id == song.id }
                                         binder?.stopRadio()
-                                        binder?.player?.forcePlay(mediaItem)
-                                        binder?.setupRadio(
-                                            NavigationEndpoint.Endpoint.Watch(videoId = mediaItem.mediaId)
+                                        binder?.player?.forcePlayAtIndex(
+                                            items = songs.map(Song::asMediaItem),
+                                            index = if (index >= 0) index else 0
                                         )
                                     }
                                 )
-                                .animateItem(fadeInSpec = null, fadeOutSpec = null)
                                 .width(itemInHorizontalGridWidth),
                             showDuration = false,
                             isPlaying = playing && currentMediaId == song.id
