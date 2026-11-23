@@ -20,7 +20,9 @@ import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
@@ -54,14 +56,15 @@ fun ColumnScope.TextField(
     outputTransformation: OutputTransformation? = null,
     onTextLayout: (Density.(() -> TextLayoutResult?) -> Unit)? = null,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    hintText: String? = null,
+    hintText: String? = null
 ) {
     val state = rememberTextFieldState(initialText)
+    val currentOnValueChange by rememberUpdatedState(onValueChange)
 
     LaunchedEffect(state) {
         snapshotFlow { state.text }
             .distinctUntilChanged()
-            .collect { onValueChange(it.toString()) }
+            .collect { currentOnValueChange(it.toString()) }
     }
 
     BasicTextField(
@@ -118,14 +121,15 @@ fun RowScope.TextField(
     outputTransformation: OutputTransformation? = null,
     onTextLayout: (Density.(() -> TextLayoutResult?) -> Unit)? = null,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    hintText: String? = null,
+    hintText: String? = null
 ) {
     val state = rememberTextFieldState(initialText)
+    val currentOnValueChange by rememberUpdatedState(onValueChange)
 
     LaunchedEffect(state) {
         snapshotFlow { state.text }
             .distinctUntilChanged()
-            .collect { onValueChange(it.toString()) }
+            .collect { currentOnValueChange(it.toString()) }
     }
 
     BasicTextField(
@@ -178,14 +182,15 @@ fun ColumnScope.SecureTextField(
     keyboardOptions: KeyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
     onTextLayout: (Density.(() -> TextLayoutResult?) -> Unit)? = null,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    hintText: String? = null,
+    hintText: String? = null
 ) {
     val state = rememberTextFieldState(initialText)
+    val currentOnValueChange by rememberUpdatedState(onValueChange)
 
     LaunchedEffect(state) {
         snapshotFlow { state.text }
             .distinctUntilChanged()
-            .collect { onValueChange(it.toString()) }
+            .collect { currentOnValueChange(it.toString()) }
     }
 
     BasicSecureTextField(
@@ -236,14 +241,15 @@ fun RowScope.SecureTextField(
     keyboardOptions: KeyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
     onTextLayout: (Density.(() -> TextLayoutResult?) -> Unit)? = null,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    hintText: String? = null,
+    hintText: String? = null
 ) {
     val state = rememberTextFieldState(initialText)
+    val currentOnValueChange by rememberUpdatedState(onValueChange)
 
     LaunchedEffect(state) {
         snapshotFlow { state.text }
             .distinctUntilChanged()
-            .collect { onValueChange(it.toString()) }
+            .collect { currentOnValueChange(it.toString()) }
     }
 
     BasicSecureTextField(

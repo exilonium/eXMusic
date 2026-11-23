@@ -163,7 +163,7 @@ fun SyncSettings(
                             onValueChange = { customInstance = it },
                             modifier = Modifier.fillMaxWidth(),
                             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                            hintText = stringResource(R.string.base_api_url),
+                            hintText = stringResource(R.string.base_api_url)
                         )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
@@ -172,7 +172,7 @@ fun SyncSettings(
                         onValueChange = { username = it },
                         modifier = Modifier.fillMaxWidth(),
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                        hintText = stringResource(R.string.username),
+                        hintText = stringResource(R.string.username)
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))

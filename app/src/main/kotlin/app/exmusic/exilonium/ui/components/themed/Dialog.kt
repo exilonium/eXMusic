@@ -102,7 +102,7 @@ fun TextFieldDialog(
             performDefaultAction()
         },
         keyboardOptions = keyboardOptions,
-        hintText = hintText,
+        hintText = hintText
     )
 
     Row(

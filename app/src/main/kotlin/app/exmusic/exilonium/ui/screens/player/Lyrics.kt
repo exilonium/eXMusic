@@ -612,7 +612,7 @@ fun Lyrics(
                                         icon = R.drawable.time,
                                         text = stringResource(
                                             if (shouldShowSynchronizedLyrics) R.string.show_unsynchronized_lyrics
-                                             else R.string.show_synchronized_lyrics
+                                            else R.string.show_synchronized_lyrics
                                         ),
                                         secondaryText = if (shouldShowSynchronizedLyrics) null
                                         else stringResource(R.string.provided_lyrics_by),
@@ -768,7 +768,7 @@ fun LrcLibSearchDialog(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 24.dp),
-        lineLimits = TextFieldLineLimits.SingleLine,
+        lineLimits = TextFieldLineLimits.SingleLine
     )
     Spacer(modifier = Modifier.height(8.dp))
 
