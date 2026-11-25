@@ -23,7 +23,7 @@ val topLevelLibs = libs
 
 allprojects {
     group = "app.exmusic"
-    version = "1.4.1"
+    version = "1.5.0"
 
     apply(plugin = "dev.detekt")
 

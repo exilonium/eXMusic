@@ -1,2 +1,6 @@
-* Fixed a regression in the security release that prevented ViTune from fetching any data
-* Fixed a small issue where ViTune would continuously refetch albums
+* Aligned Quick Picks recommendation harvesting, queue playback, and cold-start seed with Metrolist
+* Expanded touch targets on the lyrics screen (Close, Fullscreen, and Options) to prevent accidental seeking
+* Added edge gutters on synchronized lyrics lines to prevent accidental touch seeks near screen borders
+* Enhanced background playback and battery efficiency using ExoPlayer network wake locks
+* Merged upstream stability fixes, Compose compatibility updates, and dependency improvements
+* Updated compileSdk to 37.2 and resolved cross-file parcelize type serialization
