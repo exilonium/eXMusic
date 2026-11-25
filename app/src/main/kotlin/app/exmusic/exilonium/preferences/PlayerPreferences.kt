@@ -38,6 +38,7 @@ object PlayerPreferences : GlobalPreferencesHolder() {
 
     var isShowingLyrics by boolean(false)
     var isShowingSynchronizedLyrics by boolean(true)
+    var wordSyncedLyrics by boolean(true)
 
     var isShowingPrevButtonCollapsed by boolean(false)
     var horizontalSwipeToClose by boolean(false)
