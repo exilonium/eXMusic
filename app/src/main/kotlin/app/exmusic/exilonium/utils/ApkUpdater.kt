@@ -36,7 +36,8 @@ suspend fun downloadApk(context: Context, downloadUrl: String) = withContext(Dis
             .build()
 
         val response = client.newCall(Request.Builder().url(downloadUrl).build()).execute()
-        val body = response.body ?: error("Empty response body")
+        if (!response.isSuccessful) error("Failed to download update: ${response.code}")
+        val body = response.body
         val totalBytes = body.contentLength().takeIf { it > 0 }
 
         apk.outputStream().use { out ->

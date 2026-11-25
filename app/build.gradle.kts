@@ -32,8 +32,6 @@ android {
         versionCode = baseVersionCode
         versionName = project.version.toString()
 
-        multiDexEnabled = true
-
         @Suppress("UnstableApiUsage")
         externalNativeBuild {
             cmake {
