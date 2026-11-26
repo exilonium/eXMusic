@@ -58,8 +58,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -67,7 +71,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.ResolvedTextDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.C
@@ -98,6 +104,7 @@ import app.exmusic.exilonium.ui.components.themed.ValueSelectorDialogBody
 import app.exmusic.exilonium.ui.modifiers.verticalFadingEdge
 import app.exmusic.exilonium.utils.DisposableListener
 import app.exmusic.exilonium.utils.LyricSentence
+import app.exmusic.exilonium.utils.LyricWord
 import app.exmusic.exilonium.utils.LyricsPlus
 import app.exmusic.exilonium.utils.SynchronizedLyrics
 import app.exmusic.exilonium.utils.SynchronizedLyricsParser
@@ -134,6 +141,163 @@ private val AUTO_SCROLL_RESUME_DELAY = 4.seconds
 
 // How much a synchronized lyrics line shrinks while it is being pressed, so a tap is visible
 private const val PRESSED_LINE_SCALE = 0.94f
+
+private data class WordCharRange(
+    val word: LyricWord,
+    val startOffset: Int,
+    val endOffset: Int
+)
+
+private fun calculateWipeX(
+    layout: TextLayoutResult,
+    activeRange: WordCharRange,
+    currentPos: Long,
+    isWiping: Boolean
+): Float {
+    val trimmedLength = activeRange.word.text.trimEnd().length.coerceAtLeast(1)
+    val glyphEndOffset = (activeRange.startOffset + trimmedLength).coerceAtMost(layout.layoutInput.text.length)
+    val wordEndX = layout.getHorizontalPosition(glyphEndOffset, true)
+    if (!isWiping) return wordEndX
+
+    val duration = (activeRange.word.endMs - activeRange.word.startMs).coerceAtLeast(1L)
+    val progress = ((currentPos - activeRange.word.startMs).toFloat() / duration).coerceIn(0f, 1f)
+    val wordStartX = layout.getHorizontalPosition(activeRange.startOffset, true)
+    return wordStartX + (wordEndX - wordStartX) * progress
+}
+
+private fun buildWipePath(
+    path: Path,
+    layout: TextLayoutResult,
+    wordRanges: List<WordCharRange>,
+    currentPos: Long,
+    containerWidth: Float
+) {
+    val activeIndex = wordRanges.indexOfLast { currentPos >= it.word.startMs }
+    if (activeIndex == -1) return
+
+    val activeRange = wordRanges[activeIndex]
+    val activeLine = layout.getLineForOffset(activeRange.startOffset)
+
+    for (l in 0 until activeLine) {
+        path.addRect(Rect(0f, layout.getLineTop(l), containerWidth, layout.getLineBottom(l)))
+    }
+
+    val isWiping = currentPos < activeRange.word.endMs
+    val wipeX = calculateWipeX(layout, activeRange, currentPos, isWiping)
+    val lineTop = layout.getLineTop(activeLine)
+    val lineBottom = layout.getLineBottom(activeLine)
+    val isRtl = layout.getParagraphDirection(activeRange.startOffset) == ResolvedTextDirection.Rtl
+
+    if (!isRtl) {
+        path.addRect(Rect(0f, lineTop, wipeX.coerceAtLeast(0f), lineBottom))
+    } else {
+        path.addRect(Rect(wipeX.coerceAtMost(containerWidth), lineTop, containerWidth, lineBottom))
+    }
+}
+
+@Composable
+private fun WordSyncedLyricLine(
+    sentence: LyricSentence,
+    positionProvider: () -> Long,
+    isPlaying: Boolean,
+    textStyle: TextStyle,
+    modifier: Modifier = Modifier,
+    playbackSpeed: Float = 1f
+) {
+    val currentPositionProvider by rememberUpdatedState(positionProvider)
+    val currentPlaybackSpeed by rememberUpdatedState(playbackSpeed)
+    var position by remember(sentence) { mutableLongStateOf(positionProvider()) }
+
+    LaunchedEffect(isPlaying, sentence) {
+        if (!isPlaying) {
+            position = currentPositionProvider()
+            return@LaunchedEffect
+        }
+
+        var lastRealtime = SystemClock.elapsedRealtime()
+        var lastPlayerPos = currentPositionProvider()
+
+        while (true) {
+            withFrameMillis {
+                val now = SystemClock.elapsedRealtime()
+                val freshPos = currentPositionProvider()
+
+                if (freshPos != lastPlayerPos) {
+                    lastPlayerPos = freshPos
+                    lastRealtime = now
+                    position = freshPos
+                } else {
+                    val dt = now - lastRealtime
+                    position = lastPlayerPos + (dt * currentPlaybackSpeed).toLong()
+                }
+            }
+        }
+    }
+
+    val wordRanges = remember(sentence) {
+        val ranges = mutableListOf<WordCharRange>()
+        var searchIdx = 0
+        for (word in sentence.words) {
+            if (word.text.isEmpty()) continue
+            var start = sentence.text.indexOf(word.text, searchIdx)
+            if (start == -1) {
+                start = sentence.text.indexOf(word.text)
+            }
+            if (start != -1) {
+                val end = (start + word.text.length).coerceAtMost(sentence.text.length)
+                ranges.add(WordCharRange(word, start, end))
+                searchIdx = end
+            }
+        }
+        ranges
+    }
+
+    if (wordRanges.isEmpty()) {
+        BasicText(
+            text = sentence.text,
+            style = textStyle.color(Color.White),
+            modifier = modifier
+        )
+        return
+    }
+
+    var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
+    val clipPath = remember { Path() }
+
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        BasicText(
+            text = sentence.text,
+            style = textStyle.color(Color.White.copy(alpha = 0.35f)),
+            onTextLayout = { textLayoutResult = it }
+        )
+
+        BasicText(
+            text = sentence.text,
+            style = textStyle.color(Color.White),
+            modifier = Modifier.drawWithContent {
+                val layout = textLayoutResult
+                val currentPos = position
+                if (layout == null || currentPos < wordRanges.first().word.startMs) {
+                    return@drawWithContent
+                }
+
+                if (currentPos >= wordRanges.last().word.endMs) {
+                    drawContent()
+                    return@drawWithContent
+                }
+
+                clipPath.reset()
+                buildWipePath(clipPath, layout, wordRanges, currentPos, size.width)
+                clipPath(clipPath) {
+                    this@drawWithContent.drawContent()
+                }
+            }
+        )
+    }
+}
 
 enum class LyricsMode {
     WORD_SYNC,
@@ -578,6 +742,13 @@ fun Lyrics(
                             contentDescription = null,
                             colorFilter = ColorFilter.tint(color),
                             modifier = lineModifier.height(typography.xs.fontSize.dp)
+                        ) else if (isCurrentLine && sentence.isWordSynced && isWordSyncedEnabled) WordSyncedLyricLine(
+                            sentence = sentence,
+                            positionProvider = synchronizedLyrics.positionProvider,
+                            isPlaying = isPlaying,
+                            textStyle = lyricStyle,
+                            modifier = lineModifier,
+                            playbackSpeed = binder?.player?.playbackParameters?.speed ?: 1f
                         ) else BasicText(
                             text = sentence.text,
                             style = lyricStyle.color(color),
